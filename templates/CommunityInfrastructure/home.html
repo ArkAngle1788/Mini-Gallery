@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<p><b>Website Test Version</b></p>
+
+<p>current active features are the gallery and the community groups pages</p>
+
+<h1><a href="{% url 'gallery home' %}">Gallery</a></h1>
+
+<h1><a href="{% url 'groups top' %}">Groups & Organizations</a></h1>
+
+<br>
+<p>league creation/registration/managment is currently offline</p>
+<br>
+<br>
+{% endblock content %}
+
+
+{% block navbar_left_content %}
+
+  <p>Leagues you are signed up for would go here if that feature was live</p>
+
+{% endblock navbar_left_content %}
+
+{% block navbar_right_content %}
+
+<h1>Announcements</h1>
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
+{% endblock navbar_right_content %}

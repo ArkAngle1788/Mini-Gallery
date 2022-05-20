@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>
+  Upload complete
+</h1>
+
+
+
+<h1>test: </h1>
+{{test}}
+
+
+
+
+{% endblock content %}
+
+
+
+
+
+<!-- SIDEBAR -->
+
+
+{% block navbar_right_content %}
+
+<div class="panel-heading">
+  <h3>Panel</h3>
+</div>
+
+<div class='panel-body'>
+
+<p>studio detail specific sidebar</p>
+
+
+
+</div>
+
+{% include 'CommunityInfrastructure/sidebar_right.html' %}
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock%}

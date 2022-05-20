@@ -1,0 +1,122 @@
+
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+<div align='center'>
+  <h1>
+  Gallery List
+  </h1>
+  number of images: {{page_obj.paginator.count}}
+</div>
+<br>
+
+
+
+
+
+<div align='center'>
+  {% if is_paginated %}
+
+    {% if page_obj.has_previous %}
+      <a class="btn btn-outline-bright mb-4" href="?page=1&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">First</a>
+      <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.previous_page_number }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Previous</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <a class="btn btn-bright mb-4" href="?page={{ num }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">{{ num }}</a>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a class="btn btn-outline-bright mb-4" href="?page={{ num }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.next_page_number }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Next</a>
+      <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.paginator.num_pages }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Last ({{page_obj.paginator.num_pages}})</a>
+    {% endif %}
+
+  {% endif %}
+</div>
+
+<div class="row">
+
+  {%for image in user_images%}
+  <div class="col-md-6 gy-3"align='center'>
+    <div class="card bg-gallery-card-bot">
+      <a href="{% url 'image details' image.id %}" class="card-link">
+        <img src="{{image.image.url}}" class="card-img-top img-thumbnail img-fluid bg-gallery-card-top"style="width: 100%; height: 350px; object-fit: contain;" alt="Image Failed to Load">
+      </a>
+      <div class="card-body text-bright">
+        <h5 class="card-title">{{image.image_title}}</h5>
+        {%comment%}<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>{%endcomment%}
+        <a href="{% url 'image details' image.id %}" class="card-link">View Image Details</a>
+      </div>
+    </div>
+  </div>
+
+  {%comment%}original
+    <div class="col-md-6"align='center'>
+    <h3>{{image.image_title}}</h3>
+    <a href="{% url 'image details' image.id %}">
+      <img src="{{image.image.url}}" style="max-width: 100%; max-height: 500px;" alt="Image Failed to Load">  <!-- height="600"width="auto"max-width=100% max-width=100%>  -->
+    </a>
+    <br>
+    <a class='article-title' href="{% url 'image details' image.id %}">View Image Details Page</a>
+    </div>
+    {%endcomment%}
+
+
+
+  {%endfor%}
+
+</div>
+
+<br>
+
+<div class="gy-3" align='center'>
+  {% if is_paginated %}
+
+    {% if page_obj.has_previous %}
+      <a class="btn btn-outline-bright mb-4" href="?page=1&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">First</a>
+      <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.previous_page_number }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Previous</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <a class="btn btn-bright mb-4" href="?page={{ num }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">{{ num }}</a>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a class="btn btn-outline-bright mb-4" href="?page={{ num }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.next_page_number }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Next</a>
+      <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.paginator.num_pages }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Last ({{page_obj.paginator.num_pages}})</a>
+    {% endif %}
+
+  {% endif %}
+</div>
+
+
+{% endblock %}
+
+{% block navbar_right_content %}
+
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock navbar_right_content%}
+
+{% block navbar_left_content %}
+
+<h1>Announcements</h1>
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
+{% endblock navbar_left_content %}

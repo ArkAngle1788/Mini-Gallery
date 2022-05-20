@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>
+  {{studio}}
+</h1>
+
+<a href="{{studio.Studio_page}}">Visit Studio Page (external link)</a>
+
+
+<p><br>{{studio.description}}</p>
+
+<div class="row">
+  {%for image in studio_images%}
+    <div class="col-md-6 gy-3"align='center'>
+      <div class="card bg-gallery-card-bot">
+        <a href="{% url 'image details' image.id %}" class="card-link">
+          <img src="{{image.image.url}}" class="card-img-top img-thumbnail img-fluid bg-gallery-card-top"style="width: 100%; height: 350px; object-fit: contain;" alt="Image Failed to Load">
+        </a>
+        <div class="card-body text-bright">
+          <h5 class="card-title">{{image.image_title}}</h5>
+          {%comment%}<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>{%endcomment%}
+          <a href="{% url 'image details' image.id %}" class="card-link">View Image Details</a>
+        </div>
+      </div>
+    </div>
+  {%endfor%}
+</div>
+
+
+<div align='center'>
+  {% if is_paginated %}
+
+    {% if page_obj.has_previous %}
+      <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+      <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+      <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last ({{page_obj.paginator.num_pages}})</a>
+    {% endif %}
+
+  {% endif %}
+</div>
+
+
+
+
+
+{% endblock %}
+
+
+
+{%comment%}
+{% block navbar_left_content %}
+
+
+{%endblock%}
+{%endcomment%}
+
+
+
+
+
+<!-- SIDEBAR -->
+<!-- left -->
+{% block navbar_left_content %}
+  {% include 'CommunityInfrastructure/sidebar_left.html' %}
+{%endblock navbar_left_content%}
+
+<!-- sidebar Right -->
+
+{% block navbar_right_content %}
+
+<div class="panel-heading">
+  <h3>Panel</h3>
+</div>
+
+<div class='panel-body'>
+
+  <p>studio detail specific sidebar</p>
+
+  {% if request.user.is_staff or request.user == studio.userprofile %}
+    <a href="{% url 'edit painting studio' studio.id %}">Edit Page for {{studio.Studio_name}}</a>
+    <a class="list-group-item list-group-item-light" href="{% url 'gallery multiple upload' %}">upload images</a>
+
+{% load crispy_forms_tags %}
+
+    <form action="{%url 'studio export' studio.slug studio.id %}" method="post">
+        {% csrf_token %}
+
+        {% comment %}
+        <label for="select_number">Select how many images to export.</label>
+          <select id="select_number" name="select_number">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+        <label for="platform">Select the platform to export to.</label>
+          <select id="platform" name="platform">
+            <option value="Facebook">Facebook</option>
+          </select>
+        {% endcomment %}
+
+        <h3>Export Images</h3>
+
+        {{form|crispy}}
+
+        <input type="submit" value="export images">
+      </form>
+  {% endif %}
+</div>
+
+{% include 'CommunityInfrastructure/sidebar_right.html' %}
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock%}

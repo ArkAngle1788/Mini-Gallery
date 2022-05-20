@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+
+
+<h1>
+add entries to the various fields that can be present on images
+</h1>
+
+<ul>
+  <li><a href="{% url 'add colour' %}">Add Colour</a></li>
+  <li><a href="{% url 'add colour priority' %}">Add Colour Priority</a></li>
+  <br>
+  <li><a href="{% url 'add faction type' %}">Add Faction Type</a></li>
+  <li><a href="{% url 'add faction' %}">Add Faction</a></li>
+  <li><a href="{% url 'add sub faction' %}">Add Sub Faction</a></li>
+  <li><a href="{% url 'add unit type' %}">Add Unit Type</a></li>
+  <br>
+  <li><a href="{% url 'create painting studio' %}">Add Commission Studio</a></li>
+  <li><a href="{% url 'add country' %}">Add Country</a></li>
+  <li><a href="{% url 'add region' %}">Add Region</a></li>
+  <li><a href="{% url 'add city' %}">Add City</a></li>
+
+</ul>
+
+{% endblock %}
+
+{% block navbar_right_content %}
+
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock%}

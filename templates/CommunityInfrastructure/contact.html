@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<p>Nathaniel782@gmail.com or if you're here for testing message me on facebook</p>
+
+
+{% endblock content %}
+
+
+{% block navbar_right_content %}
+
+<h1>Announcements</h1>
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
+{% endblock navbar_right_content %}

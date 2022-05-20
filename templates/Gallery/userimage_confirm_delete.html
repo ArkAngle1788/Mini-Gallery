@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<form method="post">{% csrf_token %}
+    <fieldset class="form-group">
+      <legend class="border-bottom mb-4">Delete Image</legend>
+      <h2>Are you sure you want to delete the image: {{object.title}}</h2>
+    </fieldset>
+    <div class="form-group">
+      <button class="btn btn-outline-danger" type="submit">Delete</button>
+      <a class="btn btn-outline-secondary" href="{%url 'image details' object.id%}">Cancel</a>
+    </div>
+</form>
+
+
+{% endblock %}
+
+{% block navbar_right_content %}
+
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock%}
+
+
+{% block navbar_left_content %}
+
+<h1>Announcements</h1>
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
+{% endblock navbar_left_content %}

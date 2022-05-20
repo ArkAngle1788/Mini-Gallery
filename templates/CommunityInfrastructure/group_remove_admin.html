@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+
+<h1>
+Choose New Admins for {{group}}
+</h1>
+
+
+
+  {%if group.location_city %}
+    <form action="{%url 'group remove admin' group.location_city group.slug group.id %}" method="post">
+  {%elif group.location_region %}
+    <form action="{%url 'group remove admin' group.location_region group.slug group.id %}" method="post">
+  {%elif group.location_country %}
+    <form action="{%url 'group remove admin' group.location_country group.slug group.id %}" method="post">
+  {%endif%}
+
+
+  {% csrf_token %}
+
+  {%comment%}
+    <!-- admins_primary and admins_secondary are AdminProfile objects instead of UserProfile or User objects -->
+  {%endcomment%}
+
+  <label for="remove_admins_primary">Select User to remove from Primary Admins</label>
+  <select id="remove_admins_primary" class="form-control apply_select2" name="remove admins primary" multiple>
+    {% for user in admins_primary %}
+      <option value="{{ user.userprofile.id }}"> {{ user }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="remove_admins_secondary">Select User to remove from Secondary Admins</label>
+  <select id="remove_admins_secondary" class="form-control apply_select2" name="remove admins secondary" multiple>
+    {% for user in admins_secondary %}
+      <option value="{{ user.userprofile.id }}"> {{ user }}</option>
+    {% endfor %}
+  </select>
+
+
+  <!-- <input type="hidden" id="group" name="group PK" value={{group.id}} readonly> -->
+  <input type="submit" value="Remove Admins">
+</form>
+
+
+
+{% endblock %}
+
+{% block navbar_left_content %}
+
+<div class="panel-heading">
+  <h3>Title</h3>
+</div>
+
+<div class='panel-body'>
+
+<p>navbar</p>
+
+</div>
+
+
+
+{%endblock%}
+
+{% block navbar_right_content %}
+
+<div class="panel-heading">
+  <h3>Admin Panel</h3>
+</div>
+
+<div class='panel-body'>
+
+<p>content</p>
+
+</div>
+
+
+
+{%endblock%}

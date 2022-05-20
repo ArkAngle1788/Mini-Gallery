@@ -1,0 +1,61 @@
+{% load crispy_forms_tags %}
+
+{%if perms.ContentPost.add_contentpost or request.user.is_staff or object.author == request.user %}
+  <div class="panel-heading">
+    <h3>Admin Panel</h3>
+  </div>
+
+  <div class='panel-body'>
+
+  {%if perms.ContentPost.add_contentpost %}
+    <div class='panel-body'>
+      <a class="btn btn-outline-light" href="{%url 'blog create' %}">New Post</a>
+    </div>
+  {%endif%}
+
+
+    {%if object %}
+      <div class='panel-body'>
+        {%if object.author == request.user or perms.ContentPost.change_contentpost %}{%comment%}this is not a very rigorous check but maybe it's fine?{%endcomment%}
+          <div>
+            <a class="btn btn-outline-light" href="{%url 'blog update' object.id%}">Edit</a>
+            <a class="btn btn-outline-danger" href="{%url 'blog delete' object.id%}">Delete</a>
+          </div>
+        {%endif%}
+      </div>
+    {%endif%}
+
+
+
+
+
+  </div>
+{%endif%}
+
+
+<br>
+<a class="nav-item nav-link" href="{% url 'blog list' %}">All Posts</a>
+<form action="{%url 'blog list'%}" method="get">
+  {% csrf_token %}
+  <textarea name="search" rows="1" cols="26" placeholder="search for title or author"></textarea>
+  <br>
+  <input type="submit" value="Search">
+</form>
+
+<div class="panel-heading">
+  {%if news%}
+  <h3>Recent Posts</h3>
+  {%endif%}
+</div>
+
+<div class='panel-body'>
+
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
+
+</div>

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>
+  Page for uploading to facebook
+</h1>
+
+<h3>Update permissions</h3>
+
+<h3>test is:</h3>
+
+<p>{{test}}</p>
+
+<h4>test list</h4>
+{% if albums %}
+
+
+
+  <form action="{%url 'studio request facebook' studio.slug studio.id %}" method="post">
+      {% csrf_token %}
+      <label for="select_album">Select the Album to Post to.</label>
+
+      <select id="select_album" name="select_album">
+        {% for item in albums %}
+          <option value="{{item.id}}">{{item.name}}</option>
+        {%endfor%}
+      </select>
+      <input type="hidden" id="count" name="count" value={{count}} readonly>
+      <input type="hidden" id="page_id" name="page_id" value={{page_id}} readonly>
+      <input type="submit" value="select album">
+    </form>
+
+{% endif %}
+
+<h1>test: </h1>
+{{test}}
+
+
+
+
+{% endblock content %}
+
+
+
+
+
+<!-- SIDEBAR -->
+
+
+{% block navbar_right_content %}
+
+<div class="panel-heading">
+  <h3>Panel</h3>
+</div>
+
+<div class='panel-body'>
+
+<p>studio detail specific sidebar</p>
+
+
+
+</div>
+
+{% include 'CommunityInfrastructure/sidebar_right.html' %}
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock%}

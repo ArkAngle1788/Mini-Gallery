@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+
+{{ form.media.css }}
+<form method="post" >{% csrf_token %}
+    {{ form|crispy }}
+    <input type="submit" value="Submit">
+</form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{{ form.media.js }}
+
+{% endblock %}
+
+
+
+{% block navbar_left_content %}
+
+<p>left navbar</p>
+
+
+should i have the city pannel too?
+
+
+{%endblock%}
+
+
+{% block navbar_right_content %}
+
+<p>hello</p>
+
+{%endblock%}

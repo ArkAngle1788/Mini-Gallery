@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    {% block metatags %}
+    <!-- other pages that extend this will be in here! -->
+    {% endblock %}
+    <title>{% block head_title %}placeholder{% endblock %}</title>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous"> -->
+    {% load static %}
+    <link rel="stylesheet" href='{% static "/css/bootstrap.css"%}'>
+
+  </head>
+  <body>
+
+
+
+    {% include 'Top_Level_Nav/topbar.html' %}
+
+
+
+    <div id="div_lower" class="container-fluid">
+      <div class="row">
+        {%comment%}style="height: 1000px;" add this to force columns to be scrollable{%endcomment%}
+
+        <!--  Left SIDEBAR STARTS -->
+        <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
+
+        <div id="sidebar_left" class="col-12 col-md-2 order-1 collapse.show bg-sidebar text-text-sidebar overflow-auto"align="center">
+              {%block navbar_left_content%}
+                <h1>side bar not overridden</h1>
+                <li>item 1</li>
+                <li>item 2</li>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+              {%endblock navbar_left_content%}
+        </div>
+
+          <!--  Left SIDEBAR ENDS -->
+          <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
+
+
+      <!--  RIGHT SIDEBAR STARTS -->
+      <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
+
+        <div id="sidebar_right" class="col-md-2 order-2 order-md-3 collapse.show bg-sidebar text-text-sidebar overflow-auto"align='center'>
+          {%block navbar_right_content%}
+            <h1>side bar not overridden</h1>
+            <li>item 1</li>
+            <li>item 2</li>
+          {%endblock navbar_right_content%}
+        </div>
+
+        <!--  RIGHT SIDEBAR ENDS -->
+        <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
+
+        <!-- body  -->
+        <div class="col-md-8 order-3 order-md-2 bg-bodyclr text-text-main">
+          {%comment%}style="overflow-y: scroll;" forces body to be scrollable{%endcomment%}
+
+              {% if messages %}
+                {%for message in messages%}
+                  {%comment%} bootstrap alert class names are the same as the names as django alert tags so that's why we can throw in message.tags for nice formating but notanymore :( {%endcomment%}
+                  <div class="alert alert-{% if message.tags == 'error' %}danger{%else%}{{message.tags}}{%endif%}">
+                    {{message}}
+                  </div>
+                {%endfor%}
+              {%endif%}
+
+<!-- Page content here -->
+              {% block content %}
+              <!-- other pages that extend this will be in here! -->
+              {% endblock content %}
+
+        </div>
+
+      </div>
+    </div>
+
+
+
+    {% include 'Top_Level_Nav/footer.html' %}
+
+
+    <script>
+      if (window.innerWidth<=768){
+
+        document.getElementById("sidebar_right").className = "col-12 col-md-2 order-2 order-md-3 collapse bg-sidebar text-text-sidebar";
+        document.getElementById("sidebar_left").className = "col-12 col-md-2 order-1 collapse bg-sidebar text-text-sidebar";
+        // document.getElementById("div_lower").className="container-flex";
+      }
+    </script>
+
+
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script> -->
+    <script src='{% static "/js/bootstrap.js" %}'></script>
+
+  </body>
+</html>

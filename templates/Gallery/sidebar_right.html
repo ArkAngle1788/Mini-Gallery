@@ -1,0 +1,45 @@
+{% load crispy_forms_tags %}
+
+
+
+<div class="panel-heading">
+
+
+  {%if perms.Gallery.add_userimage %}
+        <h3> <a class="list-group-item list-group-item-light" href="{% url 'gallery upload' %}">upload an image</a></h3>
+  {%endif%}
+
+{% if request.user.is_staff %}
+    <a class="nav-item nav-link" href="{% url 'manage image fields' %}">manage image fields</a>
+{% endif %}
+
+
+
+  <a class="nav-item nav-link" href="{% url 'gallery home' %}">Gallery Home</a>
+  <h3>Filter Images</h3>
+</div>
+
+
+
+<div class='panel-body'>
+{{ filter_form.form.media.css }}
+<link href="/static/django_select2/django_select2.css" type="text/css" media="screen" rel="stylesheet">
+  <form action="{%url 'gallery home'%}" method="get">
+    <div class="form-group">
+
+        {# <legend class="border-bottom mb-4">Filter Images By</legend> #}
+        <p>Note: these filters currently search for images where only the selected filters are present. For example a filter of Necrons & Tyranids will return only images that have both and no images that only have one</p>
+
+        {%for field in filter_form.form%}
+          <label for="{{field.name}}" class='col-2 control-label'>{{field.label}}</label>
+          <div class='col-10'>
+            {{ field }}
+          </div>
+        {%endfor%}
+
+    </div>
+    <button class="btn btn-primary" type="submit">Filter</button>
+  </form>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  {{ filter_form.form.media.js }}
+</div>

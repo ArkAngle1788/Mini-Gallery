@@ -1,0 +1,24 @@
+
+
+{%if request.user.is_staff %}
+
+  <div class="panel-heading">
+    <h3>Site Admin Panel</h3>
+    <br>
+    <a href="{% url 'create group' %}">Create Group</a>
+    <br>
+    <a href="{% url 'create painting studio' %}">Create Painting Studio</a>
+    <br>
+    <li><a href="{% url 'add country' %}">Add Country</a></li>
+    <li><a href="{% url 'add region' %}">Add Region</a></li>
+    <li><a href="{% url 'add city' %}">Add City</a></li>
+  </div>
+
+{%endif%}
+
+
+<div class='panel-body'>
+
+<p>content</p>
+
+</div>

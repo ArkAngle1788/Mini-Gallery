@@ -1,0 +1,71 @@
+{% load static %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark nav-tabs">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'home' %}">
+      <img src="{% static 'universal/logo1.png' %}" alt="image goes here" width="60vu" height="60vu" class="d-inline-block align-text-top">
+      <!-- <img src="{% static 'universal/logo1.png' %}" alt="image goes here" class="img-responsive">-->
+      </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-link {% if '/' == request.path %} active{% endif %} " aria-current="page"href="{% url 'home' %}">Home</a>
+        <a class="nav-link {% if '/gallery' in request.path %} active{% endif %}" href="{% url 'gallery home' %}">Gallery</a>
+        <a class="nav-link {% if '/organizations' in request.path %} active{% endif %}" href="{% url 'groups top' %}">Groups & Organizations</a>
+        <a class="nav-link {% if '/news&content' in request.path %} active{% endif %}" href="{% url 'blog list' %}">Announcements</a>
+        <a class="nav-link {% if '/about' in request.path %} active{% endif %}" href="{% url 'about' %}">About</a>
+        <a class="nav-link {% if '/contact' in request.path %} active{% endif %}" href="{% url 'contact' %}">Contact</a>
+        <a class="nav-link {% if '/accounts/profile/' in request.path %} active{% endif %}" href="{% url 'profile self' %}">Account Settings</a>
+        {% if request.user.is_staff%}
+            <a class="nav-link" href="/admin/">(temp link)</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+          <a class="nav-link {% if '/accounts/logout/' in request.path %} active{% endif %}" href="{% url 'account_logout' %}">Log Out</a>
+        {%else%}
+            <a class="nav-link {% if '/accounts/login/' in request.path %} active{% endif %}" href="{% url 'account_login' %}">Log In</a>
+        {%endif%}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div style="height: 100px;"class='bg-dark'>
+  i'm in the navbar file
+</div>
+
+<div class="row bg-dark">
+  <div id="toggle_sidebar_buttons" class="d-flex justify-content-evenly">
+    <div id="toggle_sidebar_buttons1">
+    </div>
+    <div id="toggle_sidebar_buttons2">
+    </div>
+  </div>
+</div>
+
+<script>
+  if (window.innerWidth<=768){
+    // 768 is medium BP
+    var btn1 = document.createElement("BUTTON");
+    btn1.innerHTML = "Toggle Left Sidebar";
+    btn1.className="btn btn-altdark";
+    btn1.type="button";
+    btn1.setAttribute('data-bs-toggle',"collapse");
+    btn1.setAttribute('data-bs-target',"#sidebar_left");
+    btn1.setAttribute('aria-expanded',"false");
+    btn1.setAttribute('aria-controls',"sidebar_left");
+
+    var btn2 = document.createElement("BUTTON");
+    btn2.innerHTML = "Toggle Right Sidebar";
+    btn2.className="btn btn-altdark";
+    btn2.type="button";
+    btn2.setAttribute('data-bs-toggle',"collapse");
+    btn2.setAttribute('data-bs-target',"#sidebar_right");
+    btn2.setAttribute('aria-expanded',"false");
+    btn2.setAttribute('aria-controls',"sidebar_right");
+
+    document.getElementById("toggle_sidebar_buttons1").appendChild(btn1);
+    document.getElementById("toggle_sidebar_buttons2").appendChild(btn2);
+  }
+</script>

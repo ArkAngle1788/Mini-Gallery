@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load user_group_admin_check_filters %}
+
+
+<h1>
+{{group}}
+</h1>
+<h4>{{group.group_tag}}</h4>
+
+<p>
+{{group.group_description}}
+</p>
+
+
+
+
+
+
+
+{% endblock %}
+
+{% block navbar_left_content %}
+
+<div class="panel-heading">
+  <h3>Leagues Run by {{group}}</h3>
+</div>
+
+<div class='panel-body'>
+
+  {%if group.groups_leagues.all%}
+    <ul>
+      {%for league in group.groups_leagues.all %}
+        <li>{{league}}</li>
+      {%endfor%}
+    </ul>
+  {%else%}
+    <ul>No Leagues Currently Registered</ul>
+  {%endif%}
+
+</div>
+
+<a href="{% url 'groups by zone' currentzonestr %}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+</svg>View groups in {{currentzonestr}}</a>
+{%endblock%}
+
+
+
+<!-- SIDEBAR -->
+
+
+{% block navbar_right_content %}
+
+<div class="panel-heading">
+  <h3>Group Administration Panel</h3>
+</div>
+
+<div class='panel-body'>
+
+<p>content</p>
+
+{%comment%}
+  <!-- group location checks are done in ifelses b/c most of them should be citys so this saves processsing -->
+{%endcomment%}
+
+
+<h2>Group Admins:</h2>
+<b>Primary:</b>
+{%if group.group_primary_admins.all %}
+  {%for admin in group.group_primary_admins.all %}
+    <br>{{admin}}
+  {%endfor%}
+{%else%}
+  <br>No Primary Admins
+{%endif%}
+
+<br>
+<b>Secondary:</b>
+{%if group.group_secondary_admins.all %}
+  {%for admin in group.group_secondary_admins.all %}
+    <br>{{admin}}
+  {%endfor%}
+{%else%}
+  <br>No Secondary Admins
+{%endif%}
+
+<br>
+<br>
+
+
+
+{%if request.user.is_staff or group|is_primary_admin:request.user %}
+
+  <!-- Add an Admin -->
+  {%if group.location_city %}
+    <li><a href="{% url 'group add admin' group.location_city group.slug group.id %}">Add Admins</a></li>
+  {%elif group.location_region %}
+    <li><a href="{% url 'group add admin' group.location_region group.slug group.id %}">Add Admins</a></li>
+  {%elif group.location_country %}
+    <li><a href="{% url 'group add admin' group.location_country group.slug group.id %}">Add Admins</a></li>
+  {%endif%}
+
+  <!-- Remove an Admin -->
+  {%if group.location_city %}
+    <li><a href="{% url 'group remove admin' group.location_city group.slug group.id %}">Remove Admins</a></li>
+  {%elif group.location_region %}
+    <li><a href="{% url 'group remove admin' group.location_region group.slug group.id %}">Remove Admins</a></li>
+  {%elif group.location_country %}
+    <li><a href="{% url 'group remove admin' group.location_country group.slug group.id %}">Remove Admins</a></li>
+  {%endif%}
+
+
+
+{%endif%}
+{%if request.user.is_staff %}
+  <br>
+  <a href="{% url 'delete group' group.pk %}">Delete Group</a>
+{%endif%}
+
+</div>
+
+{% include 'CommunityInfrastructure/sidebar_right.html' %}
+
+{%endblock%}

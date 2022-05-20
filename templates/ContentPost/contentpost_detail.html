@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+
+<!-- {{object}} -->
+
+<h1>{{object.title}}</h1>
+<h3>Author: {{object.author}}</h3>
+<br>
+
+{%if object.text1 %}
+  {{object.text1}}<br><br>
+{%endif%}
+
+{%if object.image1 %}
+  <img class="image-center-fit" src="{{object.image1.url}}" height="auto" width="auto" max-width=100% max-width=100%><br><br>
+{%endif%}
+
+{%if object.text2 %}
+  {{object.text2}}<br><br>
+{%endif%}
+
+{%if object.image2 %}
+  <img class="image-center-fit" src="{{object.image2.url}}" height="auto" width="auto" max-width=100% max-width=100%><br><br>
+{%endif%}
+
+{%if object.text3 %}
+  {{object.text3}}<br><br>
+{%endif%}
+
+{%if object.image3 %}
+  <img class="image-center-fit" src="{{object.image3.url}}" height="auto" width="auto" max-width=100% max-width=100%><br><br>
+{%endif%}
+
+
+
+
+{% endblock %}
+
+{% block navbar_right_content %}
+
+
+
+{% include 'ContentPost/sidebar_right.html' %}
+
+{%endblock%}

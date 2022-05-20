@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>
+  Page for Testing Requests take 2
+</h1>
+
+<h3>Update permissions</h3>
+<p>if you can't select a page below you probably need to set permissions here!</p>
+{% load socialaccount %}
+
+{%comment%}
+<a href="{% provider_login_url "openid" openid="https://www.google.com/accounts/o8/id" next="/success/url/" %}">Google</a>
+<a href="{% provider_login_url "twitter" %}">Twitter</a>
+{%endcomment%}
+
+
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+
+  <div class="socialaccount_ballot">
+    <ul class="socialaccount_providers">
+      {% include "socialaccount/snippets/provider_list.html" with process="login" scope="pages_show_list,pages_read_engagement,pages_manage_posts" %}
+    </ul>
+  </div>
+
+  {% include "socialaccount/snippets/login_extra.html" %}
+{%endif%}
+
+<h3>test is:</h3>
+
+<p>{{test}}</p>
+
+<h4>test list</h4>
+
+<p>
+
+  <form action="{%url 'studio request facebook' studio.slug studio.id %}" method="post">
+      {% csrf_token %}
+      <label for="select_page">Select the Page to Post to.</label>
+
+      <select id="select_page" name="select_page">
+        {% for item in pages_managed %}
+          <option value="{{item.id}}">{{item.name}}</option>
+        {%endfor%}
+      </select>
+      <input type="hidden" id="count" name="count" value={{count}} readonly>
+      <input type="submit" value="select page">
+    </form>
+
+
+
+
+</p>
+
+<p>print the var : {{test2}}</p>
+
+<br>ssfd <br>
+<p>token value :  {{test2.token}}</p>
+<br>text <br>
+<p>token expiery :  {{test2.expires_at}}</p>
+
+<p>
+
+
+
+
+</p>
+
+{% endblock %}
+
+
+
+
+
+<!-- SIDEBAR -->
+
+
+{% block navbar_right_content %}
+
+<div class="panel-heading">
+  <h3>Panel</h3>
+</div>
+
+<div class='panel-body'>
+
+<p>studio detail specific sidebar</p>
+
+
+
+</div>
+
+{% include 'CommunityInfrastructure/sidebar_right.html' %}
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock%}

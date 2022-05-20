@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+
+  <div class="col-sm">
+    {% if currentzonestr %}
+      <h1>
+        Groups in {{currentzonestr}}:
+      </h1>
+    {%else%}
+      <h1>Groups:</h1>
+    {% endif %}
+
+
+
+    {% if groups %}
+    <ul>
+      {%for group in groups%}
+
+        {%if group.location_city %}
+          <li><a href="{% url 'group info' group.location_city group.slug group.id %}">{{group}} ({{group.group_tag}})</a></li>
+        {%elif group.location_region %}
+          <li><a href="{% url 'group info' group.location_region group.slug group.id %}">{{group}}</a></li>
+        {%elif group.location_country %}
+          <li><a href="{% url 'group info' group.location_country group.slug group.id %}">{{group}}</a></li>
+        {%endif%}
+
+
+      {%endfor%}
+    </ul>
+
+    {%else%}
+
+      <li>No Groups Found</li>
+
+    {%endif%}
+
+    {%if groups_in_subzone%}
+      <h2>Groups in subregions:</h2>
+      {%for group in groups_in_subzone%}
+        {%if group.location_city %}
+          <li><a href="{% url 'group info' group.location_city group.slug group.id %}">{{group}} ({{group.group_tag}})</a></li>
+        {%elif group.location_region %}
+          <li><a href="{% url 'group info' group.location_region group.slug group.id %}">{{group}}</a></li>
+        {%endif%}
+      {%endfor%}
+    {%else%}
+      {%comment%}
+        Is it ok to leave this empty if nothing is found?
+      {%endcomment%}
+
+    {%endif%}
+
+  </div>
+  <br>
+
+  <div class="col-sm">
+
+    {% if currentzonestr %}
+      <h1>
+        Commission Painters in {{currentzonestr}}:
+      </h1>
+    {%else%}
+      <h1>Commission Painters:</h1>
+    {% endif %}
+
+
+    {% if studio_container %}
+      {% for studio in studio_container %}
+        <li><a href="{%url 'painting studio' studio.slug studio.id %}">{{studio}}</a></li>
+      {%endfor%}
+    {%else%}
+      <li>No Painting Studio's Found</li>
+    {% endif %}
+
+
+
+  </div>
+
+</div>
+
+
+
+{% endblock %}
+
+{% block navbar_left_content %}
+  {% include 'CommunityInfrastructure/sidebar_left.html' %}
+{%endblock navbar_left_content%}
+
+{% block navbar_right_content %}
+
+{% include 'CommunityInfrastructure/sidebar_right.html' %}
+
+{%endblock%}

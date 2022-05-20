@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>
+  Page for Testing Requests
+</h1>
+
+<p>{{test}}</p>
+
+
+
+<p>
+
+  {% for item in test %}
+    {{item}}<br>
+  {%endfor%}
+
+
+</p>
+
+<p>{{test2}}</p>
+
+
+
+<p>
+
+
+
+
+</p>
+
+{% endblock %}
+
+
+
+
+
+<!-- SIDEBAR -->
+
+
+{% block navbar_right_content %}
+
+<div class="panel-heading">
+  <h3>Panel</h3>
+</div>
+
+<div class='panel-body'>
+
+<p>studio detail specific sidebar</p>
+
+
+
+</div>
+
+{% include 'CommunityInfrastructure/sidebar_right.html' %}
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock%}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{%block metatags%}
+<meta property="og:title" content="{{image.image_title}}">
+<meta property="og:description" content="from image gallery">
+<meta property="og:url" content="http://72.53.51.160:8000{% url 'image details' image.id %}">
+<meta property="og:site_name" content="TESTING">
+<meta property="og:image" content="https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png">
+<meta property="og:image:width" content="2514">
+<meta property="og:image:height" content="1380">
+{%endblock%}
+
+{% block content %}
+
+<h1>
+Gallery Image Details
+</h1>
+
+
+
+<h3>{{image.image_title}}</h3>
+<img class="image-center-fit" src="{{image.image.url}}" style="max-width: 100%; max-height: 100%;">
+
+{% if image.system.all %}
+  <h3>Game System:</h3>
+  <ul>
+    {%for system in image.system.all %}
+      <li>{{system}}</li>
+    {%endfor%}
+  </ul>
+{%endif%}
+{% if image.faction_type.all %}
+  <h3>Faction Type:</h3>
+  <ul>
+    {%for faction in image.faction_type.all %}
+      <li>{{faction}}</li>
+    {%endfor%}
+  </ul>
+{%endif%}
+{% if image.factions.all %}
+  <h3>Faction:</h3>
+  <ul>
+    {%for faction in image.factions.all %}
+      <li>{{faction}}</li>
+    {%endfor%}
+  </ul>
+{%endif%}
+{% if image.sub_factions.all %}
+  <h3>Sub-Faction:</h3>
+  <ul>
+    {%for sub_faction in image.sub_factions.all %}
+      <li>{{sub_faction}}</li>
+    {%endfor%}
+  </ul>
+{%endif%}
+{% if image.colours.all %}
+  <h3>Colours:</h3>
+  <ul>
+    {%for colour in image.colours.all %}
+      <li>{{colour}}</li>
+    {%endfor%}
+  </ul>
+{%endif%}
+{% if image.unit_type.all %}
+  <h3>Models Present:</h3>
+  <ul>
+    {%for unit_type in image.unit_type.all%}
+      <li>{{unit_type}}</li>
+    {%endfor%}
+  </ul>
+{%endif%}
+<h3>Other Data</h3>
+{% if image.conversion.all %}
+  Conversion Level:
+  <ul>
+    {%for conversion in image.conversion.all %}
+      <li>{{conversion}}</li>
+    {%endfor%}
+  </ul>
+{%endif%}
+{% if image.scale %}
+  Image Scale: {{image.scale}}<br>
+{%endif%}
+{% if image.paintingstudio.all %}
+  Painted by:
+  <ul>
+    {%for studio in image.paintingstudio.all %}
+      <ul>
+        <li>{{studio.Studio_name}}</li>
+          <ul><li><a href="{%url 'painting studio' studio.slug studio.id %}">{{studio}} (Internal Link)</a></li></ul>
+          <ul><li><a class='studio_page' href="{{studio.Studio_page}}">Visit Studio Page (External Link)</a></li></ul>
+      </ul>
+    {%endfor%}
+  </ul>
+<br>
+{%endif%}
+
+{% if image.owner %}
+  Content owner: {{image.owner}}<br>
+{%endif%}
+{% if image.location %}
+  Location: {{image.location}}<br>
+{% endif %}
+
+{% if request.user.is_authenticated %}
+  {% if liked %} <a class="nav-item nav-link" href="{% url 'image upvote' image.id %}?unlike=True">Un-Like</a> {%else%} <a class="nav-item nav-link" href="{% url 'image upvote' image.id %}?like=True">Like</a> {% endif %}
+{%endif%}
+{# <a class="nav-item nav-link" href="{% url 'image upvote' image.id %}">Upvote</a> #}
+<!-- {% if image.popularity %}
+  popularity rating is: {{image.popularity}}<br>
+{%endif%} -->
+
+
+
+
+
+
+{% endblock %}
+
+
+
+{% block navbar_right_content %}
+  {%if request.user.is_staff or request.user == image.uploader %}
+    <div>
+      <a class="btn btn-outline-light" href="{%url 'image update' object.id%}">Edit</a>
+      <a class="btn btn-outline-danger" href="{%url 'image delete' object.id%}">Delete</a>
+    </div>
+  {%endif%}
+  {% include 'Gallery/sidebar_right.html' %}
+
+{%endblock navbar_right_content%}
+
+{% block navbar_left_content %}
+
+<h1>Announcements</h1>
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
+{% endblock navbar_left_content %}

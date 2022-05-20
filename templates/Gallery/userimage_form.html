@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+
+
+<h1>
+Gallery Image Upload
+</h1>
+
+{%if image%}
+  <img class="image-center-fit" src="{{image.image.url}}" style="max-width: 100%; max-height: 100%;">
+{%endif%}
+
+{% if multi %}
+  <p>If you upload multiple images you can use the fields here as placeholder values for all the images. After uploading you will be prompted to customise tags on each image uploaded.</p>
+{% endif %}
+
+
+<form {% if remaining_images %}action="{%url 'gallery multiple update'%}"{% endif %} method="post" enctype="multipart/form-data">{% csrf_token %}
+      {{ form|crispy }}
+    {% if image %}<input type="hidden" id="imagepk" name="imagepk" value={{image.pk}} readonly>{%endif%}
+    {% if remaining_images %}<input type="hidden" id="remaining_images" name="remaining_images" value={{remaining_images}} readonly>{%endif%}
+    <input type="submit" value="Save">
+</form>
+
+
+
+{% endblock %}
+
+
+
+{% block navbar_right_content %}
+
+{% include 'Gallery/sidebar_right.html' %}
+
+{%endblock navbar_right_content%}
+
+{% block navbar_left_content %}
+
+<h1>Announcements</h1>
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
+{% endblock navbar_left_content %}
