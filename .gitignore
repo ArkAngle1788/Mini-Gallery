@@ -1,0 +1,13 @@
+CommunityInfrastructure/__pycache__/*
+CommunityInfrastructure/migrations/*
+ContentPost/__pycache__/*
+ContentPost/migrations/*
+Gallery/__pycache__/*
+Gallery/migrations/*
+League/__pycache__/*
+League/migrations/*
+UserAccounts/__pycache__/*
+UserAccounts/migrations/*
+website/__pycache__/*
+
+website/settings.py
