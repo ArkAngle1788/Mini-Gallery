@@ -11,3 +11,4 @@ UserAccounts/migrations/*
 website/__pycache__/*
 
 website/settings.py
+venv/*
