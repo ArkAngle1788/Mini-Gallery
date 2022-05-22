@@ -1076,7 +1076,8 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
 
 class Country_Create(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
     model=Country
-    fields='__all__'
+    # fields='__all__'
+    form_class=Country_Form
     template_name='GameData/game_data_form.html'
     permission_required = ('GameData.add_country')
 

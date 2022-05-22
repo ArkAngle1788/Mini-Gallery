@@ -8,7 +8,12 @@ League/__pycache__/*
 League/migrations/*
 UserAccounts/__pycache__/*
 UserAccounts/migrations/*
+UserAccounts/templatetags/__pycache__/*
+GameData/migrations/*
+GameData/__pycache__/*
+
 website/__pycache__/*
 
+media/*
 website/settings.py
 venv/*

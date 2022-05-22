@@ -4,8 +4,15 @@ from .models import *
 from django_select2 import forms as s2forms
 from django.forms.widgets import TextInput
 
-factattrs={'class':'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', 'style':'width: 50%','placeholder':'Name or Identifier'}
 
+basicattrs={'style':'width: 90%'}#select2 can only have limited styling applied to it with classes. to substantially change it it looks like we would need to override the select2 css classes
+
+textfieldattrs=basicattrs.copy()
+textfieldattrs['class']='bg-white'
+textfieldattrs['placeholder']='input'
+
+print(basicattrs)
+print(f"\n\n{textfieldattrs}\n\n")
 
 class GameWidget(s2forms.Select2Widget):
     search_fields=[
@@ -23,6 +30,8 @@ class Faction_TypeWidget(s2forms.Select2Widget):
         'faction_name__icontains',
     ]
 
+# class testwidget(forms.TextInput):
+
 
 class SystemForm(forms.ModelForm):
     class Meta:
@@ -37,9 +46,9 @@ class Faction_TypeForm(forms.ModelForm):
         model=Faction_Type
         fields="__all__"
         widgets = {
-            # 'faction': FactionWidget,
-            'faction_name': forms.TextInput(factattrs),
-            'system' : GameWidget({'class':'nedsgdsgsdgdsggsdgass', 'style':'width: 90%'}),
+            'system' : GameWidget(basicattrs),
+            'faction_name': forms.TextInput(textfieldattrs),
+
         }
 
 class FactionForm(forms.ModelForm):
@@ -47,8 +56,8 @@ class FactionForm(forms.ModelForm):
         model=Faction
         fields="__all__"
         widgets = {
-            'faction_name': forms.TextInput,
-            'faction_type' : Faction_TypeWidget({'class':'nedsgdsgsdgdsggsdgass', 'style':'width: 90%'}),
+            'faction_type' : Faction_TypeWidget(basicattrs),
+            'faction_name': forms.TextInput(textfieldattrs),
         }
 
 
@@ -58,17 +67,16 @@ class Sub_FactionForm(forms.ModelForm):
         model=Sub_Faction
         fields="__all__"
         widgets = {
-            # 'faction': FactionWidget,
-            'faction_name': forms.TextInput(factattrs),
-            'factions' : FactionWidget({'class':'nedsgdsgsdgdsggsdgass', 'style':'width: 90%'}),
+            'factions' : FactionWidget(basicattrs),
+            'faction_name': forms.TextInput(textfieldattrs),
         }
 
 
 class Unit_TypeForm(forms.ModelForm):
     class Meta:
-        model=Faction_Type
+        model=Unit_Type
         fields="__all__"
         widgets = {
-            'unit_type': forms.TextInput(factattrs),
-            'system' : GameWidget({'class':'nedsgdsgsdgdsggsdgass', 'style':'width: 90%'}),
+            'system' : GameWidget(basicattrs),
+            'unit_type': forms.TextInput(textfieldattrs),
         }
