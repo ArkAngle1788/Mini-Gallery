@@ -14,7 +14,8 @@ def update_studio_images(sender, image, studio, **kwargs):
     # print("studio is : ")
     # print(studio.pk)
     # print(f"studio_images.all is : {image.studio_images_set}\n")
-    throughobject=image.studio_images_set.get(studio_id=studio.pk)
+    throughobject=image.studio_images_set.get(studio_id=studio.pk)#_set lets us reverse lookup the relationship
+    # print(f"throughobject is : {throughobject}\n")
     # print(f' official is : {throughobject.official}')
     throughobject.official=True
     throughobject.save()

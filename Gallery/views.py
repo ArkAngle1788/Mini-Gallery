@@ -119,80 +119,30 @@ class GalleryMultipleUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateVie
         context['filter_form']=image_filter
         context['multi']=True
 
-
         return context
 
     def get_success_url(self):
         url=super().get_success_url()
         return url+"?images="+self.uploadedimagelist
 
-    def form_valid(self,form):
+    def form_valid(self,form):  #a view in CommunityInfrastructure overrides this function. changes here might need to be reflected there as well
         form.instance.uploader=self.request.user #add this data first then validate
         files = self.request.FILES.getlist('image')
         # success_url+="?images="
-
-
         # self.object = form.save()
         for f in files:
 
-
-            # print("f is : "+str(f))
             form.instance.image=f
-            # newform=UploadMultipleImages()
-            # newform.instance=form.instance
-            # newform2=UploadMultipleImages(self.request.POST)
-            # print(f'newform2 is : {newform2}')
-            # print("newform image is : "+str(newform2.instance.image))
-            # newform2.instance.image_title=form.instance.image_title
-            # print("newform image title is : "+str(newform2.instance.image_title))
-            # if newform2.is_valid():
-            #     print('validated new form')
-            # else:
-            #     print("failed to validate newform2")
-            #     print(self.form_invalid(newform2))
-            #     return self.form_invalid(newform2)
-            # if newform.is_valid():
-            #     print('validated new form')
-            # else:
-            #     print("failed to validate newform")
-            #     print(self.form_invalid(newform))
-            #     return self.form_invalid(newform)
-            # newimage=newform.save()
-            # newimage=UserImage(image=f,image_title=form.instance.image_title,scale=form.instance.scale,location=form.instance.location,uploader=form.instance.uploader)
-            # newimage.save()
-            # newimage.paintingstudio.add(PaintingStudio.objects.get(form.instance.paintingstudio))
-# ,paintingstudio=form.instance.paintingstudio,owner=form.instance.owner
-# system=form.instance.system,faction_type=form.instance.faction_type,factions=form.instance.factions,sub_factions=form.instance.sub_factions,colours=form.instance.colours,conversion=form.instance.conversion,unit_type=form.instance.unit_type,
-
             newimage=form.save(commit=False)
-            # print(f'NI starts as {newimage.id}')
-
             newimage.pk=None
             newimage.save()
             form.save_m2m()
-
-            # self.object=form.save(commit=False)
-            # # print(f'NI starts as {newimage.id}')
-            #
-            # self.object.pk=None
-            # self.object.save()
-            # self.object.save_m2m()
 
             if self.uploadedimagelist == '' :
                 self.uploadedimagelist+=str(newimage.pk)
             else:
                 self.uploadedimagelist+=','
                 self.uploadedimagelist+=str(newimage.pk)
-
-            # print(f'form image is : {form.instance.image}')
-                # self.object = form.save()
-            # print("new image ends up as is : "+str(newimage.id)+'\n')
-            # print(f'object is : {self.object.id}\n')
-            # print(f"New image value: Faction :{newimage.factions}")
-            # print(f"New image value: Colours {newimage.colours}")
-            # print(f"New image value: scale {newimage.scale}")
-            # print(f"New image value: location {newimage.location}")
-            # print(f"and studio is : {newimage.paintingstudio}")
 
 
         self.object=newimage#this stayed here b/c the createview class needs an object to bind to but it doesn't matter which one b/c we've changed functionality so much
@@ -228,7 +178,7 @@ class GalleryMultipleUpdate(PermissionRequiredMixin,LoginRequiredMixin,UserPasse
             try:
                 queryset = queryset.filter(pk=pklist[0])
             except:
-                print("Something went wrong")
+                # print("Something went wrong")
 
                 raise Http404(f'error: {queryset.model._meta.verbose_name} has not been called correctly you hacker')
 

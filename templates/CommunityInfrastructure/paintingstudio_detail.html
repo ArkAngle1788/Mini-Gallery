@@ -91,7 +91,7 @@
 
   {% if request.user.is_staff or request.user == studio.userprofile %}
     <a href="{% url 'edit painting studio' studio.id %}">Edit Page for {{studio.Studio_name}}</a>
-    <a class="list-group-item list-group-item-light" href="{% url 'gallery multiple upload' %}">upload images</a>
+    <a class="list-group-item list-group-item-light" href="{% url 'painting studio upload' studio.slug studio.id %}">upload images</a>
 
 {% load crispy_forms_tags %}
 

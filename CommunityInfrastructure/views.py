@@ -562,7 +562,6 @@ class Studio_Upload(UserPassesTestMixin,GalleryMultipleUpload):
     def form_valid(self,form): #this is almost identical to GalleryMultipleUpload's code but we need to send a signal in the middle
         form.instance.uploader=self.request.user #add this data first then validate
         files = self.request.FILES.getlist('image')
-
         for f in files:
 
             form.instance.image=f
@@ -577,11 +576,8 @@ class Studio_Upload(UserPassesTestMixin,GalleryMultipleUpload):
 
             try:
                 newimage.paintingstudio.get(id=studio.id)
-                # print("studio set")
             except:
                 newimage.paintingstudio.add(studio)
-                # print("studio not set")
-
 
             new_studio_image.send(sender=self.__class__, image=newimage, studio=studio)
 
@@ -591,7 +587,6 @@ class Studio_Upload(UserPassesTestMixin,GalleryMultipleUpload):
             else:
                 self.uploadedimagelist+=','
                 self.uploadedimagelist+=str(newimage.pk)
-
 
 
         self.object=newimage#this stayed here b/c the createview class needs an object to bind to but it doesn't matter which one b/c we've changed functionality so much
