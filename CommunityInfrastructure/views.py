@@ -721,7 +721,8 @@ class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #con
             apiurlstringforpage='https://graph.facebook.com/v13.0/'+userid+'/accounts?access_token='+tokenobject.token
             pages = requests.get(apiurlstringforpage).json()
             if 'error' in pages:
-                raise Http404(f'{pages}')
+                messages.error(request, 'The request returned an error. Make sure you have enabled the appropriate permissions')
+                raise redirect(request.META['HTTP_REFERER'])
             # there might be multipule pages available
             pagetoken=''
             for page in pages['data']:
@@ -745,7 +746,11 @@ class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #con
                     # raise Http404(f'{responsejson}')
                     return render(request, 'error.html',{'error':f'{responsejson}'})
             test=responsejson
-            return render(request, 'CommunityInfrastructure/exportcomplete.html',{'test':test})
+            messages.success(request, 'Image Export Complete!')
+            url=reverse('groups top')
+            url+=f'/paintingstudio/{studio.slug()}/{studio.id}'
+            return redirect(url)
+            # return render(request, 'CommunityInfrastructure/exportcomplete.html',{'test':test})
 
         if self.request.POST.get('select_page'):#here we take the page id and find available albums to post in. an improperly named select_page will simply cause the api lookup to fail
 
@@ -755,7 +760,8 @@ class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #con
 
             responsejson = requests.get(apiurlstring).json()
             if 'error' in responsejson:
-                raise Http404(f'{responsejson}')
+                messages.error(request, 'The request returned an error. Make sure you have enabled the appropriate permissions')
+                raise redirect(request.META['HTTP_REFERER'])
             # print(responsejson)
 
             # get a list of albums
@@ -845,7 +851,7 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
                         raise Http404(f'misconfigured image upload request: \n{apiurlstring2}\n{responsejson2}')
                     if not ('id' in responsejson2):
                         raise Http404(f'Misconfigured Response: {responsejson2}')
-                    print(f"\n\nresponse (image upload) was: {responsejson2}\n\n")
+                    # print(f"\n\nresponse (image upload) was: {responsejson2}\n\n")
                     image_post_id_list+=[responsejson2['id']]
 
 
@@ -888,8 +894,11 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
             albums=None
 
 
-
-            return render(request, 'CommunityInfrastructure/exportcomplete.html',{'test':test,'test2':test2,'albums':albums,'page_id':pageid,'count':count,'studio':studio})
+            messages.success(request, 'Image Export Complete!')
+            url=reverse('groups top')
+            url+=f'/paintingstudio/{studio.slug()}/{studio.id}'
+            return redirect(url)
+            # return render(request, 'CommunityInfrastructure/exportcomplete.html',{'test':test,'test2':test2,'albums':albums,'page_id':pageid,'count':count,'studio':studio})
 
         raise Http404(f'post error')
 
