@@ -742,7 +742,8 @@ class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #con
                 # print(apiurlstring)
                 responsejson = requests.post(apiurlstring).json()
                 if responsejson['error']:
-                    raise Http404(f'{responsejson}')
+                    # raise Http404(f'{responsejson}')
+                    return render(request, 'error.html',{'error':f'{responsejson}'})
             test=responsejson
             return render(request, 'CommunityInfrastructure/exportcomplete.html',{'test':test})
 
