@@ -741,7 +741,7 @@ class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #con
                 apiurlstring='https://graph.facebook.com/v13.0/'+albumid+'/photos?caption='+description+'&url='+imageurl+'&access_token='+pagetoken
                 # print(apiurlstring)
                 responsejson = requests.post(apiurlstring).json()
-                if responsejson['error']:
+                if 'error' in responsejson:
                     # raise Http404(f'{responsejson}')
                     return render(request, 'error.html',{'error':f'{responsejson}'})
             test=responsejson
@@ -803,7 +803,7 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
             # call the API to get the instagram_business_account
             responsejson = requests.get(apiurlstring).json()
             if 'error' in responsejson:
-                messages.error(request, 'The request returned and error. Make sure you have enabled the appropriate permissions')
+                messages.error(request, 'The request returned an error. Make sure you have enabled the appropriate permissions')
                 raise redirect(request.META['HTTP_REFERER'])
 
             if not ('instagram_business_account' in responsejson):
