@@ -12,8 +12,8 @@ providers=[('Facebook','Facebook'),('Instagram','Instagram')]
 num=[(1,'1'),(2,2),(3,"3"),(4,"4"),(5,'5'),(6,'6'),(7,7),(8,8),(9,9),(10,10)]#these all appear the same when rendered in the final form
 
 class SelectExport(forms.Form):
-    select_number=forms.ChoiceField(choices=num)
-    platform=forms.ChoiceField(choices=providers)
+    select_number=forms.ChoiceField(choices=num,widget=forms.Select(basicattrs))
+    platform=forms.ChoiceField(choices=providers,widget=forms.Select(basicattrs))
     # class Meta:
     #     fields="__all__"
 

@@ -736,7 +736,7 @@ class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #con
             # now that we have the page token we can upload the images
             for i in range(count):
                 description=studios_images[i].image_title
-                imageurl=studios_images[i].image_url
+                imageurl=studios_images[i].image.url
                 apiurlstring='https://graph.facebook.com/v13.0/'+albumid+'/photos?caption='+description+'&url='+imageurl+'&access_token='+pagetoken
                 # print(apiurlstring)
                 responsejson = requests.post(apiurlstring).json()
@@ -810,7 +810,7 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
 
             if count == 1:
                 studio_image_set=PaintingStudio.objects.get(pk=studio.pk).studios_images.all().filter(studio_images__official=True).order_by('-pk')
-                image_url=studio_image_set[0].image_url
+                image_url=studio_image_set[0].image.url
                 apiurlstring2='https://graph.facebook.com/v13.0/'+igid+'/media?image_url='+image_url+'&access_token='+tokenobject.token
                 if not caption == '':
                     apiurlstring2+=('&caption='+urllib.parse.quote(caption))
@@ -834,7 +834,7 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
                 for i in range(count):
 
                     studio_image_set=PaintingStudio.objects.get(pk=studio.pk).studios_images.all().filter(studio_images__official=True).order_by('-pk')#ordered with most recent first
-                    image_url=studio_image_set[i]
+                    image_url=studio_image_set[i].image.url
                     apiurlstring2='https://graph.facebook.com/v13.0/'+igid+'/media?image_url='+image_url+'&is_carousel_item=true&access_token='+tokenobject.token
 
                     #call the API
