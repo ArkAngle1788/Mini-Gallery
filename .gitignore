@@ -15,5 +15,6 @@ GameData/__pycache__/*
 website/__pycache__/*
 
 media/*
+static/*
 website/settings.py
 venv/*
