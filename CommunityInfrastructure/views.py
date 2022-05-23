@@ -711,7 +711,8 @@ class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #con
                 raise Http404(f'error: {count} has not been called correctly you hacker')
             #we replicate the way images are displayed on the studio page for consistant uploading selection
             studio_uploader=PaintingStudio.objects.get(pk=self.kwargs['pk']).userprofile
-            studios_images=UserImage.objects.filter(uploader=studio_uploader).annotate(num_likes=Count('popularity')).order_by('-num_likes')
+            # studios_images=UserImage.objects.filter(uploader=studio_uploader).annotate(num_likes=Count('popularity')).order_by('-num_likes')#this misses out on the offical flag
+            studios_images=PaintingStudio.objects.get(pk=studio.pk).studios_images.all().filter(studio_images__official=True).order_by('-pk')
 
 
             #now that we have all the information we need to call the api to get the page access token
