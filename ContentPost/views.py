@@ -5,7 +5,9 @@ from .models import ContentPost
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 
+
 from .custom_functions import *
+from .forms import *
 
 from GameData.models import Games
 
@@ -91,7 +93,7 @@ class ContentPostDetailView(DetailView):
 
 class ContentPostCreateView(PermissionRequiredMixin,UserPassesTestMixin,CreateView):  #shares a template with update view -- <model>_form.html
     model=ContentPost
-    fields=['headline','title','text1','image1','text2','image2','text3','image3','global_display','display_to_game','source']
+    form_class=ContentPostForm
     permission_required = ('ContentPost.add_contentpost')
 
 #over ride the form_valid method to add information to the form before it is submitted
@@ -132,8 +134,8 @@ class ContentPostCreateView(PermissionRequiredMixin,UserPassesTestMixin,CreateVi
 # this view uses passes test instead of permissionmixin because you might lose edit privilages but you should still be able to edit somethign you wrote
 class ContentPostUpdateView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):  #shares a template with update view -- <model>_form.html
     model=ContentPost
-    fields=['headline','title','text1','image1','text2','image2','text3','image3','global_display','display_to_game','source']
-
+    # fields=['headline','title','text1','image1','text2','image2','text3','image3','global_display','display_to_game','source']
+    form_class=ContentPostForm
 
 
     def get_context_data(self, **kwargs):

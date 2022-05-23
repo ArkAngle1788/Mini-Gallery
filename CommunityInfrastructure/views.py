@@ -512,7 +512,7 @@ class Studio_Details(ListView):
             elif self.model is not None:
                 # studio_uploader=PaintingStudio.objects.get(pk=self.kwargs['pk']).userprofile
                 # queryset=UserImage.objects.filter(uploader=studio_uploader).annotate(num_likes=Count('popularity')).order_by('-num_likes')
-                queryset=PaintingStudio.objects.get(pk=self.kwargs['pk']).studios_images.all().filter(studio_images__official=True)
+                queryset=PaintingStudio.objects.get(pk=self.kwargs['pk']).studios_images.all().filter(studio_images__official=True).order_by('-pk')#show the most recent images first
 
 
                 # queryset = self.model._default_manager.all()
@@ -599,182 +599,6 @@ class Studio_Upload(UserPassesTestMixin,GalleryMultipleUpload):
         # uploadedimagelist #add the list of images we uploaded to the url so we can edit them
         return FormMixin.form_valid(self,form) # then run original form_valid
 
-
-
-
-class Studio_Request(LoginRequiredMixin,UserPassesTestMixin,View):
-
-    def test_func(self):#this checks to see if you're allowed to use this functionality
-
-        group=CIgroup.objects.get(pk=self.kwargs['pk'])
-
-        if self.request.user.is_staff:
-            return True
-
-        # Check to make sure its the studio account
-
-
-        return False
-
-
-    # this is to select the admin to remove
-    def get(self, request,*args,**kwargs):
-
-
-        pageid='104509638899532'
-        userid='10158837403801172'
-        albumid="105203035496859"
-        userAUTH="EAAuRQSFZBP0cBAIoIcD8JMG4lmcJZC6BCGGKo7FuxLLU6p3IZBWbhqWmqb80yaMqAbZCNak3EwYVMqVNxQr3HZCFpG0lO3KUIeCXMKYLAHwgAiHua3xnJph6Fs2rGfd7oOutpuAZB6jxZCq6ZB04a7XyLHKUjMttntleaMNBFuwkvEgapozPmIZCoZCMzjkv2htbUOiJqAMKPNQcP8Pg7YvpfJTmmyBTym40O3OfZBCJXlmGgZDZD"
-
-        urlstring='https://graph.facebook.com/v13.0/'+userid+'/accounts?access_token='+userAUTH+''
-
-        response = requests.get(urlstring)
-
-        if response.status_code == 200:
-            print('Success!')
-        elif response.status_code == 404:
-            print('Not Found.')
-
-
-
-        test=response.json()
-        print(test)
-        # should check this exists
-        pagetoken=test['data'][0]['access_token']
-
-        post="Facebook documentation is HORRIFYING: Final take"
-
-        cat1url='https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png'
-        cat2url="https://media.npr.org/assets/img/2021/08/11/gettyimages-1279899488_wide-f3860ceb0ef19643c335cb34df3fa1de166e2761-s1100-c50.jpg"
-
-        # post an image to a page
-        # response2=requests.post('https://graph.facebook.com/v13.0/'+pageid+'/photos?message='+post+'&url='+cat1url+'&access_token='+pagetoken)
-        # response3=requests.post('https://graph.facebook.com/v13.0/'+pageid+'/photos?message='+post+'&url='+cat2url+'&access_token='+pagetoken)
-
-        # response2=requests.post('https://graph.facebook.com/v13.0/105175975499565/photos?caption=this is a cat5 caption&url='+cat1url+'&album=CATS&access_token='+pagetoken)
-        # response3=requests.post('https://graph.facebook.com/v13.0/105175975499565/photos?caption=this is a cat6 caption&url='+cat2url+'&album=CATS&access_token='+pagetoken)
-
-# non published image 105218722161957  img 2  105227635494399
-
-    #try to upload nonpublsihed images
-        var=105227635494399
-        media1=var
-        media=json.dumps(media1)
-        print(media)
-
-        # response2=requests.post('https://graph.facebook.com/'+pageid+'/feed?message=New post i know the id of&access_token='+pagetoken)
-
-        # albums
-        ablumid='105203035496859'
-        #upload to an album
-        response2=requests.post('https://graph.facebook.com/v13.0/105203035496859/photos?caption=albumreuploadtest&url='+cat1url+'&access_token='+pagetoken)
-        # response3=requests.post('https://graph.facebook.com/v13.0/105203035496859/photos?&url='+cat2url+'&access_token='+pagetoken)
-
-        # created:
-        #    {"id":"105209255496237","post_id":"104509638899532_105209255496237"} {"id":"105209295496233","post_id":"104509638899532_105209295496233"}
-
-        # most recent cats added:  {"id":"105250235492139","post_id":"104509638899532_105250235492139"} {"id":"105250288825467","post_id":"104509638899532_105250288825467"}
-
-        # published=false id's
-        #   {"id":"105209815496181"} {"id":"105209848829511"}
-
-        # a cat post to edit
-        postid='104509638899532_105187395498423'
-        # postid='104509638899532_105250235492139'
-
-        # response2=requests.post('https://graph.facebook.com/v13.0/104509638899532/feed?message=another test post&access_token='+pagetoken)
-
-        # edit a post
-        # response2=requests.post('https://graph.facebook.com/v13.0/'+postid+'?message=This post did not have a message before&access_token='+pagetoken)
-
-        # look at posts
-        # response2=requests.get('https://graph.facebook.com/v13.0/'+pageid+'/feed?fields=attachments&access_token='+pagetoken)
-
-        # this is the manual post with image
-        # "created_time":"2022-04-09T18:20:56+0000","message":"Manual post with image","id":"104509638899532_105733835443779"},
-
-        #this is double image post:
-        #  {"created_time":"2022-04-09T19:18:45+0000","message":"Double Image post","id":"104509638899532_105760508774445"}
-
-        # manual posts attachments return:
-
-    # [{"attachments":
-    #     {"data":
-    #         [{
-    #             "description":"Manual post with image",
-    #             "media":
-    #                 {"image":
-    #                     {"height":405,
-    #                         "src":"https:\/\/scontent-sea1-1.xx.fbcdn.net\/v\/t39.30808-6\/278171387_105733808777115_6605641738834364053_n.jpg?stp=dst-jpg_s720x720&_nc_cat=102&ccb=1-5&_nc_sid=8024bb&_nc_ohc=q-1degfx2FEAX8DnLY1&_nc_ht=scontent-sea1-1.xx&edm=AKK4YLsEAAAA&oh=00_AT9I0v0b8ftNJCwciAziF_DFA0zifAfcdhVTK14W3lb6KA&oe=625750F6
-    #                         ","width":720
-    #                     }
-    #                 },
-    #             "target":{"id":"105733812110448","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105733812110448\/?type=3"},
-    #             "type":"photo","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105733812110448\/?type=3"
-    #             }]
-    #         },
-    #         "id":"104509638899532_105733835443779"
-    #     },
-    #     {"id":"104509638899532_105252882158541"} #<-- this last post id is the previous post
-
-    # new post id
-        # {"id":"104509638899532_105745082109321"}
-
-        # this is imageless post
-        postid='104509638899532_105745082109321'
-
-        #this is manual post (harridan)
-        postid='104509638899532_105733835443779'
-
-        # postid='104509638899532_105187395498423'#a cat post
-        # look at a specific post
-        # response2=requests.get('https://graph.facebook.com/v13.0/'+postid+'/?fields=attachments&access_token='+pagetoken)
-
-        # lets try to look at photos
-        # photoid="104509638899532_105252882158541"
-        # response2=requests.get('https://graph.facebook.com/v13.0/'+photoid+'?access_token='+pagetoken)
-
-        # harridan
-            # hopefullyobject={"data":[{"description":"Manual post with image","media":{"image":{"height":405,"src":"https:\/\/scontent-sea1-1.xx.fbcdn.net\/v\/t39.30808-6\/278171387_105733808777115_6605641738834364053_n.jpg?stp=dst-jpg_s720x720&_nc_cat=102&ccb=1-5&_nc_sid=8024bb&_nc_ohc=q-1degfx2FEAX8DnLY1&_nc_ht=scontent-sea1-1.xx&edm=AKK4YLsEAAAA&oh=00_AT9I0v0b8ftNJCwciAziF_DFA0zifAfcdhVTK14W3lb6KA&oe=625750F6","width":720}},"target":{"id":"105733812110448","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105733812110448\/?type=3"},"type":"photo","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105733812110448\/?type=3"}]}
-
-        # harridan edit
-        # hopefullyobject={"data":[{"description":"Manual post with image but not this time","media":{"image":{"height":405,"src":"https:\/\/scontent-sea1-1.xx.fbcdn.net\/v\/t39.30808-6\/278171387_105733808777115_6605641738834364053_n.jpg?stp=dst-jpg_s720x720&_nc_cat=102&ccb=1-5&_nc_sid=8024bb&_nc_ohc=q-1degfx2FEAX8DnLY1&_nc_ht=scontent-sea1-1.xx&edm=AKK4YLsEAAAA&oh=00_AT9I0v0b8ftNJCwciAziF_DFA0zifAfcdhVTK14W3lb6KA&oe=625750F6","width":720}},"target":{"id":"105733812110448","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105203035496859\/105209255496237\/?type=3"},"type":"photo","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105203035496859\/105209255496237\/?type=3"}]}
-
-        # hopefully a cat
-        # var={"data":[{"description":"NEW POST CONTENTssss","media":{"image":{"height":360,"src":"https:\/\/scontent-sea1-1.xx.fbcdn.net\/v\/t39.30808-6\/277819104_105187388831757_6518022947573624882_n.jpg?stp=dst-jpg_s720x720&_nc_cat=105&ccb=1-5&_nc_sid=2d5d41&_nc_ohc=fnyYdSEuetMAX-Dvhvz&_nc_ht=scontent-sea1-1.xx&edm=AJfPMC4EAAAA&oh=00_AT9_yWp8S9sy-w4xJITnuhI46ZEbZbUUeECKwKjSGNrC3w&oe=62561944","width":720}},"target":{"id":"105187395498423","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105187395498423\/?type=3"},"title":"Timeline photos","type":"photo","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105187395498423\/?type=3"}]}
-
-
-        #double image post
-
-        # attchobjdbl={"attachments":{"data":[{"media":{"image":{"height":405,"src":"https:\/\/scontent-sea1-1.xx.fbcdn.net\/v\/t39.30808-6\/278202646_105760448774451_9169853434408650776_n.jpg?stp=dst-jpg_s720x720&_nc_cat=103&ccb=1-5&_nc_sid=8024bb&_nc_ohc=GE1JQtmC8U0AX_bTNUy&_nc_ht=scontent-sea1-1.xx&edm=AKK4YLsEAAAA&oh=00_AT-hf8VGWqjC6bZjVXARGLLO904Gc4WdjaSnz721x72D0A&oe=6256363E","width":720}},"subattachments":{"data":[{"media":{"image":{"height":405,"src":"https:\/\/scontent-sea1-1.xx.fbcdn.net\/v\/t39.30808-6\/278202646_105760448774451_9169853434408650776_n.jpg?stp=dst-jpg_s720x720&_nc_cat=103&ccb=1-5&_nc_sid=8024bb&_nc_ohc=GE1JQtmC8U0AX_bTNUy&_nc_ht=scontent-sea1-1.xx&edm=AKK4YLsEAAAA&oh=00_AT-hf8VGWqjC6bZjVXARGLLO904Gc4WdjaSnz721x72D0A&oe=6256363E","width":720}},"target":{"id":"105760452107784","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105760452107784\/?type=3"},"type":"photo","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105760452107784\/?type=3"},{"media":{"image":{"height":405,"src":"https:\/\/scontent-sea1-1.xx.fbcdn.net\/v\/t39.30808-6\/278215249_105760465441116_4291230953242479171_n.jpg?stp=dst-jpg_s720x720&_nc_cat=109&ccb=1-5&_nc_sid=8024bb&_nc_ohc=dqhhEhuRQS8AX_jTOrQ&_nc_ht=scontent-sea1-1.xx&edm=AKK4YLsEAAAA&oh=00_AT91hxKuObeiG5QwJ-YhL-uNCxXwYMs2JiKygA5uI1ZtCQ&oe=6256671E","width":720}},"target":{"id":"105760478774448","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105760478774448\/?type=3"},"type":"photo","url":"https:\/\/www.facebook.com\/104509638899532\/photos\/a.105169205500242\/105760478774448\/?type=3"}]},"target":{"id":"105760508774445","url":"https:\/\/www.facebook.com\/104509638899532\/posts\/105760508774445\/"},"title":"Photos from API TEST's post","type":"album","url":"https:\/\/www.facebook.com\/104509638899532\/posts\/105760508774445\/"}]},"id":"104509638899532_105760508774445"}
-
-        # ,{"id":"104509638899532_105745082109321"}
-
-
-# this doesn't work b/c the attachments field looks like it's been disabled on the backend
-        # response2=requests.post('https://graph.facebook.com/'+postid+'?message=Manual posts&attachments='+json.dumps(var)+'&access_token='+pagetoken)
-
-        test2=str(response2.text)#+" "+str(response3.text)
-
-        return render(request, 'CommunityInfrastructure/test.html',{'test':test,'test2':test2})
-
-
-#
-#
-# https://www.facebook.com/dialog/feed?
-#   app_id=708062660365700
-#   &display=popup
-#   &source=https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png
-#   &redirect_uri=https://www.facebook.com/API-TEST-104509638899532/
-#
-
-
-    def post(self, request,*args,**kwargs):
-
-
-        test="hello"
-
-        return render(request, 'CommunityInfrastructure/test.html',{'test':test})
 
 
 
@@ -917,7 +741,7 @@ class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #con
             # now that we have the page token we can upload the images
             for i in range(count):
                 description=studios_images[i].image_title
-                imageurl='https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png'
+                imageurl=studios_images[i].image_url
                 apiurlstring='https://graph.facebook.com/v13.0/'+albumid+'/photos?caption='+description+'&url='+imageurl+'&access_token='+pagetoken
                 # print(apiurlstring)
                 responsejson = requests.post(apiurlstring).json()
@@ -990,7 +814,8 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
             igid=responsejson["instagram_business_account"]['id']
 
             if count == 1:
-                image_url='https://upload.wikimedia.org/wikipedia/commons/3/38/Adorable-animal-cat-20787.jpg'
+                studio_image_set=PaintingStudio.objects.get(pk=studio.pk).studios_images.all().filter(studio_images__official=True).order_by('-pk')
+                image_url=studio_image_set[0].image_url
                 apiurlstring2='https://graph.facebook.com/v13.0/'+igid+'/media?image_url='+image_url+'&access_token='+tokenobject.token
                 if not caption == '':
                     apiurlstring2+=('&caption='+urllib.parse.quote(caption))
@@ -1000,7 +825,7 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
                     raise Http404(f'initial upload error: \n{apiurlstring2}\n{responsejson2}')
                 if not ('id' in responsejson2):
                     raise Http404(f'Misconfigured Response: {responsejson2}')
-                print(f"\n\nresponse was: {responsejson2}\n\n")
+                # print(f"\n\nresponse was: {responsejson2}\n\n")
                 image_post_id=responsejson2['id']
 
                 apiurlstring3='https://graph.facebook.com/v13.0/'+igid+'/media_publish?creation_id='+image_post_id+'&access_token='+tokenobject.token
@@ -1013,11 +838,8 @@ class Studio_Request_Instagram(LoginRequiredMixin,UserPassesTestMixin,View): #co
                 image_post_id_list=[]
                 for i in range(count):
 
-                    # //////////////////////////////////
-                    # object logic to find actual images here
-                    # //////////////////////////////////
-
-                    image_url='https://upload.wikimedia.org/wikipedia/commons/3/38/Adorable-animal-cat-20787.jpg'
+                    studio_image_set=PaintingStudio.objects.get(pk=studio.pk).studios_images.all().filter(studio_images__official=True).order_by('-pk')#ordered with most recent first
+                    image_url=studio_image_set[i]
                     apiurlstring2='https://graph.facebook.com/v13.0/'+igid+'/media?image_url='+image_url+'&is_carousel_item=true&access_token='+tokenobject.token
 
                     #call the API

@@ -2,10 +2,10 @@
 
 {%block metatags%}
 <meta property="og:title" content="{{image.image_title}}">
-<meta property="og:description" content="from image gallery">
-<meta property="og:url" content="http://72.53.51.160:8000{% url 'image details' image.id %}">
-<meta property="og:site_name" content="TESTING">
-<meta property="og:image" content="https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png">
+<meta property="og:description" content="Image from the Mini Gallery">
+<meta property="og:url" content="http://purplesquid.ca{% url 'image details' image.id %}">
+<meta property="og:site_name" content="{{ site_name }}">
+<meta property="og:image" content="image.image.url">
 <meta property="og:image:width" content="2514">
 <meta property="og:image:height" content="1380">
 {%endblock%}

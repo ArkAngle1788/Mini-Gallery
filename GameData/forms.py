@@ -11,8 +11,6 @@ textfieldattrs=basicattrs.copy()
 textfieldattrs['class']='bg-white'
 textfieldattrs['placeholder']='input'
 
-print(basicattrs)
-print(f"\n\n{textfieldattrs}\n\n")
 
 class GameWidget(s2forms.Select2Widget):
     search_fields=[
