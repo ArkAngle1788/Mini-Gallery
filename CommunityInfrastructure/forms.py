@@ -3,7 +3,9 @@ from CommunityInfrastructure.models import Country, Region, City, PaintingStudio
 from CommunityInfrastructure.models import Group as CIgroup
 # from django.forms.widgets import TextInput
 from django_select2 import forms as s2forms
+# from django_select2.forms import Select2Widget,Select2MultipleWidget
 from django.forms.widgets import TextInput
+from django.contrib.auth.models import User
 
 basicattrs={'class':'bg-white'}
 default_format={'style':'width: 90%'}
@@ -16,6 +18,9 @@ class SelectExport(forms.Form):
     platform=forms.ChoiceField(choices=providers,widget=forms.Select(basicattrs))
     # class Meta:
     #     fields="__all__"
+
+
+
 
 class GameWidget(s2forms.Select2Widget):
     #do these even do anything? they might not for a basic select widget i should test that sometime....
@@ -47,6 +52,19 @@ class Profile_Widget(s2forms.ModelSelect2Widget):
         "email__icontains",
     ]
 
+class Unapproved_Users_Widget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "username__icontains",
+        "first_name__icontains",
+        "last_name__icontains",
+        "email__icontains",
+    ]
+
+    # image= forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+#
+
+class Approve_User_Form(forms.Form):
+    unapproved_user=forms.ModelChoiceField(queryset=User.objects.all().exclude(groups__permissions__codename="add_userimage"),widget=Unapproved_Users_Widget(default_format))
 
 class Group_Form(forms.ModelForm):
     class Meta:

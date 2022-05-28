@@ -12,12 +12,17 @@ from CommunityInfrastructure.models import Group,City
 
 
 class UserProfile(models.Model):
+
+
+
     # a User is like a web account and a UserProfile is our custom data  -- a user and userprofile will always be linked
     user = models.OneToOneField(User,on_delete=models.CASCADE, related_name='profile') #we call profile instead of userprofile b/c we always reverse look up from the django user account
     # User has a username and firstname/lastname fields
     #  it is best practice to call username using .get_username() from templates since User can be replaced
 
     location=models.ForeignKey(City,on_delete=models.SET_NULL,blank=True,null=True,related_name='users_in_city')
+
+    approved_by=models.ForeignKey(User,on_delete=models.SET_NULL,blank=True,null=True,related_name='approved_users')
 
     #  this is a redundant step of data storage. There should be no reason a league profile can't be merged with a user profile (psf can be used to identify activity)
         # an account might not have participated in a league and thus will have this entry null   -reverse lookup is web_profile because we would access it from the specific league information of a player
@@ -63,6 +68,10 @@ class UserProfile(models.Model):
 # why is this here instead of a property of a group? Because a group does not know about other groups so this way you only lose/gain privilages when a list empties or is populated
 
 class AdminProfile(models.Model):
+    class Meta:
+        permissions = [
+            ("approve_users", "Can enable a user to upload images"),
+        ]
 
     userprofile = models.OneToOneField(UserProfile,on_delete=models.CASCADE, related_name='linked_admin_profile')
 

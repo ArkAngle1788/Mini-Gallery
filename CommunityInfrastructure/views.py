@@ -16,6 +16,7 @@ from UserAccounts.models import UserProfile,AdminProfile
 from Gallery.models import UserImage
 from django.db.models import Count, Q
 from Gallery.filters import ImageFilter
+from .custom_functions import *
 
 import requests
 import json
@@ -177,9 +178,6 @@ class Group_add_admin(LoginRequiredMixin,UserPassesTestMixin,View): #remove uses
 
         # only primary admins can add new admins
         for admin in group.group_primary_admins.all():
-            # print(admin)
-            # print(' matches ')
-            # print(self.request.user.profile)
             if admin.userprofile == self.request.user.profile:
                 return True
 
@@ -208,7 +206,7 @@ class Group_add_admin(LoginRequiredMixin,UserPassesTestMixin,View): #remove uses
 
 
 
-        print(group.group_primary_admins.all())
+        # print(group.group_primary_admins.all())
         # exclude existing primary admins (existing secondary admins are left in b/c you can be promoted)
         for adminprofile in group.group_primary_admins.all():#iterates through local members and excludes all admins
             local_members_primary=local_members_primary.exclude(id=adminprofile.userprofile.id)
@@ -413,6 +411,41 @@ class Group_remove_admin(LoginRequiredMixin,UserPassesTestMixin,View):
         url+=f'/{group.location_country}/{group.slug()}/{group.id}'
         return redirect(url)
 
+from django.contrib.auth.models import User
+class Approve_User(PermissionRequiredMixin,LoginRequiredMixin,View):
+
+    permission_required = ('UserAccounts.approve_users')
+
+
+
+    def get(self, request,*args,**kwargs):
+
+        users=User.objects.all()
+        users=users.exclude(groups__permissions__codename="add_userimage")
+        # print(f"test group perms {self.request.user.groups.filter(name='Test Group')[0].permissions.all()[1].codename}")
+        user_form=Approve_User_Form()
+
+        return render(request, 'CommunityInfrastructure/approve_user.html',{'unapproved_users_form':user_form})
+
+
+    # this is to apply the selection
+    def post(self, request,*args,**kwargs):
+
+        if self.request.POST.get("unapproved_user"):
+
+            user=User.objects.get(id=self.request.POST.get("unapproved_user"))
+            perm_group = PermGroup.objects.get(name='Upload Approved')
+            user.groups.add(perm_group)
+            user.profile.approved_by=self.request.user
+            user.profile.save()
+
+
+            messages.success(request, 'Permission Update Complete')
+            url=reverse('approve user')
+            # url+=f'/paintingstudio/{studio.slug()}/{studio.id}'
+            return redirect(url)
+
+
 
 class Group_Create(LoginRequiredMixin,UserPassesTestMixin,CreateView):  #shares a template with update view -- <model>_form.html
     model=CIgroup
@@ -426,6 +459,12 @@ class Group_Create(LoginRequiredMixin,UserPassesTestMixin,CreateView):  #shares 
         if form.instance.location_city:
             if form.instance.location_region or form.instance.location_country:
                 return super().form_invalid(form)
+        if form.instance.location_region:
+            if form.instance.location_city or form.instance.location_country:
+                return super().form_invalid(form)
+        if form.instance.location_country:
+            if form.instance.location_region or form.instance.location_city:
+                return super().form_invalid(form)
 
         return super().form_valid(form) # then run original form_valid
 
@@ -434,6 +473,37 @@ class Group_Create(LoginRequiredMixin,UserPassesTestMixin,CreateView):  #shares 
         if self.request.user.is_staff:
             return True
         return False
+
+class Group_Edit(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
+    model=CIgroup
+    form_class = Group_Form
+
+
+    def test_func(self):#this checks to see if you're allowed to use this functionality
+
+        if self.request.user.is_staff:
+            return True
+
+        group=CIgroup.objects.get(pk=self.kwargs['pk'])
+        for admin in group.group_primary_admins.all():
+            if admin.userprofile == self.request.user.profile:
+                return True
+
+        return False
+
+    def form_valid(self,form):
+        form.instance.uploader=self.request.user #add this data first then validate
+        if form.instance.location_city:
+            if form.instance.location_region or form.instance.location_country:
+                return super().form_invalid(form)
+        if form.instance.location_region:
+            if form.instance.location_city or form.instance.location_country:
+                return super().form_invalid(form)
+        if form.instance.location_country:
+            if form.instance.location_region or form.instance.location_city:
+                return super().form_invalid(form)
+
+        return super().form_valid(form) # then run original form_valid
 
 class Group_Delete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
     model=CIgroup

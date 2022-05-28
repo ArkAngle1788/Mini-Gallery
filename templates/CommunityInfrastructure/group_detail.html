@@ -111,7 +111,7 @@
     <li><a href="{% url 'group remove admin' group.location_country group.slug group.id %}">Remove Admins</a></li>
   {%endif%}
 
-
+  <li><a href="{% url 'edit group' group.location_city group.slug group.id %}">Edit Group</a></li>
 
 {%endif%}
 {%if request.user.is_staff %}

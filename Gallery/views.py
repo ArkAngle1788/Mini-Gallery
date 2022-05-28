@@ -320,7 +320,7 @@ class GalleryDetailView(DetailView):
             context['liked']=liked
 
         newimage=self.object
-        print(f"testing: {newimage.paintingstudio.all()}")
+        # print(f"testing: {newimage.paintingstudio.all()}")
 
         return context
 

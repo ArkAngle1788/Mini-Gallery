@@ -46,11 +46,17 @@ class Colour_Catagory(models.Model):# amount of content in picutre ex. single mo
     def get_absolute_url(self):
         return reverse('manage image fields')
 
+from datetime import date
+
+
+def get_upload_to():
+    current_year = str(date.today().year)
+    return 'gallery_images/'+current_year
 
 class UserImage(models.Model):
 
     #image size should be a property of image
-    image = models.ImageField(upload_to='gallery_images')
+    image = models.ImageField(upload_to=get_upload_to())
 
     image_title=models.CharField(max_length=50)
 

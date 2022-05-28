@@ -24,6 +24,12 @@ Private User Profile Page for : {{request.user.profile}}
   <h3>Admin Panel</h3>
 </div>
 
+
+{% if request.user.is_staff or perms.UserAccounts.approve_users %}
+<li><a href="{% url 'approve user'%}" >Enable A User to Post Images</a></li>
+{% endif %}
+<br>
+
 <div class='panel-body'>
   <ul>
     <li><a href="{% url 'account_change_password'%}" >Change Password</a></li>
