@@ -70,7 +70,7 @@
 <b>Primary:</b>
 {%if group.group_primary_admins.all %}
   {%for admin in group.group_primary_admins.all %}
-    <br>{{admin}}
+    <br>{{admin}}: {{admin.userprofile.user.first_name}} {{admin.userprofile.user.last_name}}
   {%endfor%}
 {%else%}
   <br>No Primary Admins
@@ -80,7 +80,7 @@
 <b>Secondary:</b>
 {%if group.group_secondary_admins.all %}
   {%for admin in group.group_secondary_admins.all %}
-    <br>{{admin}}
+    <br>{{admin}}: {{admin.userprofile.user.first_name}} {{admin.userprofile.user.last_name}}
   {%endfor%}
 {%else%}
   <br>No Secondary Admins
