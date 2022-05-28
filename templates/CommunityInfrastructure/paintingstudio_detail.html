@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-
+{% load markdownify %}
 <h1>
   {{studio}}
 </h1>
@@ -8,7 +8,7 @@
 <a href="{{studio.Studio_page}}">Visit Studio Page (external link)</a>
 
 
-<p><br>{{studio.description}}</p>
+<p><br>{{studio.description|markdownify}}</p>
 
 <div class="row">
   {%for image in studio_images%}

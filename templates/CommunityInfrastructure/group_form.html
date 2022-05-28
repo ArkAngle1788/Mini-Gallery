@@ -5,6 +5,7 @@
 {{ form.media.css }}
 
 <p>NOTE: only choose one of city/region/country. it is used to determine your most specific level of operation</p>
+<p>The Group Description Field allows basic markdown</p>
 
 <form method="post" >{% csrf_token %}
     {{ form|crispy }}

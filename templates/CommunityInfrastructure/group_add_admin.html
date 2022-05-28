@@ -7,6 +7,8 @@
 Choose New Admins for {{group}}
 </h1>
 
+<p>Note: Only users within the same city as your group are displayed here. If you need a user from outside your city please contact a site admin to have them manually added.</p>
+
 Existing Primary Admins:
 {%for admin in group.group_primary_admins.all %}
   <br>{{admin}}
@@ -32,14 +34,14 @@ Existing Secondary Admins:
   <label for="select_admins_primary">Select User to be Primary Admins</label>
   <select id="select_admins_primary" class="form-control apply_select2" name="select admins primary" multiple>
     {% for user in local_members_primary %}
-      <option value="{{ user.id }}"> {{ user }}</option>
+      <option value="{{ user.id }}"> {{ user.user.username }} {{user.user.first_name}} {{user.user.last_name}}</option>
     {% endfor %}
   </select>
 
   <label for="select_admins_secondary">Select User to be Secondary Admins</label>
   <select id="select_admins_secondary" class="form-control apply_select2" name="select admins secondary" multiple>
     {% for user in local_members_secondary %}
-      <option value="{{ user.id }}"> {{ user }}</option>
+      <option value="{{ user.id }}">{{ user.user.username }} {{user.user.first_name}} {{user.user.last_name}}</option>
     {% endfor %}
   </select>
 

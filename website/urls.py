@@ -33,6 +33,7 @@ urlpatterns = [
 #     path('accounts/login/', account_views.login,name="account_login" ),
     path('accounts/', include('allauth.urls')),
     path('accounts/profile/', include('UserAccounts.urls')),
+    path('markdownx/', include('markdownx.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

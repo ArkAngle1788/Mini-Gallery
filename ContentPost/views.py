@@ -63,7 +63,6 @@ class ContentPostListView(ListView):
 
 
 
-
 class ContentPostDetailView(DetailView):
     model=ContentPost
 
@@ -74,8 +73,7 @@ class ContentPostDetailView(DetailView):
         # Add in the leaguenav QuerySet
         context['league_nav'] = leagues_nav
         context['news']=calculate_news_bar()
-
-
+        
         # print(self.get_permission_required())
 
         # print('detail view')

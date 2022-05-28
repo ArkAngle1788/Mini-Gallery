@@ -1,0 +1,9 @@
+<div class="markdownx row">
+    <div class="col-md-6">
+        <textarea style="background-color: white;" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+        {% if widget.value %}{{ widget.value }}{% endif %}</textarea>
+    </div>
+    <div class="col-md-6">
+        <div class="markdownx-preview"></div>
+    </div>
+</div>

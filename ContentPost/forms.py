@@ -2,12 +2,18 @@ from django import forms
 from .models import ContentPost
 
 from django.forms.widgets import TextInput
+from markdownx.fields import MarkdownxFormField
 # from django_select2 import forms as s2forms
 # from django_select2.forms import Select2Widget,Select2MultipleWidget
 
 basicattrs={'class':'bg-white'}
 
+
+
 class ContentPostForm(forms.ModelForm):
+
+    # markdownx is a bit of overkill but i'm leaving it here for now for future reference
+    text1 = MarkdownxFormField()
 
     class Meta:
         model=ContentPost
