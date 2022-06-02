@@ -37,8 +37,10 @@ class MyCustomSignupForm(SignupForm):
 
         # after user is saved we can manipulate it's object in the DB to create a UserProfile for it
         #  self.cleaned_data['home_city'][0] is supery hacky but i don't have a better idea right now
-        new_userprofile=UserProfile(user=user,location=City.objects.get(pk=self.cleaned_data['home_city'][0]))
-        new_userprofile.save()
+        user.profile.location=City.objects.get(pk=self.cleaned_data['home_city'][0])
+        user.profile.save()
+        # new_userprofile=UserProfile(user=user,location=City.objects.get(pk=self.cleaned_data['home_city'][0]))
+        # new_userprofile.save()
 
 
         # You must return the original result.
