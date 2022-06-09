@@ -14,9 +14,8 @@
 {% get_providers as socialaccount_providers %}
 
 {% if socialaccount_providers %}
-<p>{% blocktrans with site.name as site_name %}Please sign in with one
-of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
-for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
+<p>If you have linked a facebook account you can login by clicking the facebook link.</p>
+<p>Otherwise login using your website login information.</p>
 
 <div class="socialaccount_ballot">
 
@@ -24,7 +23,7 @@ for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
     {% include "socialaccount/snippets/provider_list.html" with process="login" %}
   </ul>
 
-  <div class="login-or">{% trans 'or' %}</div>
+
 
 </div>
 
@@ -42,13 +41,17 @@ for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
   <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
   {% endif %}
   <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+  <br>
   <button class="primaryAction" type="submit">{% trans "Sign In" %}</button>
 </form>
 
+<br>
+<p>If you do not already have an account you can click the link below to create one.</p>
+<p>Note: To create a new account using facebook login you can also click the facebook link above. To add facebook to an existing account though please use the link on your user profile page.</p>
 
+<h1><a href="{{ signup_url }}">sign up</a></h1>
 
-
-<br>Here's a giant sign up link to make life easier!<br><h1><a href="{{ signup_url }}">sign up</a></h1><br><br>
+<br><br>
 
 
 

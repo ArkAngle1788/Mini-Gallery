@@ -3,10 +3,18 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    {% load static %}
     {% block metatags %}
     <!-- other pages that extend this will be in here! -->
+    <meta property="og:title" content="Mini-Gallery">
+    <meta property="og:description" content="Miniature Gallery & Communitiy Tools">
+    <meta property="og:url" content="https://nl.purplesquid.ca">
+    <meta property="og:site_name" content="Mini-Gallery">
+    <meta property="og:image" content="{% static '/universal/minigallery screen.png' %}">
+    <meta property="og:image:width" content="2514">
+    <meta property="og:image:height" content="1380">
     {% endblock %}
-    {% load static %}
+
     <title>{% block head_title %}{{site_name}}{% endblock head_title %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static '/universal/mssquid_16x16.png' %}"/>
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous"> -->
@@ -32,6 +40,7 @@
         <div id="sidebar_left" class="col-12 col-md-2 order-1 collapse.show bg-sidebar text-text-sidebar overflow-auto"align="center">
               {%block navbar_left_content%}
                 <h1>side bar not overridden</h1>
+                {{site.name}}
                 <li>item 1</li>
                 <li>item 2</li>
                 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>

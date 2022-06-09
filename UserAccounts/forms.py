@@ -24,10 +24,12 @@ class MyCustomSignupForm(SignupForm):
     for city in City.objects.all():
         city_options.append([city.pk,city.city_name])
 
-
-    first_name = forms.CharField(max_length=50,help_text="help text test",widget=forms.TextInput({'placeholder':'Name Here'})) # Required {'class':'form-control apply_select2'}
-    last_name = forms.CharField(max_length=50) # Required
+#
+    # username = forms.CharField(max_length=50,widget=forms.TextInput(basicattrs))
+    first_name = forms.CharField(max_length=50,widget=forms.TextInput({'placeholder':'First Name Here'})) # Required {'class':'form-control apply_select2'}
+    last_name = forms.CharField(max_length=50,widget=forms.TextInput({'placeholder':'Last Name Here'})) # Required
     home_city = forms.ChoiceField(choices=city_options,widget=Select2Widget)
+
 
     def save(self, request):
 
