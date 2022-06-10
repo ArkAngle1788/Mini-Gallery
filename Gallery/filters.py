@@ -12,6 +12,7 @@ global_default={'style':'width: 100%'}
 
 
 class ImageFilter(django_filters.FilterSet):#conjoined=True allows us to do an AND multipule item search instead of an OR
+    fuzzy_search=CharFilter(field_name="fuzzy_tags",lookup_expr='icontains',widget=TextInput({'style':'width: 100%','placeholder':'keyword search'}))
     title=CharFilter(field_name="image_title",lookup_expr='icontains',widget=TextInput({'style':'width: 100%','placeholder':'Image Title'}))
     system=ModelMultipleChoiceFilter(queryset=Games.objects.all(),conjoined=True,widget=Select2MultipleWidget(global_default))
     faction_type=ModelMultipleChoiceFilter(queryset=Faction_Type.objects.all(),conjoined=True,widget=Select2MultipleWidget(global_default))
@@ -27,4 +28,4 @@ class ImageFilter(django_filters.FilterSet):#conjoined=True allows us to do an A
 
     class Meta:
         model = UserImage
-        fields = ['title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','paintingstudio','owner','location']
+        fields = ['fuzzy_search','title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','paintingstudio','owner','location']

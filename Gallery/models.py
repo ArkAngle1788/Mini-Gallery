@@ -80,6 +80,7 @@ class UserImage(models.Model):
     # web_account=models.ForeignKey(UserProfile,blank=True,on_delete=models.SET_NULL,related_name='web_account_images')  #do we want images to be linked to the uploader?
     popularity = models.ManyToManyField(User,blank=True,related_name='liked_images')
     uploader=models.ForeignKey(User,on_delete=models.SET_NULL,blank=True,null=True)
+    fuzzy_tags=models.CharField(max_length=1000,default='')
 
     def __str__(self):
         return self.image_title
