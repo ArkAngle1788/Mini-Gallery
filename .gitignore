@@ -18,3 +18,4 @@ media/*
 static/*
 website/settings.py
 venv/*
+static/css/bootstrap.css
