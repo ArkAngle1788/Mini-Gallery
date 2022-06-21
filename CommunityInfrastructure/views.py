@@ -65,7 +65,8 @@ def about(request):
 def contact(request):
     return render(request,'CommunityInfrastructure/contact.html',{'news':calculate_news_bar()})
 
-
+def privacy_policy(request):
+    return render(request,'CommunityInfrastructure/privacy_policy.html')
 
 
 class Groups_top(ListView):

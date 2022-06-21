@@ -7,6 +7,7 @@ urlpatterns = [
     path('', home, name='home'),
     path('about',about,name='about'),
     path('contact',contact,name='contact'),
+    path('privacy_policy',privacy_policy,name='privacy policy'),
     path('organizations', Groups_top.as_view(), name='groups top'),
     path('organizations/create', Group_Create.as_view(),name='create group'),
     path('organizations/<str:zone>/<slug:group_slug>/<int:pk>/edit', Group_Edit.as_view(),name='edit group'),
