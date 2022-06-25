@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+{{ form.media.css }}
+
+  <form method="post"class="text-text-sidebar">{% csrf_token %}
+     {{ form|crispy }}
+     <input type="submit" value="Save">
+  </form>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  {{ form.media.js }}
+
+
+
+{% endblock content %}
+
+
+
+{% block navbar_right_content %}
+
+{% include 'UserAccounts/navbar_account_right.html' %}
+
+{%endblock navbar_right_content %}
+
+{% block navbar_left_content %}
+  <p>(league info would go here instead of announcments if that feature was live)</p>
+  <h1>Announcements</h1>
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
+{% endblock navbar_left_content %}

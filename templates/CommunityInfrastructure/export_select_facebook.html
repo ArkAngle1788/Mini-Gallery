@@ -2,11 +2,12 @@
 {% block content %}
 
 <h1>
-  Page for Testing Requests take 2
+  Facebook Image Export
 </h1>
 
-<h3>Update permissions</h3>
+<h5>Update permissions</h5>
 <p>if you can't select a page below you probably need to set permissions here!</p>
+<p>(this will redirect you back to your studio page but you only need to do it once!)</p>
 {% load socialaccount %}
 
 {%comment%}
@@ -20,20 +21,19 @@
 
   <div class="socialaccount_ballot">
     <ul class="socialaccount_providers">
+      {%comment%}
       {% include "socialaccount/snippets/provider_list.html" with process="login" scope="pages_show_list,pages_read_engagement,pages_manage_posts" %}
+      {%endcomment%}
+      <li><a href="http://localhost:8000/accounts/facebook/login/?process=login&scope=pages_show_list%2Cpages_read_engagement%2Cpages_manage_posts&next=/organizations/paintingstudio/{{studio.slug}}/{{studio.id}}">Facebook</a></li>
     </ul>
   </div>
 
   {% include "socialaccount/snippets/login_extra.html" %}
 {%endif%}
 
-<h3>test is:</h3>
 
-<p>{{test}}</p>
-
-<h4>test list</h4>
-
-<p>
+<h3>Export</h3>
+<p>First select a page to export images to.</p>
 
   <form action="{%url 'studio request facebook' studio.slug studio.id %}" method="post">
       {% csrf_token %}
@@ -49,28 +49,7 @@
     </form>
 
 
-
-
-</p>
-
-<p>print the var : {{test2}}</p>
-
-<br>ssfd <br>
-<p>token value :  {{test2.token}}</p>
-<br>text <br>
-<p>token expiery :  {{test2.expires_at}}</p>
-
-<p>
-
-
-
-
-</p>
-
 {% endblock %}
-
-
-
 
 
 <!-- SIDEBAR -->
@@ -83,11 +62,7 @@
 </div>
 
 <div class='panel-body'>
-
-<p>studio detail specific sidebar</p>
-
-
-
+  <p>studio detail specific sidebar</p>
 </div>
 
 {% include 'CommunityInfrastructure/sidebar_right.html' %}

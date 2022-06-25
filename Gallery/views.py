@@ -77,6 +77,12 @@ class GalleryListView(ListView): #defalust objectlist ? object_list? as the cont
         image_filter=ImageFilter(self.request.GET, queryset=UserImage.objects.all())
         context['filter_form']=image_filter
 
+        if self.request.GET:
+            dic_string=dict(self.request.GET)
+            if self.request.GET.get('page'):
+                dic_string.pop('page')
+            context['search']=dic_string
+
         return context
 
 

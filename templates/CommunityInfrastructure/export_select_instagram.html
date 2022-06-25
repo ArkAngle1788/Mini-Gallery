@@ -2,11 +2,12 @@
 {% block content %}
 
 <h1>
-  Page for Testing Requests take 2
+  Export to Instagram
 </h1>
 
-<h3>Update permissions</h3>
-<p>if you can't select a page below you probably need to set permissions here!</p>
+<h5>Update permissions</h5>
+<p>if you can't select a page below you probably need to set permissions here! (Instagram uses facebook permissions for their API)</p>
+<p>(this will redirect you back to your studio page but you only need to do it once!)</p>
 
 {% load socialaccount %}
 
@@ -21,28 +22,25 @@
 
   <div class="socialaccount_ballot">
     <ul class="socialaccount_providers">
-      {% include "socialaccount/snippets/provider_list.html" with process="login" scope="pages_show_list,instagram_basic,instagram_content_publish,business_management,pages_read_engagement" %}
       {%comment%}
+      {% include "socialaccount/snippets/provider_list.html" with process="login" scope="pages_show_list,instagram_basic,instagram_content_publish,business_management,pages_read_engagement" %}
         ads_management,
       {%endcomment%}
-
+      <li><a href="http://localhost:8000/accounts/facebook/login/?process=login&scope=pages_show_list%2Cinstagram_basic%2Cinstagram_content_publish%2Cbusiness_management%2Cpages_read_engagement&next=/organizations/paintingstudio/{{studio.slug}}/{{studio.id}}">Facebook</a></li>
     </ul>
   </div>
 
   {% include "socialaccount/snippets/login_extra.html" %}
 {%endif%}
 
-<h3>test is:</h3>
-
-<p>{{test}}</p>
-
 <h3>Images must be .jpeg</h3>
 
 <h4>Select the Page that the instagram account is linked to</h4>
+<p>(Instagram API connects through facebook so in order to use their api you must have a facebook page you manage linked to your Instagram account)</p>
 
   <form action="{%url 'studio request instagram' studio.slug studio.id %}" method="post">
       {% csrf_token %}
-      <label for="select_page">Select the Page to Post to.</label>
+      <label for="select_page">Select the Page your Instagram account is linked to.</label>
 
       <select id="select_page" name="select_page">
         {% for item in pages_managed %}
@@ -55,25 +53,7 @@
       <input type="submit" value="select page">
     </form>
 
-
-
-
-<p>print the var : {{test2}}</p>
-
-<br>ssfd <br>
-<p>token value :  {{test2.token}}</p>
-<br>text <br>
-<p>token expiery :  {{test2.expires_at}}</p>
-
-<p>
-
-
-
-
-</p>
-
 {% endblock %}
-
 
 
 

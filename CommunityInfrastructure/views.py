@@ -681,7 +681,7 @@ class Studio_Export(LoginRequiredMixin,UserPassesTestMixin,View):#when we have s
 
     def get(self,request,*args,**kwargs):
 
-        return render(request, 'error.html')
+        return render(request, 'error.html',{'error':'other error code'})
 
     def post(self, request,*args,**kwargs):
 
@@ -753,7 +753,9 @@ class Studio_Export(LoginRequiredMixin,UserPassesTestMixin,View):#when we have s
 
             return render(request, 'CommunityInfrastructure/export_select_instagram.html',{'pages_managed':pages_managed,'count':count,'studio':studio})
 
-        return render(request, 'error.html')
+
+        return render(request, 'error.html',{'error':'error code'})
+
 
 class Studio_Request_Facebook(LoginRequiredMixin,UserPassesTestMixin,View): #continue the process of a facebook image upload by selecting the album or if that has already been done upload the images
 

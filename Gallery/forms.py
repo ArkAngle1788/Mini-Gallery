@@ -53,6 +53,7 @@ class UploadImages(forms.ModelForm):
         'owner':forms.TextInput(attrs={'class': 'bg-white','placeholder':'Name or Identifier'}),
         'location':Select2Widget
         }
+        # labels = {'system': 'Label 2'}
 
 class UploadMultipleImages(forms.ModelForm):
     image= forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))

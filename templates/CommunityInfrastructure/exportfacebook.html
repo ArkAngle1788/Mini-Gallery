@@ -2,19 +2,12 @@
 {% block content %}
 
 <h1>
-  Page for uploading to facebook
+  Export to facebook
 </h1>
 
-<h3>Update permissions</h3>
-
-<h3>test is:</h3>
-
-<p>{{test}}</p>
-
-<h4>test list</h4>
 {% if albums %}
 
-
+  <p>Unfortunatly facebooks API does not allow the creation of albums. You will need to create albums on facebook directly if you don't want to use your existing or default albums.</p>
 
   <form action="{%url 'studio request facebook' studio.slug studio.id %}" method="post">
       {% csrf_token %}
@@ -30,17 +23,11 @@
       <input type="submit" value="select album">
     </form>
 
+{%else%}
+  <p>Unfortunatly facebooks API does not allow the creation of albums. You will need to create albums on facebook directly.</p>
 {% endif %}
 
-<h1>test: </h1>
-{{test}}
-
-
-
-
 {% endblock content %}
-
-
 
 
 
@@ -56,8 +43,6 @@
 <div class='panel-body'>
 
 <p>studio detail specific sidebar</p>
-
-
 
 </div>
 

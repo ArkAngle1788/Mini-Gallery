@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from League.models import Player,League
 from CommunityInfrastructure.models import Group,City
+from django.urls import reverse
 
 
 # if request.user.groups.filter(name="group_name").exists():
@@ -56,6 +57,8 @@ class UserProfile(models.Model):
                 return True
         return False
 
+    def get_absolute_url(self):
+        return reverse('profile self')
 
     def __str__(self):
         return self.user.username
