@@ -124,14 +124,20 @@ Gallery Image Details
 
 
 {% block navbar_right_content %}
+
+  <a class="nav-item nav-link" href="{% url 'gallery home' %}?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}">Return to Browse</a>
+
+
+
   {%if request.user.is_staff or request.user == image.uploader %}
     <div>
       <a class="btn btn-outline-light" href="{%url 'image update' object.id%}">Edit</a>
       <a class="btn btn-outline-danger" href="{%url 'image delete' object.id%}">Delete</a>
     </div>
   {%endif%}
+  <br>
   {% include 'Gallery/sidebar_right.html' %}
-  
+
 
 {%endblock navbar_right_content%}
 

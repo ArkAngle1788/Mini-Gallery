@@ -63,7 +63,11 @@ class GalleryListView(ListView): #defalust objectlist ? object_list? as the cont
             queryset = queryset.order_by(*ordering)
 
         # sort by likes
-        queryset=queryset.annotate(num_likes=Count('popularity')).order_by('-num_likes')
+        if self.request.GET.get('recent'):
+            queryset=queryset.order_by('-pk')
+        else:
+            queryset=queryset.annotate(num_likes=Count('popularity')).order_by('-num_likes')
+
 
         return queryset
 
@@ -79,6 +83,7 @@ class GalleryListView(ListView): #defalust objectlist ? object_list? as the cont
 
         if self.request.GET:
             dic_string=dict(self.request.GET)
+            print(f"\n\n{self.request.GET}\n\n")
             if self.request.GET.get('page'):
                 dic_string.pop('page')
             context['search']=dic_string
