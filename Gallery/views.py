@@ -83,7 +83,6 @@ class GalleryListView(ListView): #defalust objectlist ? object_list? as the cont
 
         if self.request.GET:
             dic_string=dict(self.request.GET)
-            print(f"\n\n{self.request.GET}\n\n")
             if self.request.GET.get('page'):
                 dic_string.pop('page')
             context['search']=dic_string
