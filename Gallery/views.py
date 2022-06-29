@@ -26,9 +26,142 @@ from django.db.models import Count #used for sorting likes
 
 from .filters import ImageFilter
 
+from django_filters.views import FilterView
 
+class GalleryListView(FilterView):
+    model=UserImage
+    filterset_class=ImageFilter
+    template_name='Gallery/gallery_home.html'
+    context_object_name='user_images'
+    paginate_by=8
 
-class GalleryListView(ListView): #defalust objectlist ? object_list? as the context variable
+    # def get_queryset(self):
+    #
+    #
+    #     # sort by likes
+    #     if self.request.GET.get('recent'):
+    #         queryset = super().get_queryset()
+    #         queryset=queryset.order_by('-pk')
+    #     else:
+    #         queryset = super().get_queryset()
+    #         queryset=queryset.annotate(num_likes=Count('popularity')).order_by('-num_likes')
+    #         # queryset=queryset.order_by('-num_likes')
+    #
+    #     print(f"\n\n\n\n")
+    #     for var in queryset:
+    #         print(f"{var.pk}")
+    #     print(f"\n\n{self.object_list}\n\n")
+    #     return queryset
+
+    # def get_paginator(
+    #     self, queryset, per_page, orphans=0, allow_empty_first_page=True, **kwargs
+    # ):
+    #     """Return an instance of the paginator for this view."""
+    #     # print(f"\n\n DEEPEST LEVEL get_paginator quryset at start\n{queryset}\n\n")
+    #
+    #     # print(f"\n\n!!!!!!!!\n\n")
+    #     # for asd in queryset:
+    #     #     print(asd.pk)
+    #
+    #     var=self.paginator_class(queryset,per_page,orphans=orphans,allow_empty_first_page=allow_empty_first_page,**kwargs,)
+    #     # print(f"\n\nobject list: \n{var.page(1).object_list}\n\n")
+    #     return var
+
+    # def paginate_queryset(self, queryset, page_size):
+    #     # print(f"Inside paginate_queryset start of function :\n{queryset}\n")
+    #     """Paginate the queryset, if needed."""
+    #     paginator = self.get_paginator(
+    #         queryset, page_size, orphans=self.get_paginate_orphans(),
+    #         allow_empty_first_page=self.get_allow_empty())
+    #     page_kwarg = self.page_kwarg
+    #     page = self.kwargs.get(page_kwarg) or self.request.GET.get(page_kwarg) or 1
+    #
+    #     # print(f"\n\nLOOK AT ME: \n\n")
+    #     # for prt in paginator.object_list:
+    #     #     print(prt.pk)
+    #     #
+    #     # print(f"paginator meta object list (page1):\n{paginator.page(1).object_list}\n")
+    #     # print(f"paginator meta object list (page2):\n{paginator.page(2).object_list}\n")
+    #     # print(f"paginator meta object list (page3):\n{paginator.page(3).object_list}\n")
+    #     # print(f"paginator meta object list (page4):\n{paginator.page(4).object_list}\n")
+    #     # print(f"paginator meta object list (page5):\n{paginator.page(5).object_list}\n")
+    #
+    #     try:
+    #         page_number = int(page)
+    #     except ValueError:
+    #         if page == 'last':
+    #             page_number = paginator.num_pages
+    #         else:
+    #             raise Http404(_('Page is not “last”, nor can it be converted to an int.'))
+    #     try:
+    #         page = paginator.page(page_number)
+    #         # print(f"\n\nTesting pagination queryset: \n\n")
+    #         # for var in queryset:
+    #         #     print(var.id)
+    #         # print("\ntesting page.object_list\n")
+    #         # for var2 in page.object_list:
+    #         #     print(var2.id)
+    #         return (paginator, page, page.object_list, page.has_other_pages())
+    #     except InvalidPage as e:
+    #         raise Http404(_('Invalid page (%(page_number)s): %(message)s') % {
+    #             'page_number': page_number,
+    #             'message': str(e)
+    #         })
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+
+        # print(f"class object list inside get_context_data before super call: \n{self.object_list}\n")
+
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        #
+        # queryset = object_list if object_list is not None else self.object_list
+        # page_size = self.get_paginate_by(queryset)
+        # context_object_name = self.get_context_object_name(queryset)
+        # if page_size:
+        #     # print(f"inside super : \n{queryset}\n")
+        #     paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
+        #     # print(f"inside super after paginate_queryset :\n{queryset}\n")
+        #     context = {
+        #         'paginator': paginator,
+        #         'page_obj': page,
+        #         'is_paginated': is_paginated,
+        #         'object_list': queryset
+        #     }
+        # else:
+        #     context = {
+        #         'paginator': None,
+        #         'page_obj': None,
+        #         'is_paginated': False,
+        #         'object_list': queryset
+        #     }
+        # if context_object_name is not None:
+        #     context[context_object_name] = queryset
+        # context.update(kwargs)
+        # return super().get_context_data(**context)
+        # print("!!!!")
+        #
+        # print(f"class object list inside get_context_data after super call: \n{self.object_list}\n\n")
+        # print(f"object list inside context after super call: \n{context['object_list']}\n")
+        # for var in self.object_list:
+        #     print(f"{var.pk}")
+        # Add in the leaguenav QuerySet and searchbar sets
+        # context['league_nav'] = leagues_nav
+        context['news']=calculate_news_bar()
+        # context['filter_form']=FilterImages(auto_id="filter_%s")
+        image_filter=ImageFilter(self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form']=image_filter
+
+        if self.request.GET:
+            dic_string=dict(self.request.GET)
+            if self.request.GET.get('page'):
+                dic_string.pop('page')
+            context['search']=dic_string
+
+        # print(f"user images before return: \n{context['user_images']}\n\n")
+        return context
+
+class GalleryListViewOld(ListView): #defalust objectlist ? object_list? as the context variable
     template_name='Gallery/gallery_home.html'
     model=UserImage
     context_object_name='user_images'
@@ -56,18 +189,27 @@ class GalleryListView(ListView): #defalust objectlist ? object_list? as the cont
                 "%(cls)s.model, %(cls)s.queryset, or override "
                 "%(cls)s.get_queryset()." % {"cls": self.__class__.__name__}
             )
-        ordering = self.get_ordering()
-        if ordering:
-            if isinstance(ordering, str):
-                ordering = (ordering,)
-            queryset = queryset.order_by(*ordering)
+        # ordering = self.get_ordering()
+        # if ordering:
+        #     if isinstance(ordering, str):
+        #         ordering = (ordering,)
+        #     queryset = queryset.order_by(*ordering)
 
+        print(f"\n\n\n\n")
+
+        for var in queryset:
+            print(f"{var.pk}")
+        queryset=queryset.order_by('-pk')
         # sort by likes
         if self.request.GET.get('recent'):
             queryset=queryset.order_by('-pk')
         else:
             queryset=queryset.annotate(num_likes=Count('popularity')).order_by('-num_likes')
+            # queryset=queryset.order_by('-num_likes')
 
+        # print(f"\n\n\n\n")
+        # for var in queryset:
+        #     print(f"{var.pk}")
 
         return queryset
 
@@ -253,7 +395,17 @@ class GalleryUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
         context['image']=self.object
         return context
 
+    def get_success_url(self):
+        url=super().get_success_url()
+        url+='?'
+        for key in self.request.GET:
+            url+=key+'='+self.request.GET[key]+'&'
+        print(self.request.GET)
+        return url
 
+    # def post(self, request,*args,**kwargs):
+    #     response=super().post(self,request,*args,**kwargs)
+    #     return response
         # i think this was copied from create? we don't want uploader to change to an admin if and admin edits
     # def form_valid(self,form):
     #     form.instance.uploader=self.request.user #add this data first then validate

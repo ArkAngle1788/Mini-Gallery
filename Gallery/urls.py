@@ -11,6 +11,7 @@ urlpatterns = [
 
 # path('', Gallery_home.as_view(), name='gallery home'),
 path('', GalleryListView.as_view(), name='gallery home'),
+# path("old", GallelryListViewOld.as_view(), name="gallery home old"),
 path('upload',GalleryUpload.as_view(),name='gallery upload'),
 path('upload/multi',GalleryMultipleUpload.as_view(),name='gallery multiple upload'),
 path('image/multi/update',GalleryMultipleUpdate.as_view(),name='gallery multiple update'),

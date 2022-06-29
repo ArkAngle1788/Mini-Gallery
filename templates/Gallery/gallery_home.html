@@ -18,9 +18,9 @@
 
 
 
-<div align='center'>
-  {% if is_paginated %}
 
+{% if is_paginated %}
+  <div align='center'>
     {% if page_obj.has_previous %}
       <a class="btn btn-outline-bright mb-4" href="?page=1&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">First</a>
       <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.previous_page_number }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Previous</a>
@@ -38,15 +38,13 @@
       <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.next_page_number }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Next</a>
       <a class="btn btn-outline-bright mb-4" href="?page={{ page_obj.paginator.num_pages }}&{% for key, value in search.items %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}">Last ({{page_obj.paginator.num_pages}})</a>
     {% endif %}
+  </div>
+{% endif %}
 
-  {% endif %}
-</div>
 
 <div class="row">
 
 
-
-{% for key, value in request.GET.all %}{%for val in value %}{{key}}={{ val }}&{%endfor%}{% endfor %}
   {%for image in user_images%}
   <div class="col-md-6 gy-3"align='center'>
     <div class="card bg-gallery-card-bot">

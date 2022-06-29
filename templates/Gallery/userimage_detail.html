@@ -16,107 +16,110 @@ Mini-Gallery -Detail
 
 {% block content %}
 
-<h1>
-Gallery Image Details
-</h1>
+<div class=""align='center'>
 
 
 
-<h3>{{image.image_title}}</h3>
-<img class="image-center-fit" src="{{image.image.url}}" style="max-width: 100%; max-height: 100%;">
-
-{% if image.system.all %}
-  <h3>Game System:</h3>
-  <ul>
-    {%for system in image.system.all %}
-      <li>{{system}}</li>
-    {%endfor%}
-  </ul>
-{%endif%}
-{% if image.faction_type.all %}
-  <h3>Faction Type:</h3>
-  <ul>
-    {%for faction in image.faction_type.all %}
-      <li>{{faction}}</li>
-    {%endfor%}
-  </ul>
-{%endif%}
-{% if image.factions.all %}
-  <h3>Faction:</h3>
-  <ul>
-    {%for faction in image.factions.all %}
-      <li>{{faction}}</li>
-    {%endfor%}
-  </ul>
-{%endif%}
-{% if image.sub_factions.all %}
-  <h3>Sub-Faction:</h3>
-  <ul>
-    {%for sub_faction in image.sub_factions.all %}
-      <li>{{sub_faction}}</li>
-    {%endfor%}
-  </ul>
-{%endif%}
-{% if image.colours.all %}
-  <h3>Colours:</h3>
-  <ul>
-    {%for colour in image.colours.all %}
-      <li>{{colour}}</li>
-    {%endfor%}
-  </ul>
-{%endif%}
-{% if image.unit_type.all %}
-  <h3>Models Present:</h3>
-  <ul>
-    {%for unit_type in image.unit_type.all%}
-      <li>{{unit_type}}</li>
-    {%endfor%}
-  </ul>
-{%endif%}
-<h3>Other Data</h3>
-{% if image.conversion.all %}
-  Conversion Level:
-  <ul>
-    {%for conversion in image.conversion.all %}
-      <li>{{conversion}}</li>
-    {%endfor%}
-  </ul>
-{%endif%}
-{% if image.scale %}
-  Image Scale: {{image.scale}}<br>
-{%endif%}
-{% if image.paintingstudio.all %}
-  Painted by:
-  <ul>
-    {%for studio in image.paintingstudio.all %}
-      <ul>
-        <li>{{studio.Studio_name}}</li>
-          <ul><li><a href="{%url 'painting studio' studio.slug studio.id %}">{{studio}} (Internal Link)</a></li></ul>
-          <ul><li><a class='studio_page' href="{{studio.Studio_page}}">Visit Studio Page (External Link)</a></li></ul>
-      </ul>
-    {%endfor%}
-  </ul>
-<br>
-{%endif%}
-
-{% if image.owner %}
-  Content owner: {{image.owner}}<br>
-{%endif%}
-{% if image.location %}
-  Location: {{image.location}}<br>
-{% endif %}
-
-{% if request.user.is_authenticated %}
-  {% if liked %} <a class="nav-item nav-link" href="{% url 'image upvote' image.id %}?unlike=True">Un-Like</a> {%else%} <a class="nav-item nav-link" href="{% url 'image upvote' image.id %}?like=True">Like</a> {% endif %}
-{%endif%}
-{# <a class="nav-item nav-link" href="{% url 'image upvote' image.id %}">Upvote</a> #}
-<!-- {% if image.popularity %}
-  popularity rating is: {{image.popularity}}<br>
-{%endif%} -->
+  <h1>
+  Image Details
+  </h1>
 
 
 
+  <h3>{{image.image_title}}</h3>
+  <a href={{image.image.url}}>
+  <img class="image-center-fit" src="{{image.image.url}}" style="max-width: 100%; max-height: 800px;">
+  </a>
 
+  {% if image.system.all %}
+    <h3>Game System:</h3>
+
+      {%for system in image.system.all %}
+        {{system}}<br>
+      {%endfor%}
+
+  {%endif%}
+  {% if image.faction_type.all %}
+    <h3>Faction Type:</h3>
+
+      {%for faction in image.faction_type.all %}
+        {{faction}}<br>
+      {%endfor%}
+
+  {%endif%}
+  {% if image.factions.all %}
+    <h3>Faction:</h3>
+
+      {%for faction in image.factions.all %}
+        {{faction}}<br>
+      {%endfor%}
+
+  {%endif%}
+  {% if image.sub_factions.all %}
+    <h3>Sub-Faction:</h3>
+
+      {%for sub_faction in image.sub_factions.all %}
+        {{sub_faction}}<br>
+      {%endfor%}
+
+  {%endif%}
+  {% if image.colours.all %}
+    <h3>Colours:</h3>
+
+      {%for colour in image.colours.all %}
+        {{colour}}<br>
+      {%endfor%}
+
+  {%endif%}
+  {% if image.unit_type.all %}
+    <h3>Models Present:</h3>
+      {%for unit_type in image.unit_type.all%}
+        {{unit_type}}<br>
+      {%endfor%}
+  {%endif%}
+  <br>
+  {% if image.conversion.all %}
+
+    <b>Conversion Level:</b>
+
+      {%for conversion in image.conversion.all %}
+        <li>{{conversion}}</li>
+      {%endfor%}
+
+  {%endif%}
+
+  {% if image.paintingstudio.all %}
+    <br>
+    <b>Painted by:</b>
+
+      {%for studio in image.paintingstudio.all %}
+
+          <li>
+            <a href="{%url 'painting studio' studio.slug studio.id %}">{{studio}} (Internal Link)</a>
+            <a class='studio_page' href="{{studio.Studio_page}}">Visit Studio Page (External Link)</a>
+          </li>
+      {%endfor%}
+
+
+  {%endif%}
+  <br>
+  {% if image.scale %}
+    Image Scale: {{image.scale}}<br>
+  {%endif%}
+  {% if image.owner %}
+    Content owner: {{image.owner}}<br>
+  {%endif%}
+  {% if image.location %}
+    Location: {{image.location}}<br>
+  {% endif %}
+
+  {% if request.user.is_authenticated %}
+  <br>
+    {% if liked %} <a class="btn btn-light" href="{% url 'image upvote' image.id %}?unlike=True">Un-Like</a> {%else%} <a class="btn btn-light" href="{% url 'image upvote' image.id %}?like=True">Like</a> {% endif %}
+  {%endif%}
+  <br>
+
+</div>
 
 
 {% endblock %}
@@ -131,7 +134,7 @@ Gallery Image Details
 
   {%if request.user.is_staff or request.user == image.uploader %}
     <div>
-      <a class="btn btn-outline-light" href="{%url 'image update' object.id%}">Edit</a>
+      <a class="btn btn-outline-light" href="{%url 'image update' object.id%}?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}">Edit</a>
       <a class="btn btn-outline-danger" href="{%url 'image delete' object.id%}">Delete</a>
     </div>
   {%endif%}
