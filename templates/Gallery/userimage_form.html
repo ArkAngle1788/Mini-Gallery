@@ -18,7 +18,7 @@ Gallery Image Upload
 <!-- ?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%} -->
 {{ form.media.css }}
 <link href="/static/django_select2/django_select2.css" type="text/css" media="screen" rel="stylesheet">
-<form {% if remaining_images %}action="{%url 'gallery multiple update'%}"{%else%}action="{%url 'image update' image.pk %}?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}"{% endif %} method="post" enctype="multipart/form-data">{% csrf_token %}
+<form {% if remaining_images %}action="{%url 'gallery multiple update'%}"{%else%}action="{{request.get_full_path}}"{% endif %} method="post" enctype="multipart/form-data">{% csrf_token %}
       {{ form|crispy }}
     {% if image %}<input type="hidden" id="imagepk" name="imagepk" value={{image.pk}} readonly>{%endif%}
     {% if remaining_images %}<input type="hidden" id="remaining_images" name="remaining_images" value={{remaining_images}} readonly>{%endif%}

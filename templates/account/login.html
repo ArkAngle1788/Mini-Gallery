@@ -14,13 +14,15 @@
 {% get_providers as socialaccount_providers %}
 
 {% if socialaccount_providers %}
-<p>If you have linked a facebook account you can login by clicking the facebook link.</p>
+<p>If you have linked a facebook account you can login by clicking the facebook link. (facebook is in development mode so there's extra prep if you want to use it)</p>
 <p>Otherwise login using your website login information.</p>
 
 <div class="socialaccount_ballot">
 
   <ul class="socialaccount_providers">
+    <s>
     {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+    </s>
   </ul>
 
 

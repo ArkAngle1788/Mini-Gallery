@@ -13,13 +13,11 @@
     <a class="nav-item nav-link" href="{% url 'manage image fields' %}">manage image fields</a>
 {% endif %}
 
-
-
-  <a class="nav-item nav-link" href="{% url 'gallery home' %}?order=popularity">Gallery Home</a>
   <!-- <a class="nav-item nav-link" href="{% url 'gallery home' %}?recent=1">View Recent Uploads</a> -->
   <h3>Filter Images</h3>
 </div>
 
+<a class="nav-item nav-link" href="{{request.path}}?order=popularity">Reset Filters</a>
 
 
 <div class='panel-body'>

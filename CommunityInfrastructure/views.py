@@ -10,6 +10,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from CommunityInfrastructure.models import Country, Region, City, PaintingStudio
 from CommunityInfrastructure.models import Group as CIgroup  #Think we had a keyword collision here where group is our model but also a model used for permissions in django authentication
 from .forms import *
+from Gallery.filters import ImageFilter
+from django_filters.views import FilterView
 from ContentPost.custom_functions import calculate_news_bar
 
 from UserAccounts.models import UserProfile,AdminProfile
@@ -564,8 +566,9 @@ class Studio_Edit(LoginRequiredMixin,UserPassesTestMixin,UpdateView):  #shares a
 
         return False
 
-class Studio_Details(ListView):
+class Studio_Details(FilterView):
     model=UserImage
+    filterset_class=ImageFilter
     context_object_name='studio_images'
     paginate_by=8
     template_name='CommunityInfrastructure/paintingstudio_detail.html'
@@ -616,7 +619,14 @@ class Studio_Details(ListView):
         contextregionzone = City.objects.filter(region__region_name=PaintingStudio.objects.get(pk=self.kwargs['pk']).location.region)
         if contextregionzone:
             context['zone_container']=contextregionzone
-            return context
+            # return context
+
+        if self.request.GET:
+            dic_string=dict(self.request.GET)
+            if self.request.GET.get('page'):
+                dic_string.pop('page')
+            context['search']=dic_string
+
 
         return context
 
