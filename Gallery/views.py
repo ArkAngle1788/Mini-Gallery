@@ -238,10 +238,9 @@ class GalleryUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
     form_class=UploadImages
     permission_required=("Gallery.add_userimage")
 
-    def post(self, request, *args, **kwargs):
-        var=super().post(self,request,*args,**kwargs)
-        print(f"\n\nlook at me\n\n")
-        return var
+    # def post(self, request, *args, **kwargs):
+    #     var=super().post(self,request,*args,**kwargs)
+    #     return var
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
@@ -404,14 +403,7 @@ class GalleryUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
         url+='?'
         for key in self.request.GET:
             url+=key+'='+self.request.GET[key]+'&'
-        print(self.request.GET)
         return url
-
-
-        # i think this was copied from create? we don't want uploader to change to an admin if and admin edits
-    # def form_valid(self,form):
-    #     form.instance.uploader=self.request.user #add this data first then validate
-    #     return super().form_valid(form) # then run original form_valid
 
     def test_func(self):
         if self.request.user.is_staff or self.get_object().uploader==self.request.user:
