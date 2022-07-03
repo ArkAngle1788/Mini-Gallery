@@ -95,7 +95,7 @@ Mini-Gallery -Detail
       {%for studio in image.paintingstudio.all %}
 
           <li>
-            <a href="{%url 'painting studio' studio.slug studio.id %}">{{studio}} (Internal Link)</a>
+            <a href="{%url 'painting studio' studio.slug studio.id %}?order=popularity">{{studio}} (Internal Link)</a>
             <a class='studio_page' href="{{studio.Studio_page}}">Visit Studio Page (External Link)</a>
           </li>
       {%endfor%}
@@ -115,7 +115,11 @@ Mini-Gallery -Detail
 
   {% if request.user.is_authenticated %}
   <br>
-    {% if liked %} <a class="btn btn-light" href="{% url 'image upvote' image.id %}?unlike=True">Un-Like</a> {%else%} <a class="btn btn-light" href="{% url 'image upvote' image.id %}?like=True">Like</a> {% endif %}
+    {% if liked %}
+        <a class="btn btn-light" href="{% url 'image upvote' image.id %}?unlike=True&{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}{{key}}={{value}}&{%endif%}{%endfor%}">un-Like</a>
+    {%else%}
+        <a class="btn btn-light" href="{% url 'image upvote' image.id %}?like=True{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Like</a>
+    {% endif %}
   {%endif%}
   <br>
 
@@ -128,7 +132,14 @@ Mini-Gallery -Detail
 
 {% block navbar_right_content %}
 
-  <a class="nav-item nav-link" href="{% url 'gallery home' %}?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}">Return to Browse</a>
+  {% if request.GET.studio %}
+    <a class="nav-item nav-link" href="{% url 'painting studio' 'static_slug' request.GET.studio %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Studio Page</a>
+  {% else %}
+    <a class="nav-item nav-link" href="{% url 'gallery home' %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{{key}}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Browse</a>
+  {% endif %}
+
+
+
 
 
 

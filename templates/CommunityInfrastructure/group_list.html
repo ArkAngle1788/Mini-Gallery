@@ -67,7 +67,7 @@
 
     {% if studio_container %}
       {% for studio in studio_container %}
-        <li><a href="{%url 'painting studio' studio.slug studio.id %}">{{studio}}</a></li>
+        <li><a href="{%url 'painting studio' studio.slug studio.id %}?order=popularity">{{studio}}</a></li>
       {%endfor%}
     {%else%}
       <li>No Painting Studio's Found</li>

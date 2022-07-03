@@ -17,8 +17,14 @@
   <h3>Filter Images</h3>
 </div>
 
-<a class="nav-item nav-link" href="{{request.path}}?order=popularity">Reset Filters</a>
 
+{% if request.GET.studio %}
+  {{request.GET.studio}}
+  <a class="nav-item nav-link" href="{% url 'painting studio' 'static_slug' request.GET.studio %}?order=popularity">Reset Studio Filters</a>
+{% else %}
+  {{request.GET.studio}}
+  <a class="nav-item nav-link" href="{{request.path}}?order=popularity">Reset Filters</a>
+{% endif %}
 
 <div class='panel-body'>
 {{ filter_form.form.media.css }}
