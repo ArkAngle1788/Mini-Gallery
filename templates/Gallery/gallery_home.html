@@ -53,24 +53,15 @@
       </a>
       <div class="card-body text-bright">
         <h5 class="card-title">{{image.image_title}}</h5>
-        {%comment%}<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>{%endcomment%}
-        <a href="{% url 'image details' image.id %}?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">View Image Details</a>
+        <!-- {%comment%}<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>{%endcomment%} -->
+        {%if image.sub_image.all%}
+          <a href="{% url 'image details' image.id %}?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">View Image Gallery Page</a>
+        {%else%}
+          <a href="{% url 'image details' image.id %}?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">View Image Details Page</a>
+        {%endif%}
       </div>
     </div>
   </div>
-
-  {%comment%}original
-    <div class="col-md-6"align='center'>
-    <h3>{{image.image_title}}</h3>
-    <a href="{% url 'image details' image.id %}">
-      <img src="{{image.image.url}}" style="max-width: 100%; max-height: 500px;" alt="Image Failed to Load">  <!-- height="600"width="auto"max-width=100% max-width=100%>  -->
-    </a>
-    <br>
-    <a class='article-title' href="{% url 'image details' image.id %}">View Image Details Page</a>
-    </div>
-    {%endcomment%}
-
-
 
   {%endfor%}
 

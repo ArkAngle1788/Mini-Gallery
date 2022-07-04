@@ -55,8 +55,31 @@ class UploadImages(forms.ModelForm):
         }
         # labels = {'system': 'Label 2'}
 
+class UploadImagesMultipart(forms.ModelForm):
+    subimage= forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True,'class':'text-text-sidebar'}),help_text="<---Select Multipule Subimages here!")
+    class Meta:
+        model=UserImage
+        fields=['image','subimage','image_title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','paintingstudio','owner','location']
+        widgets={
+        'image_title':forms.TextInput(attrs={'class': 'bg-white'}),
+        'system':Select2MultipleWidget,
+        'faction_type':Select2MultipleWidget,
+        'factions':Select2MultipleWidget,
+        'sub_factions':Select2MultipleWidget,
+        'colours':Select2MultipleWidget,
+        'conversion':Select2MultipleWidget,
+        'unit_type':Select2MultipleWidget,
+        'scale':Select2Widget,
+        'paintingstudio':Select2MultipleWidget,
+        'owner':forms.TextInput(attrs={'class': 'bg-white','placeholder':'Name or Identifier'}),
+        'location':Select2Widget
+        }
+        help_texts = {
+            'image': '<---Select Primary Display Image',
+        }
+
 class UploadMultipleImages(forms.ModelForm):
-    image= forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    image= forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
     class Meta:
         model=UserImage
         fields=['image','image_title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','paintingstudio','owner','location']

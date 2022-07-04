@@ -53,6 +53,22 @@ def get_upload_to():
     current_year = str(date.today().year)
     return 'gallery_images/'+current_year
 
+def Sub_get_upload_to():
+    current_year = str(date.today().year)
+    return 'gallery_sub_images/'+current_year
+
+
+class UserSubImage(models.Model):
+
+    #image size should be a property of image
+    image = models.ImageField(upload_to=Sub_get_upload_to())
+
+    image_title=models.CharField(max_length=50)
+    def __str__(self):
+        return self.image_title
+    def get_absolute_url(self):
+        return reverse('image details',self.parent_image.pk)
+
 class UserImage(models.Model):
 
     #image size should be a property of image
@@ -72,6 +88,7 @@ class UserImage(models.Model):
     owner=models.CharField(max_length=50,blank=True,null=True)#name of person who contents of image belong to
     location=models.ForeignKey(City,blank=True,on_delete=models.SET_NULL,null=True,related_name='image_city')
 
+    sub_image=models.ManyToManyField(UserSubImage,blank=True,related_name='parent_image')
 
     # need to add a field for the event. it should be searchable here for the exact name (lVO 2020 vs LVO 2022) but also contains a link to the league page
     #linking to season should acomplish all that

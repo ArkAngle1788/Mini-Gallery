@@ -32,7 +32,7 @@ class City(models.Model):
 class PaintingStudio(models.Model):
     Studio_name=models.CharField(max_length=50)
     Studio_page=models.CharField(max_length=100) #are these fields security vunerablilites?
-    description=models.CharField(max_length=500)
+    description=models.CharField(max_length=1000)
     location=models.ForeignKey(City,on_delete=models.SET_NULL,blank=False,null=True,related_name='studios_in_city')
     userprofile=models.ForeignKey(User,on_delete=models.SET_NULL,blank=True,null=True,related_name='studios_managed')
     # studio_images=models.ManyToManyField(UserImage,blank=True,related_name='belonging_studio')

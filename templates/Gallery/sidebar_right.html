@@ -6,7 +6,11 @@
 
 
   {%if perms.Gallery.add_userimage %}
-        <h3> <a class="list-group-item list-group-item-light" href="{% url 'gallery upload' %}">upload an image</a></h3>
+        <h3>
+          <a class="list-group-item list-group-item-light" href="{% url 'gallery upload' %}">upload an image</a>
+          <br>
+          <a class="list-group-item list-group-item-light" href="{% url 'gallery upload multipart' %}">upload multiple angles of an image</a>
+        </h3>
   {%endif%}
 
 {% if request.user.is_staff %}

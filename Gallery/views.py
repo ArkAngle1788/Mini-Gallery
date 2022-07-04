@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
-from .models import Conversion, Scale_Of_Image, Colour, Colour_Priority,  Colour_Catagory, UserImage
+from .models import Conversion, Scale_Of_Image, Colour, Colour_Priority,  Colour_Catagory, UserImage, UserSubImage
 from ContentPost.custom_functions import calculate_news_bar
 from CommunityInfrastructure.models import Country, Region, City, PaintingStudio
 from GameData.models import Unit_Type,Faction_Type,Faction,Sub_Faction
@@ -255,6 +255,36 @@ class GalleryUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
     def form_valid(self,form):
         form.instance.uploader=self.request.user #add this data first then validate
         return super().form_valid(form) # then run original form_valid
+
+class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
+    model=UserImage
+    # fields=['image','image_title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','professional','owner']
+    form_class=UploadImagesMultipart
+    permission_required=("Gallery.add_userimage")
+
+    # def post(self, request, *args, **kwargs):
+    #     var=super().post(self,request,*args,**kwargs)
+    #     return var
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in the leaguenav QuerySet
+        # context['league_nav'] = leagues_nav
+        context['news']=calculate_news_bar()
+        # context['filter_form']=FilterImages()
+        image_filter=ImageFilter(self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form']=image_filter
+        return context
+
+    def form_valid(self,form):
+        form.instance.uploader=self.request.user #add this data first then validate
+        object=super().form_valid(form) # then run original form_valid
+        files = self.request.FILES.getlist('subimage')
+        for img in files:
+            subimage=UserSubImage(image=img,image_title=self.object.image_title)
+            subimage.save()
+            self.object.sub_image.add(subimage)
+        return object
 
 class GalleryMultipleUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
     model=UserImage
