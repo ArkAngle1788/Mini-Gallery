@@ -377,16 +377,25 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
 
             imagename_str=sub_get_upload_to()+'/'+os.path.basename(img.image.name)
             subimage=UserSubImage(image=img.image,image_title=main.image_title,parent_image=main)
-            permfile=default_storage.save(imagename_str, img.image)
-            subimage.image=permfile
+
+
+
+            copy_blob(GS_BUCKET_NAME,img.image.name,GS_BUCKET_NAME,imagename_str)
+
+
+
+
+            # permfile=default_storage.save(imagename_str, img.image)
+            subimage.image=imagename_str
             subimage.save()
             # main.sub_image.add(subimage)
             img.image.close()
 
 
         imagename_str=get_upload_to()+'/'+os.path.basename(main_image.image.name)
-        var=default_storage.save(imagename_str, main_image.image)
-        main.image=var
+        # var=default_storage.save(imagename_str, main_image.image)
+        copy_blob(GS_BUCKET_NAME,main_image.image.name,GS_BUCKET_NAME,imagename_str)
+        main.image=imagename_str
         main.save()
         main_image.image.close()
 
@@ -399,8 +408,43 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
         url=main.get_absolute_url()
         # messages.success(request, f'New League \" {league_name} \" has been created')
         return redirect(url)
-# image_name=object.image.name
-# default_storage.delete(image_name)
+
+
+
+from google.cloud import storage
+
+
+def copy_blob(
+    bucket_name, blob_name, destination_bucket_name, destination_blob_name
+):
+    """Copies a blob from one bucket to another with a new name."""
+    # bucket_name = "your-bucket-name"
+    # blob_name = "your-object-name"
+    # destination_bucket_name = "destination-bucket-name"
+    # destination_blob_name = "destination-object-name"
+
+    storage_client = storage.Client()
+
+    source_bucket = storage_client.bucket(bucket_name)
+    source_blob = source_bucket.blob(blob_name)
+    destination_bucket = storage_client.bucket(destination_bucket_name)
+
+    blob_copy = source_bucket.copy_blob(
+        source_blob, destination_bucket, destination_blob_name
+    )
+
+    print(
+        "Blob {} in bucket {} copied to blob {} in bucket {}.".format(
+            source_blob.name,
+            source_bucket.name,
+            blob_copy.name,
+            destination_bucket.name,
+        )
+    )
+
+
+
+
 
 class GalleryMultipleUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
     model=UserImage
