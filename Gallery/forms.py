@@ -59,7 +59,7 @@ class UploadImagesMultipart(forms.ModelForm):
     subimage= forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True,'class':'text-text-sidebar'}),help_text="<---Select Multipule Subimages here!")
     class Meta:
         model=UserImage
-        fields=['image','subimage','image_title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','paintingstudio','owner','location']
+        fields=['subimage','image_title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','paintingstudio','owner','location']
         widgets={
         'image_title':forms.TextInput(attrs={'class': 'bg-white'}),
         'system':Select2MultipleWidget,
@@ -74,9 +74,19 @@ class UploadImagesMultipart(forms.ModelForm):
         'owner':forms.TextInput(attrs={'class': 'bg-white','placeholder':'Name or Identifier'}),
         'location':Select2Widget
         }
-        help_texts = {
-            'image': '<---Select Primary Display Image',
-        }
+        # help_texts = {
+        #     'image': '<---Select Primary Display Image',
+        # }
+
+class SelectPrimaryImage(forms.Form):
+    select_primary=forms.ChoiceField(choices=[],widget=forms.Select(basicattrs))
+    def __init__(self, image_options=None, *args, **kwargs):
+        super(SelectPrimaryImage, self).__init__(*args, **kwargs)
+        if image_options:
+            self.fields['select_primary'].choices = [
+                (str(k), v)
+                for k, v in enumerate(image_options)
+            ]
 
 class UploadMultipleImages(forms.ModelForm):
     image= forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True}))

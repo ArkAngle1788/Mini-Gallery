@@ -44,7 +44,7 @@
         <div class="card-body text-bright">
           <h5 class="card-title">{{image.image_title}}</h5>
           {%comment%}<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>{%endcomment%}
-          <a href="{% url 'image details' image.id %}?studio={{studio.id}}&{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">View Image Details</a>
+          <a href="{% url 'image details' image.id %}?studio={{studio.id}}&{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">{%if image.sub_image.all%}View Image Gallery Page{%else%}View Image Details{%endif%}</a>
         </div>
       </div>
     </div>

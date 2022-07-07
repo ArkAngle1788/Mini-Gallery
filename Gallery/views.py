@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
-from .models import Conversion, Scale_Of_Image, Colour, Colour_Priority,  Colour_Catagory, UserImage, UserSubImage
+from .models import Conversion, Scale_Of_Image, Colour, Colour_Priority,  Colour_Catagory, UserImage, UserSubImage, TempImage,sub_get_upload_to,get_upload_to
 from ContentPost.custom_functions import calculate_news_bar
 from CommunityInfrastructure.models import Country, Region, City, PaintingStudio
 from GameData.models import Unit_Type,Faction_Type,Faction,Sub_Faction
 from League.models import League
 
+import os
 from django.views import View
 from django.views.generic.edit import FormMixin
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
@@ -256,11 +257,14 @@ class GalleryUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
         form.instance.uploader=self.request.user #add this data first then validate
         return super().form_valid(form) # then run original form_valid
 
+
+
 class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
     model=UserImage
     # fields=['image','image_title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','professional','owner']
     form_class=UploadImagesMultipart
     permission_required=("Gallery.add_userimage")
+    image_choices=[]
 
     # def post(self, request, *args, **kwargs):
     #     var=super().post(self,request,*args,**kwargs)
@@ -277,14 +281,126 @@ class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateVi
         return context
 
     def form_valid(self,form):
+        self.image_choices=[]
         form.instance.uploader=self.request.user #add this data first then validate
         object=super().form_valid(form) # then run original form_valid
         files = self.request.FILES.getlist('subimage')
+
+
+        # for img in files:
+        #     subimage=UserSubImage(image=img,image_title=self.object.image_title)
+        #     subimage.save()
+        #     self.object.sub_image.add(subimage)
+
+
+
         for img in files:
-            subimage=UserSubImage(image=img,image_title=self.object.image_title)
+            subimage=TempImage(image=img,uploader=self.request.user)
             subimage.save()
-            self.object.sub_image.add(subimage)
+            self.image_choices+=[subimage]
+        self.object.image=self.image_choices[0].image
+        self.object.save()
         return object
+    # def get_success_url(self):
+    #
+    #     return url
+    def post(self, request, *args, **kwargs):
+        super().post(self,request,*args,**kwargs)
+
+        item_list=''
+        item_list+=str(self.image_choices.pop(0))
+        for option in self.image_choices:
+            item_list+=','+str(option.pk)
+        # item_list=','.join(self.image_choices)
+
+        # return render(request, 'Gallery/error.html',{"var":self.image_choices})
+        url=reverse('gallery upload multipart confirm')
+        url+='?'+f'images={item_list}&main={self.object.pk}'
+        return redirect(url)
+
+
+class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,View):
+
+    # form_class=SelectPrimaryImage
+    permission_required=("Gallery.add_userimage")
+
+    def get(self, request, *args, **kwargs):
+
+
+        try:
+            main=UserImage.objects.get(pk=self.request.GET.get('main'))
+            if self.request.user != main.uploader:
+                messages.error(request, f'Invalid Permissions')
+                url=reverse('gallery home')+'?order=popularity'
+                return redirect(url)
+            strlist=self.request.GET.get('images').split(',')
+            image_choices=TempImage.objects.filter(id__in=strlist)
+        except :
+            return render(request, 'error.html',{"error":'bad request'})
+
+        for image in image_choices:
+            if image.uploader!=self.request.user:
+                messages.error(request, f'Invalid Permissions')
+                url=reverse('gallery home')+'?order=popularity'
+                return redirect(url)
+
+
+        return render(request, 'Gallery/upload_sub_confirm.html',{"images":image_choices,'main':main.pk})
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            main=UserImage.objects.get(pk=self.request.POST.get('main'))
+            if self.request.user != main.uploader:
+                messages.error(request, f'Invalid Permissions')
+                url=reverse('gallery home')+'?order=popularity'
+                return redirect(url)
+            image_choices=TempImage.objects.filter(id__in=self.request.POST.get('image_list').split(','))
+        except :
+            return render(request, 'error.html',{"error":'bad data'})
+
+        for image in image_choices:
+            if image.uploader==self.request.user:
+                pass
+            else:
+                messages.error(request, f'Invalid Permissions')
+                url=reverse('gallery home')+'?order=popularity'
+                return redirect(url)
+        try:
+            main_image=image_choices.get(pk=self.request.POST.get('image_select'))
+        except:
+            return render(request, 'error.html',{"error":'bad data'})
+
+        image_choices=image_choices.exclude(pk=main_image.pk)
+
+        for img in image_choices:
+
+            imagename_str=sub_get_upload_to()+'/'+os.path.basename(img.image.name)
+            subimage=UserSubImage(image=img.image,image_title=main.image_title,parent_image=main)
+            permfile=default_storage.save(imagename_str, img.image)
+            subimage.image=permfile
+            subimage.save()
+            # main.sub_image.add(subimage)
+            img.image.close()
+
+
+        imagename_str=get_upload_to()+'/'+os.path.basename(main_image.image.name)
+        var=default_storage.save(imagename_str, main_image.image)
+        main.image=var
+        main.save()
+        main_image.image.close()
+
+
+
+        for img in TempImage.objects.filter(id__in=self.request.POST.get('image_list').split(',')):
+            image_name=img.image.name
+            default_storage.delete(image_name)
+
+        url=main.get_absolute_url()
+        # messages.success(request, f'New League \" {league_name} \" has been created')
+        return redirect(url)
+# image_name=object.image.name
+# default_storage.delete(image_name)
 
 class GalleryMultipleUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
     model=UserImage
@@ -453,25 +569,29 @@ class GalleryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
         context['news']=calculate_news_bar()
         return context
 
-    def delete(self, request, *args, **kwargs):
-
-        object=self.get_object()
-
-        if object.image:#actually deletes the image file instead of just dereferencing it
-            image_name=object.image.name
-            default_storage.delete(image_name)
-            print("\ndeleting image from delete\n")
-
-        return super().delete(self,request,*args,**kwargs)
+    # def delete(self, request, *args, **kwargs):
+    #
+    #     object=self.get_object()
+    #
+    #     if object.image:#actually deletes the image file instead of just dereferencing it
+    #         image_name=object.image.name
+    #         default_storage.delete(image_name)
+    #         print("\ndeleting image from delete\n")
+    #
+    #     return super().delete(self,request,*args,**kwargs)
 
     def form_valid(self,form):
 
         object=self.get_object()
 
+        #a warning appeared when this was in the delete function saying to move custom delete logic here so it lives here now.
         if object.image:#actually deletes the image file instead of just dereferencing it
             image_name=object.image.name
             default_storage.delete(image_name)
-            print("\ndeleting image from form_valid\n")
+
+            for img in object.sub_image.all():
+                sub_image_name=img.image.name
+                default_storage.delete(sub_image_name)
 
         #copied code from original form_valid
         success_url = self.get_success_url()

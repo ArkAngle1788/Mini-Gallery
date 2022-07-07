@@ -51,23 +51,26 @@ from datetime import date
 
 def get_upload_to():
     current_year = str(date.today().year)
-    return 'gallery_images/'+current_year
+    current_month = str(date.today().month)
+    return 'gallery_images/'+current_year+'/'+current_month
 
-def Sub_get_upload_to():
+def sub_get_upload_to():
     current_year = str(date.today().year)
-    return 'gallery_sub_images/'+current_year
+    current_month = str(date.today().month)
+    return 'gallery_sub_images/'+current_year+'/'+current_month
 
+def temp_get_upload_to():
+    current_year = str(date.today().year)
+    current_month = str(date.today().month)
+    return 'staging_images/'+current_year+'/'+current_month
 
-class UserSubImage(models.Model):
-
-    #image size should be a property of image
-    image = models.ImageField(upload_to=Sub_get_upload_to())
-
-    image_title=models.CharField(max_length=50)
+class TempImage(models.Model):
+    image=models.ImageField(upload_to=temp_get_upload_to())
+    uploader=models.ForeignKey(User,on_delete=models.CASCADE)
     def __str__(self):
-        return self.image_title
-    def get_absolute_url(self):
-        return reverse('image details',self.parent_image.pk)
+        return str(self.pk)
+
+
 
 class UserImage(models.Model):
 
@@ -88,7 +91,7 @@ class UserImage(models.Model):
     owner=models.CharField(max_length=50,blank=True,null=True)#name of person who contents of image belong to
     location=models.ForeignKey(City,blank=True,on_delete=models.SET_NULL,null=True,related_name='image_city')
 
-    sub_image=models.ManyToManyField(UserSubImage,blank=True,related_name='parent_image')
+    # sub_image=models.OneToManyField(UserSubImage,blank=True,related_name='parent_image')
 
     # need to add a field for the event. it should be searchable here for the exact name (lVO 2020 vs LVO 2022) but also contains a link to the league page
     #linking to season should acomplish all that
@@ -105,3 +108,15 @@ class UserImage(models.Model):
     #need this to return to detail view after saving (upload edit)
     def get_absolute_url(self):
         return reverse('image details',kwargs={'pk':self.pk})
+
+class UserSubImage(models.Model):
+
+    #image size should be a property of image
+    image = models.ImageField(upload_to=sub_get_upload_to())
+    image_title=models.CharField(max_length=50)
+    parent_image=models.ForeignKey(UserImage,on_delete=models.CASCADE,related_name='sub_image')
+
+    def __str__(self):
+        return self.image_title
+    def get_absolute_url(self):
+        return reverse('image details',self.parent_image.pk)
