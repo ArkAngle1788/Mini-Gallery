@@ -29,6 +29,12 @@ from .filters import ImageFilter
 
 from django_filters.views import FilterView
 
+
+
+from django.conf import settings
+
+
+
 class GalleryListView(FilterView):
     model=UserImage
     filterset_class=ImageFilter
@@ -319,6 +325,12 @@ class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateVi
         return redirect(url)
 
 
+#GOOGLE_APPLICATION_CREDENTIALS='/etc/solid-ego-284723-ee1d8e55a890.json'
+
+#os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/etc/solid-ego-284723-ee1d8e55a890.json'
+
+
+
 class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,View):
 
     # form_class=SelectPrimaryImage
@@ -380,7 +392,7 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
 
 
 
-            copy_blob(GS_BUCKET_NAME,img.image.name,GS_BUCKET_NAME,imagename_str)
+            copy_blob('mini-gallery',img.image.name,'mini-gallery',imagename_str)
 
 
 
@@ -394,7 +406,7 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
 
         imagename_str=get_upload_to()+'/'+os.path.basename(main_image.image.name)
         # var=default_storage.save(imagename_str, main_image.image)
-        copy_blob(GS_BUCKET_NAME,main_image.image.name,GS_BUCKET_NAME,imagename_str)
+        copy_blob('mini-gallery',main_image.image.name,'mini-gallery',imagename_str)
         main.image=imagename_str
         main.save()
         main_image.image.close()
