@@ -445,15 +445,6 @@ def copy_blob(
         source_blob, destination_bucket, destination_blob_name
     )
 
-    print(
-        "Blob {} in bucket {} copied to blob {} in bucket {}.".format(
-            source_blob.name,
-            source_bucket.name,
-            blob_copy.name,
-            destination_bucket.name,
-        )
-    )
-
 
 
 
