@@ -40,7 +40,46 @@ Gallery Image Upload
   <br>
   {{image.image_title}}
   <img class="image-center-fit" src="{{image.image.url}}" style="max-width: 100%; max-height: 100%;">
+
+
+
+
+  <form action="{%url 'subimage update' image.pk%}" method="post" enctype="multipart/form-data">{% csrf_token %}
+
+
+    {{subimage_form.image.label}}
+    {{subimage_form.image}}
+    <br><br>
+
+    {{subimage_form.sub.label}}
+
+    {% for option in current_subimages.all %}
+    <br>
+    <input type="checkbox" name="sub" value="{{option.pk}}" id="id_sub_{{option.pk}}" >
+    <label for="id_sub_{{option.pk}}"><img class="image-center-fit" src="{{option.image.url}}" style="max-width: 100px; max-height: 100px;"></label>
+
+    {%endfor%}
+
+    <!-- {% for option in subimage_form.sub %}
+    <br>
+    <input type="checkbox" name="sub" value="{{option.pk}}" id="id_sub_{{option.pk}}" data-np-checked="1">
+    <label for="id_sub_{{option.pk}}"><img class="image-center-fit" src="{{option.image.url}}" style="max-width: 100px; max-height: 100px;"></label>
+
+    {%endfor%} -->
+
+
+
+<!-- <img class="image-center-fit" src="{{image.image.url}}" style="max-width: 50px; max-height: 50px;"> -->
+
+    <!-- <input type="file" name="subimage" accept="image/*" class="clearablefileinput form-control-file" id="id_subimage" data-np-checked="1"> -->
+    <!-- <input type="hidden" id="imagepk" name="imagepk" value={{image.pk}} readonly> -->
+    <br>
+    <input type="submit" value="Update">
+  </form>
+
+
 {%endif%}
+
 
 {%endblock navbar_right_content%}
 

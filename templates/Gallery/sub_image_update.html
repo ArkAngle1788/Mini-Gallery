@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+<h1>
+Subimage Update
+</h1>
+
+<form action="{%url 'subimage update' current_subimages.0.parent_image.pk%}" method="post" enctype="multipart/form-data">{% csrf_token %}
+
+
+
+
+  {{form.image.label}}
+  {{form.image}}
+
+  {% if form.image.errors %}
+    <ol class="text-danger">
+    {% for error in form.image.errors %}
+        <li><strong>{{ error|escape }}</strong></li>
+    {% endfor %}
+    </ol>
+  {% endif %}
+  <br><br>
+
+
+  {{form.sub.label}}
+
+  {% for option in current_subimages.all %}
+    <br>
+    <input type="checkbox" name="sub" value="{{option.pk}}" id="id_sub_{{option.pk}}">
+    <label for="id_sub_{{option.pk}}"><img class="image-center-fit" src="{{option.image.url}}" style="max-width: 100px; max-height: 100px;"></label>
+
+  {%endfor%}
+
+  {% if form.sub.errors %}
+    <ol class="text-danger">
+    {% for error in form.sub.errors %}
+        <li><strong>{{ error|escape }}</strong></li>
+    {% endfor %}
+    </ol>
+  {% endif %}
+
+  <!-- {% for option in subimage_form.sub %}
+  <br>
+  <input type="checkbox" name="sub" value="{{option.pk}}" id="id_sub_{{option.pk}}" data-np-checked="1">
+  <label for="id_sub_{{option.pk}}"><img class="image-center-fit" src="{{option.image.url}}" style="max-width: 100px; max-height: 100px;"></label>
+
+  {%endfor%} -->
+
+
+
+<!-- <img class="image-center-fit" src="{{image.image.url}}" style="max-width: 50px; max-height: 50px;"> -->
+
+  <!-- <input type="file" name="subimage" accept="image/*" class="clearablefileinput form-control-file" id="id_subimage" data-np-checked="1"> -->
+  <!-- <input type="hidden" id="imagepk" name="imagepk" value={{image.pk}} readonly> -->
+  <br>
+  <input type="submit" value="Update">
+</form>
+
+
+{% endblock %}

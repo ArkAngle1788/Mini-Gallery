@@ -21,6 +21,7 @@ path('image/multi/update',GalleryMultipleUpdate.as_view(),name='gallery multiple
 path('image/<int:pk>/', GalleryDetailView.as_view(), name='image details'),
 path('image/<int:pk>/like', GalleryDetailUpvoteView.as_view(), name='image upvote'),
 path('image/<int:pk>/update', GalleryUpdate.as_view(), name='image update'),
+path('image/<int:pk>/subimage/update', GallerySubImageUpdate.as_view(), name='subimage update'),
 path('image/<int:pk>/delete', GalleryDelete.as_view(), name='image delete'),
 #
 path('manage_image_fields',Manage_image_fields.as_view(), name='manage image fields'),

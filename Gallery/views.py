@@ -27,11 +27,12 @@ from django.db.models import Count #used for sorting likes
 
 from .filters import ImageFilter
 
+
 from django_filters.views import FilterView
 
+from google.cloud import storage
 
-
-from django.conf import settings
+# from django.conf import settings
 
 
 
@@ -311,7 +312,15 @@ class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateVi
     #
     #     return url
     def post(self, request, *args, **kwargs):
-        super().post(self,request,*args,**kwargs)
+
+        self.object = None
+
+        form = self.get_form()
+        if form.is_valid():
+            self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
 
         item_list=''
         item_list+=str(self.image_choices.pop(0))
@@ -390,14 +399,18 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
             imagename_str=sub_get_upload_to()+'/'+os.path.basename(img.image.name)
             subimage=UserSubImage(image=img.image,image_title=main.image_title,parent_image=main)
 
+            cloud=False
+            try:
+                os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+                cloud=True
+            except:
+                pass
 
+            if cloud:
+                copy_blob('mini-gallery',img.image.name,'mini-gallery',imagename_str)
+            else:
+                default_storage.save(imagename_str, img.image)
 
-            copy_blob('mini-gallery',img.image.name,'mini-gallery',imagename_str)
-
-
-
-
-            # permfile=default_storage.save(imagename_str, img.image)
             subimage.image=imagename_str
             subimage.save()
             # main.sub_image.add(subimage)
@@ -405,8 +418,16 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
 
 
         imagename_str=get_upload_to()+'/'+os.path.basename(main_image.image.name)
-        # var=default_storage.save(imagename_str, main_image.image)
-        copy_blob('mini-gallery',main_image.image.name,'mini-gallery',imagename_str)
+        cloud=False
+        try:
+            os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+            cloud=True
+        except:
+            pass
+        if cloud:
+            copy_blob('mini-gallery',main_image.image.name,'mini-gallery',imagename_str)
+        else:
+            default_storage.save(imagename_str, main_image.image)
         main.image=imagename_str
         main.save()
         main_image.image.close()
@@ -423,13 +444,11 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
 
 
 
-from google.cloud import storage
 
 
-def copy_blob(
-    bucket_name, blob_name, destination_bucket_name, destination_blob_name
-):
-    """Copies a blob from one bucket to another with a new name."""
+
+def copy_blob(bucket_name, blob_name, destination_bucket_name, destination_blob_name):
+    #"""Copies a blob from one bucket to another with a new name."""
     # bucket_name = "your-bucket-name"
     # blob_name = "your-object-name"
     # destination_bucket_name = "destination-bucket-name"
@@ -441,9 +460,7 @@ def copy_blob(
     source_blob = source_bucket.blob(blob_name)
     destination_bucket = storage_client.bucket(destination_bucket_name)
 
-    blob_copy = source_bucket.copy_blob(
-        source_blob, destination_bucket, destination_blob_name
-    )
+    blob_copy = source_bucket.copy_blob(source_blob, destination_bucket, destination_blob_name)
 
 
 
@@ -587,7 +604,8 @@ class GalleryUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
         context['news']=calculate_news_bar()
         # context['filter_form']=FilterImages()
         image_filter=ImageFilter(self.request.GET, queryset=UserImage.objects.all())
-        context['filter_form']=image_filter
+        context['current_subimages']=UserSubImage.objects.filter(parent_image__pk=self.object.pk)
+        context['subimage_form']=UpdateSubImages(self.object.pk)
         context['image']=self.object
         return context
 
@@ -603,6 +621,61 @@ class GalleryUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
             return True
         return False
 
+class GallerySubImageUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
+    model=UserImage
+    form_class=UpdateSubImages
+    template_name='Gallery/sub_image_update.html'
+
+    def test_func(self):
+        if self.request.user.is_staff or self.get_object().uploader==self.request.user:
+            return True
+        return False
+    def get_form(self, form_class=None):
+        """Return an instance of the form to be used in this view."""
+        if form_class is None:
+            form_class = self.get_form_class()
+        kwargs=self.get_form_kwargs()
+        kwargs.update({
+            'parent_pk': self.object.pk
+        })
+        return form_class(**kwargs)
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+
+        delete_me=UserSubImage.objects.filter(pk__in=form.data.getlist('sub'))
+        for img in delete_me:
+            image_name=img.image.name
+            default_storage.delete(image_name)
+            img.delete()
+        for img in self.request.FILES.getlist('image'):
+            newimage=UserSubImage(image=img,image_title=self.object.image_title,parent_image=self.object)
+            newimage.save()
+        url=self.object.get_absolute_url()
+        # messages.success(request, f'New League \" {league_name} \" has been created')
+        return redirect(url)
+
+
+        # return super().form_valid(form)
+    def post(self, request, *args, **kwargs):
+        # print(f"\n\npost has run!\n\n")
+        self.object = self.get_object()
+        return super().post(request, *args, **kwargs)
+
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in the leaguenav QuerySet
+        # context['league_nav'] = leagues_nav
+        # context['news']=calculate_news_bar()
+        context['current_subimages']=UserSubImage.objects.filter(parent_image__pk=self.object.pk)
+
+        # context['image']=self.object
+        return context
+
+    def form_invalid(self, form):
+        """If the form is invalid, render the invalid form."""
+        return self.render_to_response(self.get_context_data(form=form))
 
 class GalleryDelete(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
     model=UserImage
