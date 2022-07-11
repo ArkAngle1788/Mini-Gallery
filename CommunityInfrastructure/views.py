@@ -560,7 +560,7 @@ class Studio_Edit(LoginRequiredMixin,UserPassesTestMixin,UpdateView):  #shares a
 
     def test_func(self):#this checks to see if you're allowed to use this functionality
 
-        if self.request.user.is_staff or self.request.user==self.object.userprofile:
+        if self.request.user.is_staff or self.request.user==self.get_object().userprofile:
             return True
 
 

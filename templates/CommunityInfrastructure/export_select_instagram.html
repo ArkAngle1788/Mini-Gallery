@@ -6,7 +6,7 @@
 </h1>
 
 <h5>Update permissions</h5>
-<p>if you can't select a page below you probably need to set permissions here! (Instagram uses facebook permissions for their API)</p>
+<p>If you can't select a page below you probably need to set permissions here! (Instagram uses facebook permissions for their API)</p>
 <p>(this will redirect you back to your studio page but you only need to do it once!)</p>
 
 {% load socialaccount %}
@@ -47,10 +47,12 @@
           <option value="{{item.id}}">{{item.name}}</option>
         {%endfor%}
       </select>
+      <br><br>
       <label for="caption">Caption for uploaded images: </label>
-        <input id='caption' type="text" name="caption">
+        <textarea id='caption' name="caption" rows="2" cols="50"></textarea>
       <input type="hidden" id="count" name="count" value={{count}} readonly>
-      <input type="submit" value="select page">
+      <br><br>
+      <input type="submit" value="Export Images">
     </form>
 
 {% endblock %}
