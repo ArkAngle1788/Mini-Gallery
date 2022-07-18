@@ -4,8 +4,6 @@
 
 {% load crispy_forms_tags %}
 
-
-
 {{ form.media.css }}
 
   <form method="post">{% csrf_token %}
@@ -19,9 +17,7 @@
 {% endblock content %}
 
 
-
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-{% include 'Gallery/sidebar_right.html' %}
-
+  {% include 'Gallery/sidebar_right.html' %}
 {%endblock navbar_right_content %}

@@ -23,7 +23,7 @@ from .models import Match, Player, League,Season, Player_season_faction, Round
 
 
 
-
+# actual league views backed up elsewhere since I probably will want to completly rewrite most of them.
 
 
 def leagues(request):

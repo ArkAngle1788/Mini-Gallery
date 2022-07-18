@@ -10,11 +10,9 @@ Public User Profile Page for : {{profile}}
 <p>User's Home City: {{profile.location}}</p>
 
 
+{% endblock content%}
 
-
-
-{% endblock %}
-
+<!-- SIDEBAR Left -->
 {% block navbar_left_content %}
 
 <div class="panel-heading">
@@ -27,10 +25,9 @@ Public User Profile Page for : {{profile}}
 
 </div>
 
+{%endblock navbar_left_content%}
 
-
-{%endblock%}
-
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
 <div class="panel-heading">
@@ -43,6 +40,4 @@ Public User Profile Page for : {{profile}}
 
 </div>
 
-
-
-{%endblock%}
+{%endblock navbar_right_content%}

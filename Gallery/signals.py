@@ -11,15 +11,12 @@ def create_colour_catagory_from_colour(sender, instance, created, **kwargs):
     if created:
         for priority in Colour_Priority.objects.all():
             Colour_Catagory.objects.create(colour=instance,colour_priority=priority)
-            # print("creating: "+f'/{instance} and {priority}')
 
 @receiver(post_save,sender=Colour_Priority)
 def create_colour_catagory_from_priority(sender, instance, created, **kwargs):
     if created:
         for colour in Colour.objects.all():
             Colour_Catagory.objects.create(colour=colour,colour_priority=instance)
-            # print("creating: "+f'/{instance} and {colour}')
-
 
 
 # all of the below is a huge yikes. It will need to be revisited for efficiency once i understand signals better
@@ -148,7 +145,4 @@ def update_fuzzy_search_tag7(sender, instance,  **kwargs):
     for var in instance.unit_type.all():
         fuzzy_tag+=var.__str__()
     fuzzy_tag+=instance.image_title
-    # instance.fuzzy_tags=fuzzy_tag
     UserImage.objects.filter(pk=instance.pk).update(fuzzy_tags=fuzzy_tag)
-
-# post_save.connect(create_colour_catagory, sender=Colour)

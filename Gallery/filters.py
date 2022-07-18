@@ -13,12 +13,6 @@ from django.forms import RadioSelect
 global_default={'style':'width: 100%'}
 
 
-#
-# CHOICES=[('select1','select 1'),
-#          ('select2','select 2')]
-#
-# like = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
-
 class CustomOrderingFilter(django_filters.OrderingFilter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,29 +20,14 @@ class CustomOrderingFilter(django_filters.OrderingFilter):
             ('popularity', 'Popularity'),
             ('recent', 'Recently Uploaded'),
         ]
-        # self.extra['required']=True
-        # for field_name in self.fields:
-        #     field = self.fields.get(field_name)
-        #     if field and isinstance(field , forms.TypedChoiceField):
-        #         field.choices = field.choices[1:]
-
 
     def filter(self, qs, value):
 
         if value:
-
             # OrderingFilter is CSV-based, so `value` is a list
-            # if any(v in ['popularity'] for v in value):
-            #
-            #     # sort queryset by relevance
-            #     qs=qs.annotate(num_likes=Count('popularity')).order_by('-num_likes')
-            #     # for var in qs:
-            #     #     print(var.id)
-            #     return qs
 
             if value[0]=='popularity':
                 qs=qs.annotate(num_likes=Count('popularity')).order_by('-num_likes','id')
-
                 return qs
             if value[0]=='recent':
                 return qs.order_by('-pk')
@@ -78,13 +57,6 @@ class ImageFilter(django_filters.FilterSet):#conjoined=True allows us to do an A
         label='Sorty By',
         empty_label=None,
         widget=RadioSelect
-        # fields=(
-        #     ('id', 'idtest'),
-        #
-        #     ),
-        #     field_labels={
-        #         'id': 'Recently Uploaded',
-        #     }
     )
 
     class Meta:

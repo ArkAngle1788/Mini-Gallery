@@ -10,10 +10,9 @@
 </form>
 {{ form.media }}
 
-{% endblock %}
+{% endblock content%}
 
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-{% include 'ContentPost/sidebar_right.html' %}
-
+  {% include 'ContentPost/sidebar_right.html' %}
 {%endblock%}

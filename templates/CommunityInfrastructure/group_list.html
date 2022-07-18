@@ -46,7 +46,7 @@
       {%endfor%}
     {%else%}
       {%comment%}
-        Is it ok to leave this empty if nothing is found?
+        <!-- Is it ok to leave this empty if nothing is found? -->
       {%endcomment%}
 
     {%endif%}
@@ -79,16 +79,14 @@
 
 </div>
 
-
-
 {% endblock %}
 
+<!-- SIDEBAR Left -->
 {% block navbar_left_content %}
   {% include 'CommunityInfrastructure/sidebar_left.html' %}
 {%endblock navbar_left_content%}
 
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-{% include 'CommunityInfrastructure/sidebar_right.html' %}
-
-{%endblock%}
+  {% include 'CommunityInfrastructure/sidebar_right.html' %}
+{%endblock navbar_right_content%}

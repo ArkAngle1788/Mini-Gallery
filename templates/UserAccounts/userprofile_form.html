@@ -14,18 +14,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   {{ form.media.js }}
 
-
-
 {% endblock content %}
 
-
-
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-{% include 'UserAccounts/navbar_account_right.html' %}
-
+  {% include 'UserAccounts/navbar_account_right.html' %}
 {%endblock navbar_right_content %}
 
+<!-- SIDEBAR Left -->
 {% block navbar_left_content %}
   <p>(league info would go here instead of announcments if that feature was live)</p>
   <h1>Announcements</h1>

@@ -7,32 +7,22 @@
       {% csrf_token %}
       <div class="row ">
 <!-- justify-content-around -->
-
-        <!-- <div class="col-md-3 gy-3"align='center'> -->
           <div class="form-check">
             <div class='row justify-content-around align-items-center'>
             {% for option in images %}
-
                 <div class='col-md-4 gy-3' align='center'>
                   <input class="" required type="radio" id='option_{{option.id}}' name='image_select' value='{{option.id}}'>
                   <label class="form-check-label" for="option_{{option.id}}"><img class="image-center-fit" src="{{option.image.url}}" style="max-width: 350px; max-height: 350px;"></label>
                 </div>
-
-
             {%endfor%}
             </div>
           </div>
           <input type="hidden" id="image_list" name="image_list" value="{{ images|join:',' }}" readonly>
           <input type="hidden" id="main" name="main" value="{{main}}" readonly>
-
-        <!-- </div> -->
       </div>
       <div align='center'>
         <button class="btn btn-primary" type="submit">Select</button>
       </div>
     </form>
 
-
-
-    {% endblock %}
-<!-- style="width: 100%; height: 350px; object-fit: contain;" -->
+{% endblock %}

@@ -3,8 +3,6 @@
 {% load markdownify %}
 
 
-<!-- {{object}} -->
-
 <h1>{{object.title}}</h1>
 <h3>Author: {{object.author}}/{{object.author.first_name}} {{object.author.last_name}}</h3>
 <br>
@@ -34,14 +32,9 @@
 {%endif%}
 
 
+{% endblock content%}
 
-
-{% endblock %}
-
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-
-
-{% include 'ContentPost/sidebar_right.html' %}
-
+  {% include 'ContentPost/sidebar_right.html' %}
 {%endblock%}

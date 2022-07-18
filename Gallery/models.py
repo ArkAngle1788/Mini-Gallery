@@ -4,7 +4,7 @@ from CommunityInfrastructure.models import PaintingStudio,Studio_Images, Country
 from League.models import Season
 from django.contrib.auth.models import User
 from django.urls import reverse
-
+from datetime import date
 
 
 class Conversion(models.Model):
@@ -16,11 +16,9 @@ class Conversion(models.Model):
 
 
 class Scale_Of_Image(models.Model):# amount of content in picutre ex. single model, 2000pt army, entire collection
-    # system = models.ForeignKey(Games,on_delete=models.CASCADE,related_name='system_scale_classification')
-    scale = models.CharField(max_length=100,unique=True)#got rid of system b/c it's probably better to use generalized terms
+    scale = models.CharField(max_length=100,unique=True)
     def __str__(self):
         return self.scale
-
 
 class Colour(models.Model):
     colour_name = models.CharField(max_length=100,unique=True)
@@ -37,17 +35,14 @@ class Colour_Priority(models.Model):
         return reverse('manage image fields')
 
 
-class Colour_Catagory(models.Model):# amount of content in picutre ex. single model, 2000pt army, entire collection
-    colour_priority = models.ForeignKey(Colour_Priority,on_delete=models.CASCADE,related_name='colour_priority_group')
+class Colour_Catagory(models.Model):#a combination of a colour and a level of prominance
+    colour_priority = models.ForeignKey(Colour_Priority,on_delete=models.CASCADE,related_name='colour_priority_group')#this might be something like 'primary or secondary'
     colour=models.ForeignKey(Colour,on_delete=models.CASCADE,related_name='colour_group')
 
     def __str__(self):
         return f'{self.colour_priority} {self.colour}'
     def get_absolute_url(self):
         return reverse('manage image fields')
-
-from datetime import date
-
 
 def get_upload_to():
     current_year = str(date.today().year)
@@ -71,12 +66,9 @@ class TempImage(models.Model):
         return str(self.pk)
 
 
-
 class UserImage(models.Model):
 
-    #image size should be a property of image
     image = models.ImageField(upload_to=get_upload_to())
-
     image_title=models.CharField(max_length=50)
 
     system=models.ManyToManyField(Games,blank=True)
@@ -91,13 +83,10 @@ class UserImage(models.Model):
     owner=models.CharField(max_length=50,blank=True,null=True)#name of person who contents of image belong to
     location=models.ForeignKey(City,blank=True,on_delete=models.SET_NULL,null=True,related_name='image_city')
 
-    # sub_image=models.OneToManyField(UserSubImage,blank=True,related_name='parent_image')
-
     # need to add a field for the event. it should be searchable here for the exact name (lVO 2020 vs LVO 2022) but also contains a link to the league page
     #linking to season should acomplish all that
     source=models.ForeignKey(Season,blank=True,null=True,on_delete=models.SET_NULL,related_name='image_source')
 
-    # web_account=models.ForeignKey(UserProfile,blank=True,on_delete=models.SET_NULL,related_name='web_account_images')  #do we want images to be linked to the uploader?
     popularity = models.ManyToManyField(User,blank=True,related_name='liked_images')
     uploader=models.ForeignKey(User,on_delete=models.SET_NULL,blank=True,null=True)
     fuzzy_tags=models.CharField(max_length=1000,default='')
@@ -111,7 +100,6 @@ class UserImage(models.Model):
 
 class UserSubImage(models.Model):
 
-    #image size should be a property of image
     image = models.ImageField(upload_to=sub_get_upload_to())
     image_title=models.CharField(max_length=50)
     parent_image=models.ForeignKey(UserImage,on_delete=models.CASCADE,related_name='sub_image')

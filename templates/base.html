@@ -17,7 +17,6 @@
 
     <title>{% block head_title %}{{site_name}}{% endblock head_title %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static '/universal/mssquid_16x16.png' %}"/>
-    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous"> -->
     {% load static %}
     <link rel="stylesheet" href='{% static "/css/bootstrap.css"%}'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,9 +24,7 @@
   <body>
 
 
-
     {% include 'Top_Level_Nav/topbar.html' %}
-
 
 
     <div id="div_lower" class="container-fluid">
@@ -36,25 +33,21 @@
 
         <!--  Left SIDEBAR STARTS -->
         <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
-
         <div id="sidebar_left" class="col-12 col-md-2 order-1 collapse.show bg-sidebar text-text-sidebar overflow-auto"align="center">
               {%block navbar_left_content%}
-                <h1>side bar not overridden</h1>
-                {{site.name}}
-                <li>item 1</li>
-                <li>item 2</li>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <h1>Sidebar content under development!!!</h1>
+                <br>
+                <h1><a href="{% url 'gallery home' %}?order=popularity">Gallery</a></h1>
+                <br>
+                <h1><a href="{% url 'groups top' %}">Groups & Organizations</a></h1>
               {%endblock navbar_left_content%}
         </div>
+        <!--  Left SIDEBAR ENDS -->
+        <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
 
-          <!--  Left SIDEBAR ENDS -->
-          <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
 
-
-      <!--  RIGHT SIDEBAR STARTS -->
-      <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
-
+        <!--  RIGHT SIDEBAR STARTS -->
+        <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
         <div id="sidebar_right" class="col-md-2 order-2 order-md-3 collapse.show bg-sidebar text-text-sidebar overflow-auto"align='center'>
           {%block navbar_right_content%}
             <h1>side bar not overridden</h1>
@@ -62,7 +55,6 @@
             <li>item 2</li>
           {%endblock navbar_right_content%}
         </div>
-
         <!--  RIGHT SIDEBAR ENDS -->
         <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
 
@@ -79,10 +71,13 @@
                 {%endfor%}
               {%endif%}
 
-<!-- Page content here -->
+              <!-- Page content here -->
+              <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
               {% block content %}
-              <!-- other pages that extend this will be in here! -->
+                <!-- other pages that extend this will be in here! -->
               {% endblock content %}
+              <!-- -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_- -->
+              <!-- Page content ends -->
 
         </div>
 
@@ -90,7 +85,7 @@
     </div>
 
 
-
+    <!-- footer -->
     {% include 'Top_Level_Nav/footer.html' %}
 
 
@@ -99,13 +94,9 @@
 
         document.getElementById("sidebar_right").className = "col-12 col-md-2 order-2 order-md-3 collapse bg-sidebar text-text-sidebar";
         document.getElementById("sidebar_left").className = "col-12 col-md-2 order-1 collapse bg-sidebar text-text-sidebar";
-        // document.getElementById("div_lower").className="container-flex";
       }
     </script>
 
-
-
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script> -->
     <script src='{% static "/js/bootstrap.js" %}'></script>
 
   </body>

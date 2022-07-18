@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-
-
 <h1>
 Private User Profile Page for : {{request.user.profile}}
 </h1>
@@ -14,16 +12,14 @@ Private User Profile Page for : {{request.user.profile}}
 {{request.user.last_name}}<br>
 {{request.user.email}}<br>
 
-
 {% endblock %}
 
-
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
 <div class="panel-heading">
   <h3>Admin Panel</h3>
 </div>
-
 
 {% if request.user.is_staff or perms.UserAccounts.approve_users %}
 <li><a href="{% url 'approve user'%}" >Enable A User to Post Images</a></li>
@@ -45,12 +41,11 @@ Private User Profile Page for : {{request.user.profile}}
     {%endfor%}
   {% endif %}
 
-
-
 </div>
 
 {%endblock navbar_right_content%}
 
+<!-- SIDEBAR Left -->
 {% block navbar_left_content %}
   <p>(league info would go here instead of announcments if that feature was live)</p>
   <h1>Announcements</h1>

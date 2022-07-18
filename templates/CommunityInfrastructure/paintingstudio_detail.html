@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
 {% load markdownify %}
 <h1>
@@ -83,26 +84,12 @@
 {% endblock %}
 
 
-
-{%comment%}
-{% block navbar_left_content %}
-
-
-{%endblock%}
-{%endcomment%}
-
-
-
-
-
-<!-- SIDEBAR -->
-<!-- left -->
+<!-- SIDEBAR Left-->
 {% block navbar_left_content %}
   {% include 'CommunityInfrastructure/sidebar_left.html' %}
 {%endblock navbar_left_content%}
 
-<!-- sidebar Right -->
-
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
 <div class="panel-heading">
@@ -111,40 +98,14 @@
 
 <div class='panel-body'>
 
-
   {% if request.user.is_staff or request.user == studio.userprofile %}
     <a href="{% url 'edit painting studio' studio.id %}">Edit Page for {{studio.Studio_name}}</a>
     <a class="list-group-item list-group-item-light" href="{% url 'painting studio upload' studio.slug studio.id %}">upload images</a>
 
-{% load crispy_forms_tags %}
-
     <form action="{%url 'studio export' studio.slug studio.id %}" method="post">
         {% csrf_token %}
-
-        {% comment %}
-        <label for="select_number">Select how many images to export.</label>
-          <select id="select_number" name="select_number">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-          </select>
-        <label for="platform">Select the platform to export to.</label>
-          <select id="platform" name="platform">
-            <option value="Facebook">Facebook</option>
-          </select>
-        {% endcomment %}
-
         <h3>Export Images</h3>
-
-        {{form|crispy}}
-
+          {{form|crispy}}
         <input type="submit" value="export images">
       </form>
   {% endif %}
@@ -152,42 +113,6 @@
 
 {% include 'CommunityInfrastructure/sidebar_right.html' %}
 
-{% load crispy_forms_tags %}
+{% include 'CommunityInfrastructure/studio_image_filter.html' %}
 
-
-
-<div class="panel-heading">
-
-  {% if request.user.is_staff %}
-      <a class="nav-item nav-link" href="{% url 'manage image fields' %}">manage image fields</a>
-  {% endif %}
-
-  <h3>Filter Images</h3>
-</div>
-<a class="nav-item nav-link" href="{{request.path}}">Reset Filters</a>
-
-<div class='panel-body'>
-{{ filter_form.form.media.css }}
-<link href="/static/django_select2/django_select2.css" type="text/css" media="screen" rel="stylesheet">
-  <form  method="get">
-    <div class="form-group">
-
-        {# <legend class="border-bottom mb-4">Filter Images By</legend> #}
-        <p>Note: these filters currently search for images where only the selected filters are present. For example a filter of Necrons & Tyranids will return only images that have both and no images that only have one</p>
-
-        {%for field in filter_form.form%}
-          <label for="{{field.name}}" class='col-2 control-label'>{{field.label}}</label>
-          <div class='col-10'>
-            {{ field }}
-          </div>
-        {%endfor%}
-
-    </div>
-    <button class="btn btn-primary" type="submit">Filter</button>
-  </form>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  {{ filter_form.form.media.js }}
-</div>
-
-
-{%endblock%}
+{%endblock navbar_right_content%}

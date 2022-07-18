@@ -11,22 +11,17 @@
 
 {% load socialaccount %}
 
-{%comment%}
-<a href="{% provider_login_url "openid" openid="https://www.google.com/accounts/o8/id" next="/success/url/" %}">Google</a>
-<a href="{% provider_login_url "twitter" %}">Twitter</a>
-{%endcomment%}
-
-
 {% get_providers as socialaccount_providers %}
 {% if socialaccount_providers %}
 
   <div class="socialaccount_ballot">
     <ul class="socialaccount_providers">
       {%comment%}
+      <!-- this was the original code before i built the link manually to get the parameters i wanted -->
       {% include "socialaccount/snippets/provider_list.html" with process="login" scope="pages_show_list,instagram_basic,instagram_content_publish,business_management,pages_read_engagement" %}
         ads_management,
       {%endcomment%}
-      <li><a href="http://localhost:8000/accounts/facebook/login/?process=login&scope=pages_show_list%2Cinstagram_basic%2Cinstagram_content_publish%2Cbusiness_management%2Cpages_read_engagement&next=/organizations/paintingstudio/{{studio.slug}}/{{studio.id}}">Facebook</a></li>
+      <li><a href="https://nl.purplesquid.ca/accounts/facebook/login/?process=login&scope=pages_show_list%2Cinstagram_basic%2Cinstagram_content_publish%2Cbusiness_management%2Cpages_read_engagement&next=/organizations/paintingstudio/{{studio.slug}}/{{studio.id}}">Facebook</a></li>
     </ul>
   </div>
 
@@ -61,7 +56,6 @@
 
 
 <!-- SIDEBAR -->
-
 
 {% block navbar_right_content %}
 

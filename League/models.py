@@ -5,6 +5,13 @@ from CommunityInfrastructure.models import City, Region, Country
 
 
 
+
+# UNDER CONSTRUCTION: this file is code fragments from a previous version, it is a mess
+
+
+
+
+
 #add an location eligibility field for areas to display default registration in ---- maybe not don't want to make the basic configuration too complex and do we really gain that much by doing this?
 # league pages need to be visible on the website all the time not just when they're running so that people can look them up and get information about them (because leagues will include events as well)
 class League(models.Model):
@@ -32,7 +39,7 @@ class Season(models.Model):
     allow_repeat_matches=models.BooleanField(default=False)
     registration_active=models.BooleanField(default=True)
     use_names=models.BooleanField(default=True)
-    league = models.ForeignKey(League, on_delete=models.CASCADE,related_name='child_season')#many to one many seasons in one leauge
+    league = models.ForeignKey(League, on_delete=models.CASCADE,related_name='child_season')
     def __str__(self):
         return str(self.league.league_name)+" "+str(self.season_name)
 

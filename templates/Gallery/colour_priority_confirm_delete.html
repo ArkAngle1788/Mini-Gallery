@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-
 <form method="post">{% csrf_token %}
     <fieldset class="form-group">
       <legend class="border-bottom mb-4">Delete Colour Priority</legend>
@@ -13,11 +12,9 @@
     </div>
 </form>
 
-
 {% endblock %}
 
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-{% include 'Gallery/sidebar_right.html' %}
-
-{%endblock%}
+  {% include 'Gallery/sidebar_right.html' %}
+{%endblock navbar_right_content%}

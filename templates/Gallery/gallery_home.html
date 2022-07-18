@@ -16,9 +16,6 @@
 
 
 
-
-
-
 {% if is_paginated %}
   <div align='center'>
     {% if page_obj.has_previous %}
@@ -94,14 +91,14 @@
 </div>
 
 
-{% endblock %}
+{% endblock content%}
 
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-{% include 'Gallery/sidebar_right.html' %}
-
+  {% include 'Gallery/sidebar_right.html' %}
 {%endblock navbar_right_content%}
 
+<!-- SIDEBAR Left -->
 {% block navbar_left_content %}
 
 <h1>Announcements</h1>

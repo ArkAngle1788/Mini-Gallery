@@ -38,8 +38,6 @@ Choose New Admins for {{group}}
     {% endfor %}
   </select>
 
-
-  <!-- <input type="hidden" id="group" name="group PK" value={{group.id}} readonly> -->
   <input type="submit" value="Remove Admins">
 </form>
 
@@ -47,6 +45,7 @@ Choose New Admins for {{group}}
 
 {% endblock %}
 
+<!-- SIDEBAR Left -->
 {% block navbar_left_content %}
 
 <div class="panel-heading">
@@ -61,8 +60,9 @@ Choose New Admins for {{group}}
 
 
 
-{%endblock%}
+{%endblock navbar_left_content%}
 
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
 <div class="panel-heading">
@@ -77,4 +77,4 @@ Choose New Admins for {{group}}
 
 
 
-{%endblock%}
+{%endblock navbar_right_content%}

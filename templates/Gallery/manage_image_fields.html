@@ -2,8 +2,6 @@
 {% block content %}
 
 
-
-
 <h1>
 add entries to the various fields that can be present on images
 </h1>
@@ -24,10 +22,9 @@ add entries to the various fields that can be present on images
 
 </ul>
 
-{% endblock %}
+{% endblock content%}
 
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-{% include 'Gallery/sidebar_right.html' %}
-
-{%endblock%}
+  {% include 'Gallery/sidebar_right.html' %}
+{%endblock navbar_right_content%}

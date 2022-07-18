@@ -10,11 +10,6 @@
 <p>(this will redirect you back to your studio page but you only need to do it once!)</p>
 {% load socialaccount %}
 
-{%comment%}
-<a href="{% provider_login_url "openid" openid="https://www.google.com/accounts/o8/id" next="/success/url/" %}">Google</a>
-<a href="{% provider_login_url "twitter" %}">Twitter</a>
-{%endcomment%}
-
 
 {% get_providers as socialaccount_providers %}
 {% if socialaccount_providers %}
@@ -22,9 +17,10 @@
   <div class="socialaccount_ballot">
     <ul class="socialaccount_providers">
       {%comment%}
+      <!-- this was the original code before i just manually built the link to get the parameters I wanted. -->
       {% include "socialaccount/snippets/provider_list.html" with process="login" scope="pages_show_list,pages_read_engagement,pages_manage_posts" %}
       {%endcomment%}
-      <li><a href="http://localhost:8000/accounts/facebook/login/?process=login&scope=pages_show_list%2Cpages_read_engagement%2Cpages_manage_posts&next=/organizations/paintingstudio/{{studio.slug}}/{{studio.id}}">Facebook</a></li>
+      <li><a href="https://nl.purplesquid.ca/accounts/facebook/login/?process=login&scope=pages_show_list%2Cpages_read_engagement%2Cpages_manage_posts&next=/organizations/paintingstudio/{{studio.slug}}/{{studio.id}}">Facebook</a></li>
     </ul>
   </div>
 

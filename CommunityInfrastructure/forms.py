@@ -11,19 +11,16 @@ basicattrs={'class':'bg-white'}
 default_format={'style':'width: 90%'}
 
 providers=[('Facebook','Facebook'),('Instagram','Instagram')]
-num=[(1,'1'),(2,2),(3,"3"),(4,"4"),(5,'5'),(6,'6'),(7,7),(8,8),(9,9),(10,10)]#these all appear the same when rendered in the final form
+num=[(1,'1'),(2,'2'),(3,"3"),(4,"4"),(5,'5'),(6,'6'),(7,'7'),(8,'8'),(9,'9'),(10,'10')]#allow up to 10 images because of API limitations
 
 class SelectExport(forms.Form):
     select_number=forms.ChoiceField(choices=num,widget=forms.Select(basicattrs))
     platform=forms.ChoiceField(choices=providers,widget=forms.Select(basicattrs))
-    # class Meta:
-    #     fields="__all__"
 
 
-
-
+    #icontains is the default so this is more of a functionality/syntax reference
+    #when these might be useful for more complex lookups if unit_type is changed to link factions or if we want only unit types from a selected system to show up or such.
 class GameWidget(s2forms.Select2Widget):
-    #do these even do anything? they might not for a basic select widget i should test that sometime....
     search_fields=[
         'game_system_name__icontains',
     ]
@@ -32,7 +29,6 @@ class FactionWidget(s2forms.Select2Widget):
     search_fields=[
         'faction_name__icontains',
     ]
-
 
 class City_Widget(s2forms.Select2Widget):
     search_fields=[
@@ -60,8 +56,6 @@ class Unapproved_Users_Widget(s2forms.ModelSelect2Widget):
         "email__icontains",
     ]
 
-    # image= forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
-#
 
 class Approve_User_Form(forms.Form):
     unapproved_user=forms.ModelChoiceField(queryset=User.objects.all().exclude(groups__permissions__codename="add_userimage"),widget=Unapproved_Users_Widget(default_format))

@@ -18,13 +18,9 @@ Mini-Gallery -Detail
 
 <div class=""align='center'>
 
-
-
   <h1>
   Image Details
   </h1>
-
-
 
   <h3>{{image.image_title}}</h3>
   <a href={{image.image.url}}>
@@ -93,7 +89,6 @@ Mini-Gallery -Detail
     <b>Painted by:</b>
 
       {%for studio in image.paintingstudio.all %}
-
           <li>
             <a href="{%url 'painting studio' studio.slug studio.id %}?order=popularity">{{studio}} (Internal Link)</a>
             <a class='studio_page' href="{{studio.Studio_page}}">Visit Studio Page (External Link)</a>
@@ -123,45 +118,24 @@ Mini-Gallery -Detail
   {%endif%}
   <br>
 
-  <!-- {%for sub in image.sub_image.all %}
-
-  <a href={{sub.image.url}}>
-    <img class="image-center-fit" src="{{sub.image.url}}" style="max-width: 200px; max-height: 200px;">
-  </a>
-
-  {%endfor%} -->
-
-
   <div class="row justify-content-around">
-
-
     {%for sub in image.sub_image.all%}
     <div class="col-md-3 gy-3">
       <div class="card bg-gallery-card-bot"align="center">
         <a href="{{sub.image.url}}" class="card-link">
           <img src="{{sub.image.url}}" class="card-img-top img-thumbnail img-fluid bg-gallery-card-top"style="width: 100%; height: 350px; object-fit: contain;" alt="Image Failed to Load">
         </a>
-        <!-- <div class="card-body text-bright">
-          <h5 class="card-title">{{image.image_title}}</h5>
-          {%comment%}<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>{%endcomment%}
-          <a href="{% url 'image details' image.id %}?{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">View Image Details</a>
-        </div> -->
       </div>
     </div>
-
     {%endfor%}
-
   </div>
-
-
 
 </div>
 
-
-{% endblock %}
-
+{% endblock content%}
 
 
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
   {% if request.GET.studio %}
@@ -169,10 +143,6 @@ Mini-Gallery -Detail
   {% else %}
     <a class="nav-item nav-link" href="{% url 'gallery home' %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{{key}}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Browse</a>
   {% endif %}
-
-
-
-
 
 
   {%if request.user.is_staff or request.user == image.uploader %}
@@ -184,9 +154,9 @@ Mini-Gallery -Detail
   <br>
   {% include 'Gallery/sidebar_right.html' %}
 
-
 {%endblock navbar_right_content%}
 
+<!-- SIDEBAR Left -->
 {% block navbar_left_content %}
 
 <h1>Announcements</h1>

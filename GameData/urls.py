@@ -2,9 +2,6 @@ from django.urls import path
 
 from .views import *
 
-
-# app_name= 'League' #does this need to be here?
-
 urlpatterns = [
 
 path('unit_type/add',Unit_Type_Create.as_view(),name='add unit type'),

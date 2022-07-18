@@ -12,23 +12,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 {{ form.media.js }}
 
-{% endblock %}
+{% endblock content%}
 
 
-
+<!-- SIDEBAR Left -->
 {% block navbar_left_content %}
 
 <p>left navbar</p>
 
-
 should i have the city pannel too?
 
+{%endblock navbar_left_content%}
 
-{%endblock%}
-
-
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
 <p>hello</p>
 
-{%endblock%}
+{%endblock navbar_right_content%}

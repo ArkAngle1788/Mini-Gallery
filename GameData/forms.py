@@ -22,14 +22,10 @@ class FactionWidget(s2forms.Select2Widget):
         'faction_name__icontains',
     ]
 
-
 class Faction_TypeWidget(s2forms.Select2Widget):
     search_fields=[
         'faction_name__icontains',
     ]
-
-# class testwidget(forms.TextInput):
-
 
 class SystemForm(forms.ModelForm):
     class Meta:
@@ -46,7 +42,6 @@ class Faction_TypeForm(forms.ModelForm):
         widgets = {
             'system' : GameWidget(basicattrs),
             'faction_name': forms.TextInput(textfieldattrs),
-
         }
 
 class FactionForm(forms.ModelForm):
@@ -58,8 +53,6 @@ class FactionForm(forms.ModelForm):
             'faction_name': forms.TextInput(textfieldattrs),
         }
 
-
-
 class Sub_FactionForm(forms.ModelForm):
     class Meta:
         model=Sub_Faction
@@ -68,7 +61,6 @@ class Sub_FactionForm(forms.ModelForm):
             'factions' : FactionWidget(basicattrs),
             'faction_name': forms.TextInput(textfieldattrs),
         }
-
 
 class Unit_TypeForm(forms.ModelForm):
     class Meta:

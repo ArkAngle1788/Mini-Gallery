@@ -35,8 +35,6 @@ class ContentPost(models.Model):
     source=models.ForeignKey(Group,on_delete=models.CASCADE,blank=True,null=True)
 
 
-
-
     def __str__(self):
         return self.title
 

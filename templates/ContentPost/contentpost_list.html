@@ -2,12 +2,9 @@
 {% block content %}
 
 
-
-
 <h1>
 Announcements
 </h1>
-
 
 
 {%for content_post in content_posts%}
@@ -19,10 +16,7 @@ Announcements
 {%endfor%}
 
 
-
 <br>
-
-
 
 {% if is_paginated %}
 
@@ -48,14 +42,9 @@ Announcements
 
 
 
-{% endblock %}
+{% endblock content%}
 
+<!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
-
-
-{% include 'ContentPost/sidebar_right.html' %}
-
-<!-- end if was here -->
-
-{%endblock%}
+  {% include 'ContentPost/sidebar_right.html' %}
+{%endblock navbar_right_content%}

@@ -45,8 +45,6 @@ Existing Secondary Admins:
     {% endfor %}
   </select>
 
-
-  <!-- <input type="hidden" id="group" name="group PK" value={{group.id}} readonly> -->
   <input type="submit" value="Add Admins">
 </form>
 
@@ -54,8 +52,8 @@ Existing Secondary Admins:
 
 {% endblock %}
 
+<!-- Sidebar Left-->
 {% block navbar_left_content %}
-
 <div class="panel-heading">
   <h3>Title</h3>
 </div>
@@ -66,13 +64,11 @@ Existing Secondary Admins:
 
 </div>
 
+{%endblock navbar_left_content%}
 
-
-{%endblock%}
-
+<!-- Sidebar Right -->
 {% block navbar_right_content %}
 
 {% include 'CommunityInfrastructure/sidebar_right.html' %}
 
-
-{%endblock%}
+{%endblock navbar_right_content%}
