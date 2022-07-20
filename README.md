@@ -1,15 +1,16 @@
 ## Mini-Gallery Web Project
 
-##### Show me the site
+### Show me the site
 [here you go](https://nl.purplesquid.ca)
 
-##### What is it?
+### What is it?
 *part 1:*
-	This website is a project aimed at providing a unmet service for the tabletop miniature community. Currently artists wishing to share their painted miniatures do so on facebook groups or platforms like instagram, the problem with this system is that these images are very difficult to find, facebook is not searchable and instagram while searchable does not provide relevant enough results to be useful. This website makes it easy to search images and discover new artists.
+	This website is a project aimed at providing a unmet service for the tabletop miniature community. Currently artists wishing to share their painted miniatures do so on facebook groups or platforms like instagram, the problem with this system is that these images are very difficult to find, facebook is not searchable and instagram while searchable does not provide relevant enough results to be useful. This website makes it easy to search images and discover new artists.  
+  
 *part 2:*
 	Currently stores and clubs for many miniature wargames run leagues for their local Communities with the admins managing league registration and matchmaking by hand. This website also provides tools for league administrators to automate the managment of their leagues.
 
-##### Current Scope and Status
+### Current Scope and Status
 The gallery portion of the website is completed and undergoing user testing to identify design improvemnts.
 
 A first pass of the export to social media feature is implemented, this system will need to be iterated on but exists now as a proof of concept while i collect feedback about the type of functonality desired by the features users.
@@ -22,7 +23,7 @@ Eliminate the list of known bugs.
 
 Find and stamp out more bugs.
 
-##### Future Development
+### Future Development
 
 Rewrite the league managment tools to function with the current implementation of the site.
 
