@@ -1,18 +1,18 @@
 import django_filters
-from django_filters import CharFilter,ModelChoiceFilter,ModelMultipleChoiceFilter
+from django_filters import CharFilter,ModelChoiceFilter,ModelMultipleChoiceFilter,BooleanFilter
 
 from .models import UserImage, Colour, Colour_Catagory,Conversion,Scale_Of_Image
 from CommunityInfrastructure.models import City,PaintingStudio
 from GameData.models import Games,Faction_Type,Faction,Sub_Faction,Unit_Type
 
 from django_select2.forms import Select2Widget,Select2MultipleWidget
-from django.forms.widgets import TextInput
+from django.forms.widgets import TextInput,CheckboxInput
 from django.db.models import Count #used for sorting likes
 from django.forms import RadioSelect
 
 global_default={'style':'width: 100%'}
 
-
+# override the ordering filter to create the two types of orderings that are relevant to our use case
 class CustomOrderingFilter(django_filters.OrderingFilter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,7 +25,6 @@ class CustomOrderingFilter(django_filters.OrderingFilter):
 
         if value:
             # OrderingFilter is CSV-based, so `value` is a list
-
             if value[0]=='popularity':
                 qs=qs.annotate(num_likes=Count('popularity')).order_by('-num_likes','id')
                 return qs
@@ -33,6 +32,18 @@ class CustomOrderingFilter(django_filters.OrderingFilter):
                 return qs.order_by('-pk')
 
         return super().filter(qs, value)
+
+class OfficialStudioFilter(django_filters.BooleanFilter):
+
+
+    def filter(self, qs, value):
+        if value:#value is the filter input the user selects
+            # if value is true we want only the official images and the queryset starts as UserImages that have any paintingstudio tags not official ones specifically
+            qs=qs.filter(studio_images__official=True)
+            return super().filter(qs, value)
+        # if value was false we do not want to change the queryset in any way so we just return it
+        return qs
+
 
 class ImageFilter(django_filters.FilterSet):#conjoined=True allows us to do an AND multipule item search instead of an OR
 
@@ -54,11 +65,24 @@ class ImageFilter(django_filters.FilterSet):#conjoined=True allows us to do an A
 
     order = CustomOrderingFilter(
         # initial='popularity',
-        label='Sorty By',
+        label='Sort By',
         empty_label=None,
         widget=RadioSelect
     )
 
+    # Because Studio_Images is not defined for images that are not associated with a painting studio we exclude all null entries to find the set of studio images
+    # We override the filterclass because we need to take no action of filter input is false and we also still need to only display official images if true.
+    studio_official=OfficialStudioFilter(
+
+        label='Show only official studio uploads',
+        field_name='paintingstudio',
+        lookup_expr='studio_images__official__isnull',
+        exclude=True,
+        widget=CheckboxInput
+
+    )
+
+
     class Meta:
         model = UserImage
-        fields = ['order','fuzzy_search','title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','paintingstudio','owner','location']
+        fields = ['order','fuzzy_search','title','system','faction_type','factions','sub_factions','colours','conversion','unit_type','scale','studio_official','paintingstudio','owner','location']
