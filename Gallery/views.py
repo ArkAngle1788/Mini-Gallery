@@ -282,6 +282,7 @@ class GalleryMultipleUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateVie
 
         return FormMixin.form_valid(self,form) # then run original form_valid
 
+
 class GalleryMultipleUpdate(PermissionRequiredMixin,LoginRequiredMixin,UserPassesTestMixin,UpdateView):
     model=UserImage
     form_class=UploadImages
@@ -338,10 +339,27 @@ class GalleryMultipleUpdate(PermissionRequiredMixin,LoginRequiredMixin,UserPasse
             context['remaining_images']=pkliststr
         return context
 
+    def form_valid(self,form,original_name):
+        self.object = form.save()
+
+        if original_name != self.object.image.name:
+            default_storage.delete(original_name)
+
+        return super().form_valid(form)
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        return super().post(request, *args, **kwargs)#this will check that the form is valid
+        # form.is_valid() overrites self.object if it returns true. so we have to note the original name here so we can delete it after committing the new one
+        original_name=self.object.image.name
+        form = self.get_form()
+        if form.is_valid():
+            # form valid will commit the changes to the DB
+            return self.form_valid(form,original_name)
+        else:
+            return self.form_invalid(form)
 
+
+    # these values are not actually needed each step of the loop since we send them in the form. The initial check wants them in the url though and for now i'm leaving it like that b/c it's easier and also allows the user to look at the url to see how many more they have left.
     def get_success_url(self):
 
         if self.request.method=="POST":
@@ -355,6 +373,29 @@ class GalleryMultipleUpdate(PermissionRequiredMixin,LoginRequiredMixin,UserPasse
 class GalleryUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
     model=UserImage
     form_class=UploadImages
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # form.is_valid() overrites self.object if it returns true. so we have to note the original name here so we can delete it after committing the new one
+        original_name=self.object.image.name
+
+        form = self.get_form()
+
+        if form.is_valid():
+            # form valid will commit the changes to the DB
+            return self.form_valid(form,original_name)
+        else:
+            return self.form_invalid(form)
+
+
+    def form_valid(self,form,original_name):
+        self.object = form.save()
+
+        if original_name != self.object.image.name:
+            default_storage.delete(original_name)
+
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
