@@ -57,7 +57,15 @@
 <div class='panel-body'>
 {{ filter_form.form.media.css }}
 <link href="/static/django_select2/django_select2.css" type="text/css" media="screen" rel="stylesheet">
-  <form method="get">
+  <form method="get"
+  {% if source_imagedetail_fromstudio %}
+    action="{%url 'painting studio' 'static_slug' source_imagedetail_fromstudio %}"
+  {% elif source_imagedetail_fromprofile %}
+    action="{%url 'profile' source_imagedetail_fromprofile %}"
+  {% else %}
+    action="{%url 'gallery home'%}"
+  {% endif %}
+  >
     <div class="form-group">
 
         {# <legend class="border-bottom mb-4">Filter Images By</legend> #}

@@ -154,7 +154,20 @@ Mini-Gallery -Detail
     </div>
   {%endif%}
   <br>
-  {% include 'Gallery/gallery_display/image_filter_sidebar.html' with source_gallery=True %}
+
+
+
+  {%comment%}
+    <!-- the action parameter for the form on the image detail page should reflect where you came from -->
+  {%endcomment%}
+
+  {% if request.GET.studio %}
+    {% include 'Gallery/gallery_display/image_filter_sidebar.html' with source_imagedetail_fromstudio=request.GET.studio %}
+  {% elif request.GET.profile %}
+    {% include 'Gallery/gallery_display/image_filter_sidebar.html' with source_imagedetail_fromprofile=request.GET.profile %}
+  {% else %}
+    {% include 'Gallery/gallery_display/image_filter_sidebar.html' with source_imagedetail=True %}
+  {% endif %}
 
 {%endblock navbar_right_content%}
 
