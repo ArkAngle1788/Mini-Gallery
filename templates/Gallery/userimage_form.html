@@ -12,6 +12,7 @@ Gallery Image Upload
 {% if multi %}
   <p>If you upload multiple images you can use the fields here as placeholder values for all the images. After uploading you will be prompted to customise tags on each image uploaded.</p>
 {% endif %}
+<p>To update Image tags or change the primary Image use the form below. To add or remove subimages use the right sidebar. Note that you cannot submit changes to both at the same time.</p>
 
 {{ form.media.css }}
 <link href="/static/django_select2/django_select2.css" type="text/css" media="screen" rel="stylesheet">
@@ -41,7 +42,11 @@ Gallery Image Upload
     {{subimage_form.image.label}}
     {{subimage_form.image}}
     <br><br>
-    {{subimage_form.sub.label}}
+    {% if current_subimages %}
+      {{subimage_form.sub.label}}
+    {% endif %}
+
+
 
     {% for option in current_subimages.all %}
       <br>
