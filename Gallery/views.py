@@ -37,7 +37,7 @@ class GalleryListView(FilterView):
     model=UserImage
     filterset_class=ImageFilter
     template_name='Gallery/gallery_home.html'
-    context_object_name='user_images'
+    context_object_name='images'
     paginate_by=8
 
 

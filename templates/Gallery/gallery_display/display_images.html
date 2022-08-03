@@ -1,0 +1,16 @@
+<div class="row">
+  {%for image in images%}
+    <div class="col-md-6 gy-3"align='center'>
+      <div class="card bg-gallery-card-bot">
+        <a href="{% url 'image details' image.id %}?{% if source_studiodetail %}studio={{studio.id}}{% elif source_profile %}profile={{profile.id}}{% endif %}&{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">
+          <img src="{{image.image.url}}" class="card-img-top img-thumbnail img-fluid bg-gallery-card-top"style="width: 100%; height: 350px; object-fit: contain;" alt="Image Failed to Load">
+        </a>
+        <div class="card-body text-bright">
+          <h5 class="card-title">{{image.image_title}}</h5>
+          {%comment%}<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>{%endcomment%}
+          <a href="{% url 'image details' image.id %}?studio={{studio.id}}&{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">{%if image.sub_image.all%}View Image Gallery Page{%else%}View Image Details{%endif%}</a>
+        </div>
+      </div>
+    </div>
+  {%endfor%}
+</div>

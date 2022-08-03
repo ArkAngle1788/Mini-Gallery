@@ -20,7 +20,6 @@ from ContentPost.custom_functions import calculate_news_bar
 from UserAccounts.models import UserProfile,AdminProfile
 from Gallery.models import UserImage
 from django.db.models import Count, Q
-from Gallery.filters import ImageFilter
 from .custom_functions import *
 
 import requests
@@ -418,7 +417,7 @@ class Studio_Edit(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
 class Studio_Details(FilterView):
     model=UserImage
     filterset_class=ImageFilter
-    context_object_name='studio_images'
+    context_object_name='images'
     paginate_by=8
     template_name='CommunityInfrastructure/paintingstudio_detail.html'
 
@@ -471,7 +470,7 @@ class Studio_Details(FilterView):
 
         return context
 
-
+# this is for creating the through link model
 new_studio_image = django.dispatch.Signal()
 
 class Studio_Upload(UserPassesTestMixin,GalleryMultipleUpload):

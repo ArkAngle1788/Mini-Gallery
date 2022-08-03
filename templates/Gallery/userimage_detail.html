@@ -140,6 +140,8 @@ Mini-Gallery -Detail
 
   {% if request.GET.studio %}
     <a class="nav-item nav-link" href="{% url 'painting studio' 'static_slug' request.GET.studio %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Studio Page</a>
+  {% elif request.GET.profile %}
+    <a class="nav-item nav-link" href="{% url 'profile' request.GET.profile %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Profile Page</a>
   {% else %}
     <a class="nav-item nav-link" href="{% url 'gallery home' %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{{key}}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Browse</a>
   {% endif %}
@@ -152,7 +154,7 @@ Mini-Gallery -Detail
     </div>
   {%endif%}
   <br>
-  {% include 'Gallery/sidebar_right.html' %}
+  {% include 'Gallery/gallery_display/image_filter_sidebar.html' with source_gallery=True %}
 
 {%endblock navbar_right_content%}
 

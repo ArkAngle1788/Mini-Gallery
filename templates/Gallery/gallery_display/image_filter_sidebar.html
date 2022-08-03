@@ -3,6 +3,8 @@
 
 <div class="panel-heading">
 
+
+{% if source_gallery %}
   {%if perms.Gallery.add_userimage %}
         <h3>
           <a class="list-group-item list-group-item-light" href="{% url 'gallery upload' %}">Upload Images with no sub-images</a>
@@ -10,6 +12,37 @@
           <a class="list-group-item list-group-item-light" href="{% url 'gallery upload multipart' %}">Upload an Image with sub-images linked to it</a>
         </h3>
   {%endif%}
+{% endif %}
+
+
+{% if source_studiodetail %}
+  {% if request.user.is_staff or request.user == studio.userprofile %}
+        <h3>
+          <a class="list-group-item list-group-item-light" href="{% url 'painting studio upload' studio.slug studio.id %}">Upload Images with no sub-images</a>
+          <br>
+          <!-- <a class="list-group-item list-group-item-light" href="{% url 'gallery upload multipart' %}">Upload an Image with sub-images linked to it</a> -->
+        </h3>
+  {%endif%}
+{% endif %}
+
+
+
+{% if source_profile %}
+
+  {%if perms.Gallery.add_userimage and request.user == profile.user %}
+        <h3>
+          <a class="list-group-item list-group-item-light" href="{% url 'gallery upload' %}">Upload Images with no sub-images</a>
+          <br>
+          <a class="list-group-item list-group-item-light" href="{% url 'gallery upload multipart' %}">Upload an Image with sub-images linked to it</a>
+        </h3>
+  {%endif%}
+
+{% endif %}
+
+
+
+
+
 
 {% if request.user.is_staff %}
     <a class="nav-item nav-link" href="{% url 'manage image fields' %}">manage image fields</a>
@@ -18,18 +51,13 @@
   <h3>Filter Images</h3>
 </div>
 
-{% if request.GET.studio %}
-  {{request.GET.studio}}
-  <a class="nav-item nav-link" href="{% url 'painting studio' 'static_slug' request.GET.studio %}?order=popularity">Reset Studio Filters</a>
-{% else %}
-  {{request.GET.studio}}
-  <a class="nav-item nav-link" href="{{request.path}}?order=popularity">Reset Filters</a>
-{% endif %}
+<a class="nav-item nav-link" href="{{request.path}}?order=popularity">Reset Filters</a>
+
 
 <div class='panel-body'>
 {{ filter_form.form.media.css }}
 <link href="/static/django_select2/django_select2.css" type="text/css" media="screen" rel="stylesheet">
-  <form action="{%url 'gallery home'%}" method="get">
+  <form method="get">
     <div class="form-group">
 
         {# <legend class="border-bottom mb-4">Filter Images By</legend> #}
