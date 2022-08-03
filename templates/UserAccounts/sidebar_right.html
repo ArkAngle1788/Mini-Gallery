@@ -1,0 +1,32 @@
+{% if request.user.profile == profile %}
+
+
+  <div class="panel-heading">
+    <h3>Administration Panel</h3>
+  </div>
+
+  {% if request.user.is_staff or perms.UserAccounts.approve_users %}
+  <li><a href="{% url 'approve user'%}" >Enable A User to Post Images</a></li>
+  {% endif %}
+  <br>
+
+  <div class='panel-body'>
+    <ul>
+      <li><a href="{% url 'profile update' request.user.profile.pk %}" >Update Profile</a></li>
+      <li><a href="{% url 'account_change_password'%}" >Change Password</a></li>
+      <li><a href="{% url 'account_email'%}" >Update Email Address</a></li>
+      <li><a href="{% url 'socialaccount_connections'%}" >Alternative Log in Methods</a></li>
+    </ul>
+
+    {% if request.user.studios_managed.all %}
+      <h5>Painting Studios you manage</h5>
+      {% for studio in request.user.studios_managed.all %}
+        <li><a href="{%url 'painting studio' studio.slug studio.id %}">{{studio}}</a></li>
+      {%endfor%}
+    {% endif %}
+
+  </div>
+
+
+
+{% endif %}

@@ -1,43 +1,53 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
-
-
-
+{% load markdownify %}
 <h1>
-Public User Profile Page for : {{profile}}
+  {{profile}}
 </h1>
 
-<p>User's Home City: {{profile.location}}</p>
+{% if request.user.profile == profile %}
+
+  <b>Home City:</b> {{request.user.profile.location}}<br>
+  <b>Username:</b> {{request.user.username}}<br>
+  <b>Firstname:</b> {{request.user.first_name}}<br>
+  <b>Lastname:</b> {{request.user.last_name}}<br>
+  <b>Email:</b> {{request.user.email}}<br>
+{% endif %}
+
+
+
+{% include 'Gallery/gallery_display/pagination.html'%}
+
+
+{% include 'Gallery/gallery_display/display_images.html' with source_profile=True%}
+
+<br>
+{% include 'Gallery/gallery_display/pagination.html'%}
+
 
 
 {% endblock content%}
 
-<!-- SIDEBAR Left -->
+
+<!-- SIDEBAR Left-->
 {% block navbar_left_content %}
-
-<div class="panel-heading">
-  <h3>Title</h3>
-</div>
-
-<div class='panel-body'>
-
-<p>navbar</p>
-
-</div>
-
+  <p>(league info would go here instead of announcments if that feature was live)</p>
+  <h1>Announcements</h1>
+  {%for news in news %}
+    {%if news.headline%}
+      <a class="list-group-item list-group-item-dark" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%else%}
+      <a class="list-group-item list-group-item-secondary" href="{% url 'blog detail' news.id %}">{{news}}</a>
+    {%endif%}
+  {%endfor%}
 {%endblock navbar_left_content%}
 
 <!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
-<div class="panel-heading">
-  <h3>Admin Panel</h3>
-</div>
+{% include 'UserAccounts/sidebar_right.html' %}
 
-<div class='panel-body'>
-
-<p>content</p>
-
-</div>
+{% include 'Gallery/gallery_display/image_filter_sidebar.html' with source_profile=True %}
 
 {%endblock navbar_right_content%}
