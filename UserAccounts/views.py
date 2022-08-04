@@ -14,7 +14,7 @@ from django.urls import reverse
 class Self_Profile(LoginRequiredMixin,View):
 
     def get(self, request,*args,**kwargs):
-        url=reverse('profile', args=[self.request.user.profile.pk])
+        url=reverse('profile', args=[self.request.user.profile.pk])+"?order=recent"
         return redirect(url)
 
 # note that this currently transmits all user data so if the model contains private information we will need to clense that
