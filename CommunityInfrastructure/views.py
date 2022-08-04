@@ -12,7 +12,7 @@ from django.views.generic.edit import FormMixin
 from CommunityInfrastructure.models import Country, Region, City, PaintingStudio
 from CommunityInfrastructure.models import Group as CIgroup  #Think we had a keyword collision here where group is our model but also a model used for permissions in django authentication
 from .forms import *
-from Gallery.views import GalleryMultipleUpload
+from Gallery.views import GalleryMultipleUpload,GalleryUploadMultipart
 from Gallery.filters import ImageFilter
 from django_filters.views import FilterView
 from ContentPost.custom_functions import calculate_news_bar
@@ -25,7 +25,7 @@ from .custom_functions import *
 import requests
 import json
 import urllib.parse
-import django.dispatch
+# import django.dispatch
 
 from allauth.socialaccount.models import SocialToken,SocialAccount
 
@@ -471,42 +471,22 @@ class Studio_Details(FilterView):
         return context
 
 # this is for creating the through link model
-new_studio_image = django.dispatch.Signal()
+# new_studio_image = django.dispatch.Signal()
 
 class Studio_Upload(UserPassesTestMixin,GalleryMultipleUpload):
+    studio_official_upload=True
+
     def test_func(self):
         if self.request.user.is_staff or self.request.user==PaintingStudio.objects.get(pk=self.kwargs['pk']).userprofile:
             return True
         return False
 
-    def form_valid(self,form): #this is almost identical to GalleryMultipleUpload's code but we need to send a signal in the middle
-        form.instance.uploader=self.request.user #add this data first then validate
-        files = self.request.FILES.getlist('image')
-        for f in files:
-
-            form.instance.image=f
-            newimage=form.save(commit=False)#need to do a false commit because we're saving m2m relations before the data is commited
-            newimage.pk=None
-            newimage.save()
-            form.save_m2m()
-            studio=PaintingStudio.objects.get(pk=self.kwargs['pk'])
-
-            try:
-                newimage.paintingstudio.get(id=studio.id)
-            except:
-                newimage.paintingstudio.add(studio)
-
-            new_studio_image.send(sender=self.__class__, image=newimage, studio=studio)
-
-            if self.uploadedimagelist == '' :
-                self.uploadedimagelist+=str(newimage.pk)
-            else:
-                self.uploadedimagelist+=','
-                self.uploadedimagelist+=str(newimage.pk)
-
-        self.object=newimage#this stayed here b/c the createview class needs an object to bind to but it doesn't matter which one b/c we've changed functionality so much
-
-        return FormMixin.form_valid(self,form) # then run original form_valid
+class Studio_Upload_Multipart(UserPassesTestMixin,GalleryUploadMultipart):
+    studio_official_upload=True
+    def test_func(self):
+        if self.request.user.is_staff or self.request.user==PaintingStudio.objects.get(pk=self.kwargs['pk']).userprofile:
+            return True
+        return False
 
 class Studio_Export(LoginRequiredMixin,UserPassesTestMixin,View):#when we have selected which platform to use we come here to begin initial configuration
 

@@ -20,7 +20,7 @@
         <h3>
           <a class="list-group-item list-group-item-light" href="{% url 'painting studio upload' studio.slug studio.id %}">Upload Images with no sub-images</a>
           <br>
-          <!-- <a class="list-group-item list-group-item-light" href="{% url 'gallery upload multipart' %}">Upload an Image with sub-images linked to it</a> -->
+          <a class="list-group-item list-group-item-light" href="{% url 'painting studio multipart upload' studio.slug studio.id %}">Upload an Image with sub-images linked to it</a>
         </h3>
   {%endif%}
 {% endif %}

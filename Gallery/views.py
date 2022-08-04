@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from .models import Conversion, Scale_Of_Image, Colour, Colour_Priority,  Colour_Catagory, UserImage, UserSubImage, TempImage,sub_get_upload_to,get_upload_to
 from ContentPost.custom_functions import calculate_news_bar
 from CommunityInfrastructure.models import Country, Region, City, PaintingStudio
+from CommunityInfrastructure.custom_functions import studio_official_send
 from GameData.models import Unit_Type,Faction_Type,Faction,Sub_Faction
 from League.models import League
 
@@ -83,6 +84,7 @@ class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateVi
     form_class=UploadImagesMultipart
     permission_required=("Gallery.add_userimage")
     image_choices=[]
+    studio_official_upload=False#this allows us to toggle the addionional relevant funcionality in CommunityInfrastructure
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -106,6 +108,7 @@ class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateVi
             self.image_choices+=[subimage]
         self.object.image=self.image_choices[0].image
         self.object.save()
+
         return object
 
     def post(self, request, *args, **kwargs):
@@ -121,6 +124,10 @@ class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateVi
         item_list+=str(self.image_choices.pop(0))
         for option in self.image_choices:
             item_list+=','+str(option.pk)
+
+        if self.studio_official_upload:
+            studio_official_send(self,self.object)
+
 
         url=reverse('gallery upload multipart confirm')
         url+='?'+f'images={item_list}&main={self.object.pk}'
@@ -237,13 +244,13 @@ def copy_blob(bucket_name, blob_name, destination_bucket_name, destination_blob_
     blob_copy = source_bucket.copy_blob(source_blob, destination_bucket, destination_blob_name)
 
 
-
 class GalleryMultipleUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateView):
     model=UserImage
     form_class=UploadMultipleImages
     permission_required=("Gallery.add_userimage")
     success_url = reverse_lazy('gallery multiple update')
     uploadedimagelist=''
+    studio_official_upload=False#this allows us to toggle the addionional relevant funcionality in CommunityInfrastructure
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -261,16 +268,18 @@ class GalleryMultipleUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateVie
         url=super().get_success_url()
         return url+"?images="+self.uploadedimagelist
 
-    def form_valid(self,form):  #a view in CommunityInfrastructure overrides this function. changes here might need to be reflected there as well -- could extend the function to take a custom parameter that would determine which code to resolve and then it could be in one spot
+    def form_valid(self,form):
         form.instance.uploader=self.request.user #add this data first then validate
         files = self.request.FILES.getlist('image')
-
         for f in files:
+
             form.instance.image=f
-            newimage=form.save(commit=False)
+            newimage=form.save(commit=False)#need to do a false commit because we're saving m2m relations before the data is commited
             newimage.pk=None
             newimage.save()
             form.save_m2m()
+            if self.studio_official_upload:
+                studio_official_send(self,newimage)
 
             if self.uploadedimagelist == '' :
                 self.uploadedimagelist+=str(newimage.pk)
@@ -281,7 +290,6 @@ class GalleryMultipleUpload(PermissionRequiredMixin,LoginRequiredMixin,CreateVie
         self.object=newimage#this stayed here b/c the createview class needs an object to bind to but it doesn't matter which one b/c we've changed functionality so much
 
         return FormMixin.form_valid(self,form) # then run original form_valid
-
 
 class GalleryMultipleUpdate(PermissionRequiredMixin,LoginRequiredMixin,UserPassesTestMixin,UpdateView):
     model=UserImage

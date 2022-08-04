@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Studio_Images
 
-from .views import new_studio_image
+from CommunityInfrastructure.custom_functions import new_studio_image
 
 
 # remember we have to enable this functionality in apps.py
