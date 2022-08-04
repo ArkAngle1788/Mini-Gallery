@@ -106,6 +106,7 @@ class GalleryUploadMultipart(PermissionRequiredMixin,LoginRequiredMixin,CreateVi
             subimage=TempImage(image=img,uploader=self.request.user)
             subimage.save()
             self.image_choices+=[subimage]
+
         self.object.image=self.image_choices[0].image
         self.object.save()
 
@@ -193,6 +194,8 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
             except:
                 pass
 
+            imagename_str=default_storage.get_available_name(imagename_str,80)
+
             if cloud:
                 copy_blob('mini-gallery',img.image.name,'mini-gallery',imagename_str)
             else:
@@ -212,6 +215,9 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin,LoginRequiredMixin,V
             cloud=True
         except:
             pass
+
+        imagename_str=default_storage.get_available_name(imagename_str,80)
+
         if cloud:
             copy_blob('mini-gallery',main_image.image.name,'mini-gallery',imagename_str)
         else:
