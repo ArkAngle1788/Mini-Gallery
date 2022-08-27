@@ -1,13 +1,14 @@
 from django.urls import path
 
-from .views import *
+from .views import (FactionCreate, FactionTypeCreate, SubFactionCreate,
+                    SystemCreate, UnitTypeCreate)
 
 urlpatterns = [
 
-path('unit_type/add',Unit_Type_Create.as_view(),name='add unit type'),
-path('system/add', System_Create.as_view(), name='add system'),
-path('faction_type/add', Faction_Type_Create.as_view(), name='add faction type'),
-path('faction/add', Faction_Create.as_view(), name='add faction'),
-path('sub_faction/add', Sub_Faction_Create.as_view(), name='add sub faction'),
+path('unit_type/add',UnitTypeCreate.as_view(),name='add unit type'),
+path('system/add', SystemCreate.as_view(), name='add system'),
+path('faction_type/add', FactionTypeCreate.as_view(), name='add faction type'),
+path('faction/add', FactionCreate.as_view(), name='add faction'),
+path('sub_faction/add', SubFactionCreate.as_view(), name='add sub faction'),
 
 ]

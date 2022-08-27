@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import PaintingStudio,Language,Country,Region,City,Group
+
+from .models import City, Country, Group, Language, PaintingStudio, Region
 
 admin.site.register(Group)
 admin.site.register(PaintingStudio)

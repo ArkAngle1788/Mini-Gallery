@@ -1,72 +1,89 @@
 from django import forms
-from .models import *
 # from django.forms.widgets import TextInput
 from django_select2 import forms as s2forms
-from django.forms.widgets import TextInput
 
+from .models import Faction, FactionType, Game, SubFaction, UnitType
 
-basicattrs={'style':'width: 90%'}#select2 can only have limited styling applied to it with classes. to substantially change it it looks like we would need to override the select2 css classes
+# select2 can only have limited styling applied to it with classes.
+# to substantially change it it looks like
+# we would need to override the select2 css classes
+basicattrs = {'style': 'width: 90%'}
 
-textfieldattrs=basicattrs.copy()
-textfieldattrs['class']='bg-white'
-textfieldattrs['placeholder']='input'
+textfieldattrs = basicattrs.copy()
+textfieldattrs['class'] = 'bg-white'
+textfieldattrs['placeholder'] = 'input'
 
 
 class GameWidget(s2forms.Select2Widget):
-    search_fields=[
+    """name__icontains search, can be adapted"""
+    search_fields = [
         'game_system_name__icontains',
     ]
 
+
 class FactionWidget(s2forms.Select2Widget):
-    search_fields=[
+    """name__icontains search, can be adapted"""
+    search_fields = [
         'faction_name__icontains',
     ]
 
-class Faction_TypeWidget(s2forms.Select2Widget):
-    search_fields=[
+
+class FactionTypeWidget(s2forms.Select2Widget):
+    """name__icontains search, can be adapted"""
+    search_fields = [
         'faction_name__icontains',
     ]
+
 
 class SystemForm(forms.ModelForm):
+    """creates a game system"""
     class Meta:
-        model=Games
-        fields="__all__"
+        model = Game
+        fields = "__all__"
         widgets = {
             'game_system_name': forms.TextInput,
         }
 
-class Faction_TypeForm(forms.ModelForm):
+
+class FactionTypeForm(forms.ModelForm):
+    """links a type of faction to a game system"""
     class Meta:
-        model=Faction_Type
-        fields="__all__"
+        model = FactionType
+        fields = "__all__"
         widgets = {
-            'system' : GameWidget(basicattrs),
+            'system': GameWidget(basicattrs),
             'faction_name': forms.TextInput(textfieldattrs),
         }
+
 
 class FactionForm(forms.ModelForm):
+    """links a faction to it's type"""
     class Meta:
-        model=Faction
-        fields="__all__"
+        model = Faction
+        fields = "__all__"
         widgets = {
-            'faction_type' : Faction_TypeWidget(basicattrs),
+            'faction_type': FactionTypeWidget(basicattrs),
             'faction_name': forms.TextInput(textfieldattrs),
         }
 
-class Sub_FactionForm(forms.ModelForm):
+
+class SubFactionForm(forms.ModelForm):
+    """links a subfaction to a faction"""
     class Meta:
-        model=Sub_Faction
-        fields="__all__"
+        model = SubFaction
+        fields = "__all__"
         widgets = {
-            'factions' : FactionWidget(basicattrs),
+            'factions': FactionWidget(basicattrs),
             'faction_name': forms.TextInput(textfieldattrs),
         }
 
-class Unit_TypeForm(forms.ModelForm):
+
+class UnitTypeForm(forms.ModelForm):
+    """links unit_type to a system"""
     class Meta:
-        model=Unit_Type
-        fields="__all__"
+        model = UnitType
+        fields = "__all__"
         widgets = {
-            'system' : GameWidget(basicattrs),
+            'system': GameWidget(basicattrs),
             'unit_type': forms.TextInput(textfieldattrs),
         }

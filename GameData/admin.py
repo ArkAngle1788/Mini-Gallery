@@ -1,8 +1,9 @@
 from django.contrib import admin
-from .models import Games,Faction_Type,Faction,Sub_Faction,Unit_Type
 
-admin.site.register(Games)
-admin.site.register(Faction_Type)
+from .models import Faction, FactionType, Game, SubFaction, UnitType
+
+admin.site.register(Game)
+admin.site.register(FactionType)
 admin.site.register(Faction)
-admin.site.register(Sub_Faction)
-admin.site.register(Unit_Type)
+admin.site.register(SubFaction)
+admin.site.register(UnitType)

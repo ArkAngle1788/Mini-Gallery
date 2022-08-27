@@ -1,24 +1,32 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
-from UserAccounts.models import UserProfile
+from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, UpdateView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
-from ContentPost.custom_functions import calculate_news_bar
-from .forms import *
-from Gallery.filters import ImageFilter
-from Gallery.models import UserImage
+from django.views.generic import UpdateView
 from django_filters.views import FilterView
 
-from django.urls import reverse
+from ContentPost.custom_functions import calculate_news_bar
+from Gallery.filters import ImageFilter
+from Gallery.models import UserImage
+from UserAccounts.models import UserProfile
 
-class Self_Profile(LoginRequiredMixin,View):
+from .forms import ProfileEditForm
+
+
+class SelfProfile(LoginRequiredMixin,View):
+    """a profile view shortcut. redirects to your 'public' page"""
 
     def get(self, request,*args,**kwargs):
+        """redirects to the profile url structure"""
         url=reverse('profile', args=[self.request.user.profile.pk])+"?order=recent"
         return redirect(url)
 
-# note that this currently transmits all user data so if the model contains private information we will need to clense that
+
 class Profile(FilterView):
+    """
+    note that this currently transmits all user data
+    so if the model contains private information we will need to clense that
+    """
     model=UserImage
     filterset_class=ImageFilter
     context_object_name='images'
@@ -56,6 +64,7 @@ class Profile(FilterView):
         return context
 
 class ProfileUpdate(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
+    """uses a test instead of a permission to access"""
     model=UserProfile
     form_class=ProfileEditForm
 

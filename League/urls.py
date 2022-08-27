@@ -1,11 +1,11 @@
 from django.urls import path
 
-from . import views
-
+# from . import views
+from .views import leagues
 
 urlpatterns = [
 
-path('', views.leagues, name='leagues'),
+path('', leagues, name='leagues'),
 # # path('<str:league>/', views.league_details, name='league details'),
 # path('<str:league>/', League_details.as_view(), name='league details'),
 # # path('view_league',views.view_league,name='view league'),
