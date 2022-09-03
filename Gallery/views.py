@@ -164,7 +164,7 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin, LoginRequiredMixin,
                 return redirect(url)
 
         return render(request, 'Gallery/upload_sub_confirm.html',
-            {"images": image_choices, 'main': main.pk})
+                      {"images": image_choices, 'main': main.pk})
 
     def post(self, request, *args, **kwargs):
         """saves to google drive if configured"""
@@ -327,7 +327,7 @@ class GalleryMultipleUpload(PermissionRequiredMixin, LoginRequiredMixin, CreateV
 
 
 class GalleryMultipleUpdate(PermissionRequiredMixin,
-    LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+                            LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """requires permission change_userimage"""
     model = UserImage
     form_class = UploadImages
@@ -364,7 +364,7 @@ class GalleryMultipleUpdate(PermissionRequiredMixin,
         except queryset.model.DoesNotExist as error:
             raise Http404(
                 f'error: {queryset.model._meta.verbose_name} has not been called correctly')\
-                     from error
+                from error
         return obj
 
     def get_context_data(self, **kwargs):
@@ -643,12 +643,36 @@ class ColourCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     form_class = ColourForm
     permission_required = ("staff")
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Add in the leaguenav QuerySet and searchbar sets
+        # context['league_nav'] = leagues_nav
+        # context['news'] = calculate_news_bar()
+        image_filter = ImageFilter(
+            self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form'] = image_filter
+        return context
+
 
 class ColourPriorityCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     """requires staff status"""
     model = ColourPriority
     form_class = ColourPriorityForm
     permission_required = ("staff")
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Add in the leaguenav QuerySet and searchbar sets
+        # context['league_nav'] = leagues_nav
+        # context['news'] = calculate_news_bar()
+        image_filter = ImageFilter(
+            self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form'] = image_filter
+        return context
 
 
 class ColourDelete(PermissionRequiredMixin, LoginRequiredMixin, DeleteView):
@@ -675,7 +699,7 @@ class ManageImageFields(PermissionRequiredMixin, LoginRequiredMixin, View):
         colours = Colour.objects.all()
         prioritys = ColourPriority.objects.all()
         return render(request, 'Gallery/manage_image_fields.html',
-        {"colours": colours,
-        "prioritys": prioritys,
-        "league_nav": leagues_nav,
-        'filter_form': ImageFilter})
+                      {"colours": colours,
+                       "prioritys": prioritys,
+                       "league_nav": leagues_nav,
+                       'filter_form': ImageFilter})

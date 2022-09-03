@@ -955,6 +955,17 @@ class CountryCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     template_name = 'GameData/game_data_form.html'
     permission_required = ('GameData.add_country')
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Add in the leaguenav QuerySet and searchbar sets
+        # context['league_nav'] = leagues_nav
+        # context['news'] = calculate_news_bar()
+        image_filter = ImageFilter(
+            self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form'] = image_filter
+        return context
 
 class RegionCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     """adds a new region to the DB can be done with anyone with the add_region permission"""
@@ -963,6 +974,18 @@ class RegionCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     template_name = 'GameData/game_data_form.html'
     permission_required = ('GameData.add_region')
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Add in the leaguenav QuerySet and searchbar sets
+        # context['league_nav'] = leagues_nav
+        # context['news'] = calculate_news_bar()
+        image_filter = ImageFilter(
+            self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form'] = image_filter
+        return context
+
 
 class CityCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     """adds a new city to the DB can be done with anyone with the add_city permission"""
@@ -970,3 +993,15 @@ class CityCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     form_class = CityForm
     template_name = 'GameData/game_data_form.html'
     permission_required = ('GameData.add_city')
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Add in the leaguenav QuerySet and searchbar sets
+        # context['league_nav'] = leagues_nav
+        # context['news'] = calculate_news_bar()
+        image_filter = ImageFilter(
+            self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form'] = image_filter
+        return context

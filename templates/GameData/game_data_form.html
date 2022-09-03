@@ -4,20 +4,20 @@
 
 {% load crispy_forms_tags %}
 
-{{ form.media.css }}
+{% comment %} {{ form.media.css }} {% endcomment %}
 
   <form method="post">{% csrf_token %}
      {{ form|crispy }}
      <input type="submit" value="Save">
   </form>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  {{ form.media.js }}
+  {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> {% endcomment %}
+  {% comment %} {{ form.media.js }} {% endcomment %}
 
 {% endblock content %}
 
 
 <!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-  {% include 'Gallery/sidebar_right.html' %}
+  {% include 'Gallery/gallery_display/image_filter_sidebar.html' %}
 {%endblock navbar_right_content %}
