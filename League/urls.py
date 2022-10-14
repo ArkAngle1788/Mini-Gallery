@@ -1,12 +1,15 @@
 from django.urls import path
 
 # from . import views
-from .views import leagues
+from .views import leagues,LeagueCreate,LeagueEdit,LeagueDelete,LeagueView
 
 urlpatterns = [
 
 path('', leagues, name='leagues'),
-# # path('<str:league>/', views.league_details, name='league details'),
+path('<int:pk>/create', LeagueCreate.as_view(),name='create league'),
+path('<int:pk>/edit', LeagueEdit.as_view(),name='edit league'),
+path('delete/<int:pk>', LeagueDelete.as_view(),name='delete league'),
+path('<int:pk>/<str:league>/', LeagueView.as_view(), name='league details'),
 # path('<str:league>/', League_details.as_view(), name='league details'),
 # # path('view_league',views.view_league,name='view league'),
 # path('manage_leagues',views.manage_leagues,name='manage leagues'),

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% load user_group_admin_check_filters %}
+{% load markdownify %}
+
+<h1>
+{{league}}
+</h1>
+
+
+<p>
+{{league.league_description|markdownify}}
+</p>
+
+
+
+{% endblock %}
+
+
+<!-- SIDEBAR Left -->
+{% block navbar_left_content %}
+
+<a href="{% url 'group info' 'Region' league.group.slug league.group.id %}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+</svg>Return to {{league.group}}</a>
+
+{%endblock%}
+
+<!-- SIDEBAR Right -->
+{% block navbar_right_content %}
+
+{% comment %} {% include 'CommunityInfrastructure/sidebar_right.html' %} {% endcomment %}
+
+{% comment %} need to create the relation link in league creation then worry about this {% endcomment %}
+{%if request.user.is_staff or group|is_primary_admin:request.user %}
+
+<div class="panel-heading">
+  <h3>League Administration Panel</h3>
+</div>
+
+<a href="{% url 'delete league' league.pk %}">Delete League</a>
+
+{%endif%}
+
+{%endblock%}

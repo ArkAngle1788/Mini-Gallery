@@ -24,10 +24,10 @@
 
 <div class='panel-body'>
 
-  {%if group.groups_leagues.all%}
+  {%if group.leagues_managed.all%}
     <ul>
-      {%for league in group.groups_leagues.all %}
-        <li>{{league}}</li>
+      {%for league in group.leagues_managed.all %}
+        <li><a href="{% url 'league details' league.id league.league_name %}">{{league.league_name}}</a></li>
       {%endfor%}
     </ul>
   {%else%}
@@ -47,13 +47,9 @@
 <!-- SIDEBAR Right-->
 {% block navbar_right_content %}
 
-<div class="panel-heading">
-  <h3>Group Administration Panel</h3>
-</div>
 
 <div class='panel-body'>
 
-<p>content</p>
 
 {%comment%}
   <!-- group location checks are done in ifelses b/c most of them should be citys so this saves processsing -->
@@ -86,6 +82,11 @@
 
 
 {%if request.user.is_staff or group|is_primary_admin:request.user %}
+
+<div class="panel-heading">
+  <h3>Group Administration Panel</h3>
+</div>
+  <li><a href="{% url 'create league' group.id %}">Create new League or Event</a></li>
 
   <!-- Add an Admin -->
   {%if group.location_city %}

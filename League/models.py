@@ -1,8 +1,11 @@
 from django.db import models
 from django.urls import reverse
 
-from CommunityInfrastructure.models import City
+from CommunityInfrastructure.models import City,Group
 from GameData.models import Faction, Game, SubFaction
+from django.template.defaultfilters import slugify
+
+# from UserAccounts.models import UserProfile
 
 # UNDER CONSTRUCTION: this file is code fragments from a previous version, it is a mess
 
@@ -25,26 +28,17 @@ class League(models.Model):
     location_city = models.ForeignKey(
         City, on_delete=models.SET_NULL, null=True, related_name='leagues_in_city')
     display_name = models.BooleanField(default=True)
-    # we can use just location_city to tell us everything
-    # the following two fields would have told us
-    # location_region=models.ForeignKey(
-    #   Region,on_delete=models.SET_NULL,null=True,related_name='leagues_in_region')
-    # location_country=models.ForeignKey(
-    #   Country,on_delete=models.SET_NULL,null=True,related_name='leagues_in_country')
     system = models.ForeignKey(
         Game, on_delete=models.CASCADE, related_name='child_leagues')
+    group=models.ForeignKey(
+        Group,on_delete=models.CASCADE, related_name="leagues_managed")
 
     def __str__(self):
         return self.league_name
 
     def get_absolute_url(self):
-        """returns 'manage leagues'"""
-        return reverse('manage leagues')
-
-
-# is it best to have the activity flag inside season rather than league?
-# the only advantage to season that I can think of is if your season is if
-# you wanted to display information about the next season without opening registration
+        """returns 'league details'"""
+        return reverse('league details', kwargs={'league':slugify(self.league_name),'pk': self.pk})
 
 
 class Season(models.Model):
@@ -62,23 +56,23 @@ class Season(models.Model):
         return str(self.league.league_name) + " " + str(self.season_name)
 
 
-# depricated phase this out
-class Player(models.Model):
-    """depricated"""
-    player_name = models.CharField(max_length=50, unique=True)
+# # depricated phase this out
+# class Player(models.Model):
+#     """depricated"""
+#     player_name = models.CharField(max_length=50, unique=True)
 
-    def __str__(self):
-        return self.player_name
+#     def __str__(self):
+#         return self.player_name
 
-    def get_name(self):
-        """dep"""
-        return self.player_name
+#     def get_name(self):
+#         """dep"""
+#         return self.player_name
 
 
 class PlayerSeasonFaction(models.Model):
     """tracks season information for a player including score"""
     player = models.ForeignKey(
-        Player, on_delete=models.CASCADE, related_name='player_psf')
+        'UserAccounts.UserProfile', on_delete=models.CASCADE, related_name='player_psf')
     faction = models.ForeignKey(Faction, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='player_faction')
     sub_faction = models.ForeignKey(SubFaction, on_delete=models.SET_NULL, null=True, blank=True,
@@ -88,9 +82,10 @@ class PlayerSeasonFaction(models.Model):
 
     # this is updated in save_matchup
     previous_opponents = models.ManyToManyField(
-        Player, blank=True, related_name='previous_opponents')
+        'UserAccounts.UserProfile', blank=True, related_name='previous_opponents')
 
     score = models.IntegerField(default=0)
+    scoring_instructions = models.CharField(max_length=1000)
     wlrecord = models.CharField(max_length=100, default="-")
 
     # each time a new round is created this will need to be reset to False
@@ -99,21 +94,22 @@ class PlayerSeasonFaction(models.Model):
     matched = models.BooleanField(default=False)
 
     def __str__(self):
-        player_name = self.player.get_name()
+        player_name = self.player.user
         season_name = str(self.season)
-        # faction_name=str(self.faction)
+        faction_name = str(self.faction)
         title = player_name + "   ------    " + \
-            season_name + "   ------   " + str(self.faction)
+            season_name + "   ------   " + faction_name
         if self.sub_faction:
             title = title + "   ------   " + str(self.sub_faction)
-        # return player_name#changed this return for a troubleshoot
-        return title  # admin panel uses this so we want full information
+
+        # admin panel uses this so we want full information
+        return title
 
 
 class Round(models.Model):
     """rounds consist of matches populated by all players"""
     round_number = models.IntegerField()
-    round_details = models.CharField(max_length=150, default='')
+    round_details = models.CharField(max_length=250, default='')
     season = models.ForeignKey(
         Season, on_delete=models.CASCADE, related_name='seasons_rounds')
 
@@ -133,18 +129,24 @@ class Match(models.Model):
     round = models.ForeignKey(
         Round, on_delete=models.CASCADE, related_name='round_matches')
 
-    # confirm that you can have repeat matchups with this setup (pretty sure you can)
-    # there is a players played detail attached to player_season_faction
     player1 = models.ForeignKey(
-        Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='player1')
+        'UserAccounts.UserProfile', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='player1')
     player2 = models.ForeignKey(
-        Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='player2')
+        'UserAccounts.UserProfile', on_delete=models.SET_NULL,\
+            null=True, blank=True, related_name='player2')
     winner = models.ForeignKey(
-        Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='winner')
+        'UserAccounts.UserProfile', on_delete=models.SET_NULL,\
+            null=True, blank=True, related_name='winner')
     player1_score = models.IntegerField(default=0)
     player2_score = models.IntegerField(default=0)
 
     def __str__(self):
-        matchup = str(self.round) + ": " + str(self.player1) + \
-            " vs. " + str(self.player2)
+
+        if self.round.season.use_names:
+            matchup = str(self.round) + ": " + str(self.player1) + \
+                " vs. " + str(self.player2)
+        else:
+            matchup = str(self.round) + ": " + str(self.player1.user) + \
+                " vs. " + str(self.player2.user)
         return matchup

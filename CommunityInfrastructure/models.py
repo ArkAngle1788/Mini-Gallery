@@ -99,6 +99,7 @@ class Group(models.Model):
     group_description = models.CharField(max_length=600)
     group_leagues = models.ManyToManyField(
         'League.League', blank=True, related_name='group_running')
+    
 
     # will need to have carefull app logic to ensure
     # only one of these gets set since that's how we will check for scope
