@@ -1,9 +1,9 @@
 from django.db import models
+from django.template.defaultfilters import slugify
 from django.urls import reverse
 
-from CommunityInfrastructure.models import City,Group
+from CommunityInfrastructure.models import City, Group
 from GameData.models import Faction, Game, SubFaction
-from django.template.defaultfilters import slugify
 
 # from UserAccounts.models import UserProfile
 
@@ -30,15 +30,16 @@ class League(models.Model):
     display_name = models.BooleanField(default=True)
     system = models.ForeignKey(
         Game, on_delete=models.CASCADE, related_name='child_leagues')
-    group=models.ForeignKey(
-        Group,on_delete=models.CASCADE, related_name="leagues_managed")
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, related_name="leagues_managed")
 
     def __str__(self):
         return self.league_name
 
     def get_absolute_url(self):
         """returns 'league details'"""
-        return reverse('league details', kwargs={'league':slugify(self.league_name),'pk': self.pk})
+        return reverse('league details',
+            kwargs={'league': slugify(self.league_name), 'pk': self.pk})
 
 
 class Season(models.Model):
@@ -133,11 +134,11 @@ class Match(models.Model):
         'UserAccounts.UserProfile', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='player1')
     player2 = models.ForeignKey(
-        'UserAccounts.UserProfile', on_delete=models.SET_NULL,\
-            null=True, blank=True, related_name='player2')
+        'UserAccounts.UserProfile', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='player2')
     winner = models.ForeignKey(
-        'UserAccounts.UserProfile', on_delete=models.SET_NULL,\
-            null=True, blank=True, related_name='winner')
+        'UserAccounts.UserProfile', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='winner')
     player1_score = models.IntegerField(default=0)
     player2_score = models.IntegerField(default=0)
 

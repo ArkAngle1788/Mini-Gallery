@@ -10,8 +10,14 @@ path('<int:pk>/create', LeagueCreate.as_view(),name='create league'),
 path('<int:pk>/edit', LeagueEdit.as_view(),name='edit league'),
 path('delete/<int:pk>', LeagueDelete.as_view(),name='delete league'),
 path('<int:pk>/<str:league>/', LeagueView.as_view(), name='league details'),
-# path('<str:league>/', League_details.as_view(), name='league details'),
-# # path('view_league',views.view_league,name='view league'),
+    # path('season/<int:pk>/create', LeagueCreate.as_view(), name='create league'),
+    # path('season/<int:pk>/edit', LeagueEdit.as_view(), name='edit league'),
+    # path('season/<int:pk>/delete', LeagueDelete.as_view(), name='delete league'),
+    # path('<int:pk>/<str:league>/', LeagueView.as_view(), name='league details'),
+
+    # path('new_season',views.new_season, name='new season'),
+    # path('save_season',views.save_season, name='save season'),
+
 # path('manage_leagues',views.manage_leagues,name='manage leagues'),
 # path('manage_leagues_original',views.manage_leagues_original, name='manage leagues original'),
 # path('new_league',views.new_league, name= 'new league'),
@@ -19,11 +25,11 @@ path('<int:pk>/<str:league>/', LeagueView.as_view(), name='league details'),
 # # path('basic_matchmaking',views.basic_matchmaking, name='basic matchmaking'),
 # path('create_matchup',views.create_matchup, name='create matchup'),#this is the view in charge of matchmaking now
 # path('new_round',views.create_round_matchup, name='new round'),
-# path('new_season',views.new_season, name='new season'),
+
 # path('matchup_created',views.save_matchup, name='save matchup'),
 # path('submit_results',views.submit_results, name='submit results'),
 # path('save_results',views.save_results, name='save results'),
-# path('save_season',views.save_season, name='save season'),
+
 # path('register_for_league',views.league_signup,name='league signup'),
 #
 # path('edit_round/<int:pk>', RoundUpdateView.as_view(), name='round update'),

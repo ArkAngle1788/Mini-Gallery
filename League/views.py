@@ -1,11 +1,12 @@
 # from UserAccounts.models import UserProfile
 # from Gallery.models import Professional
 # from ContentPost.models import ContentPost
-from django.urls import reverse
 # from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.http import Http404
 from django.shortcuts import render
+from django.urls import reverse
 # from django.contrib import messages
 # from django.urls import reverse_lazy
 # from .custom_functions import *
@@ -14,18 +15,15 @@ from django.shortcuts import render
 # from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+
+from CommunityInfrastructure.models import Group
 from Gallery.models import UserImage
 from UserAccounts.models import UserProfile
 
 from .forms import LeagueForm
 # from django.http import HttpResponseRedirect
 # from GameData.models import Games, Faction, Faction_Type, Sub_Faction
-from .models import League#,Season, PlayerSeasonFaction, Round,Match
-from CommunityInfrastructure.models import Group
-
-# actual league views backed up elsewhere since I probably will want to
-# completly rewrite most of them.
-
+from .models import League  # ,Season, PlayerSeasonFaction, Round,Match
 
 
 def leagues(request):
@@ -57,6 +55,7 @@ def leagues(request):
 
     return render(request, 'CommunityInfrastructure/home.html')
 
+
 class LeagueCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """can only be created by staff. fields support markdown"""
     model = League
@@ -64,34 +63,93 @@ class LeagueCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     permission_required = ('staff')
 
     def test_func(self):
-        if self.request.user.is_staff or self.request.user == self.get_object().userprofile:
+
+        try:
+            owning_group = Group.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff or (
+                self.request.user.profile.linked_admin_profile \
+                    in owning_group.group_primary_admins.all()):
             return True
         return False
 
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        kwargs.update({
+            'group': Group.objects.get(pk=self.kwargs['pk'])
+        })
+        return kwargs
+
     def form_valid(self, form):
-        #group_id cannot be null so we must add it to the form info
-        owning_group=Group.objects.get(pk=self.kwargs['pk'])
-        form.instance.group=owning_group
-        valid_object=super().form_valid(form)  # then run original form_valid
+        # group_id cannot be null so we must add it to the form info
+        owning_group = Group.objects.get(pk=self.kwargs['pk'])
+        form.instance.group = owning_group
+        valid_object = super().form_valid(form)
+
+        for admin in form.cleaned_data['admin_options']:
+            admin.leagues_managed.add(self.object)
+            admin.save()
+
         return valid_object
 
 
 class LeagueEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    """only staff and the registered owner can edit. Currently only supports one studio admin."""
+    """only staff and the primary admins can edit."""
     model = League
     form_class = LeagueForm
 
     def test_func(self):
-        if self.request.user.is_staff or self.request.user == self.get_object().userprofile:
+        """only primary admins and staff can edit"""
+        try:
+            league = League.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff or (
+            self.request.user.profile.linked_admin_profile
+                in league.group_primary_admins.all()):
             return True
         return False
 
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        kwargs.update({
+            'group': League.objects.get(pk=self.kwargs['pk']).group
+        })
+        return kwargs
+
+    def form_valid(self, form):
+        """group_id cannot be null so we must add it to the form info"""
+        owning_group = League.objects.get(pk=self.kwargs['pk']).group
+        form.instance.group = owning_group
+        valid_object = super().form_valid(form)
+
+        for admin in form.cleaned_data['admin_options']:
+            admin.leagues_managed.add(self.object)
+            admin.save()
+
+        return valid_object
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add in the leaguenav QuerySet and searchbar sets
+        # context['league_nav'] = leagues_nav
+        context['group'] = self.object.group
+        return context
+
 
 class LeagueDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    """only staff can delete groups"""
+    """only staff or primary admins can delete leagues"""
     model = League
     # success_url = reverse_lazy('groups top')
-    
 
     # context_object_name = 'group'
     # permission_required = ('staff')
@@ -119,15 +177,18 @@ class LeagueDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     #             admin.userprofile.user.groups.remove(sec_admin_group)
 
     #     return super().delete(self, request, *args, **kwargs)
+
     def test_func(self):
         if self.request.user.is_staff or self.request.user == self.get_object().userprofile:
             return True
         return False
 
     def get_success_url(self):
-        url=reverse('group info',args=['region',self.object.group.slug(),self.object.group.id])
-       
+        url = reverse('group info', args=[
+                      'region', self.object.group.slug(), self.object.group.id])
+
         return url
+
 
 class LeagueView(DetailView):
     """Viewing leagues is public"""

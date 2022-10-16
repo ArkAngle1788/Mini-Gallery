@@ -32,6 +32,14 @@
 {% block navbar_right_content %}
 
 {% comment %} {% include 'CommunityInfrastructure/sidebar_right.html' %} {% endcomment %}
+<h2>League Admins:</h2>
+{%if league.admins_managing.all %}
+  {%for admin in league.admins_managing.all %}
+    {{admin}}: {{admin.userprofile.user.first_name}} {{admin.userprofile.user.last_name}}<br>
+  {%endfor%}
+{%else%}
+  <br>No Admins
+{%endif%}
 
 {% comment %} need to create the relation link in league creation then worry about this {% endcomment %}
 {%if request.user.is_staff or group|is_primary_admin:request.user %}
@@ -40,6 +48,8 @@
   <h3>League Administration Panel</h3>
 </div>
 
+<a href="{% url 'edit league' league.pk %}">Edit League</a>
+<br>
 <a href="{% url 'delete league' league.pk %}">Delete League</a>
 
 {%endif%}
