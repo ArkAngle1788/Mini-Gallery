@@ -1,6 +1,6 @@
-from django.http import Http404
 import django.dispatch
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 
 from .models import PaintingStudio
 

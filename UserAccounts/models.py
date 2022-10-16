@@ -81,7 +81,7 @@ class AdminProfile(models.Model):
 
     # this will be a list of all the leagues a user has permission to manage.
     leagues_managed = models.ManyToManyField(
-        League, blank=True, related_name='admins_manageing')
+        League, blank=True, related_name='admins_managing')
 
     def is_primary_admin(self, group):
         """returns true if the UserProfile is present in group.group_primary_admins"""
