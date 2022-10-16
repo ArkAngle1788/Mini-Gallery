@@ -29,7 +29,7 @@ Rewrite the league managment tools to function with the current implementation o
 
 Implement proper cacheing for the webserver
 
-Image previews and thumbnails can be cleaned up to me much more efficent.
+Image previews and thumbnails can be cleaned up to be much more efficent.
 
 Research database indexing and best practices for searching data, lazy lookups across large datasets will get expensive fast.
 
