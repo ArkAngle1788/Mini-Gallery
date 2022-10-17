@@ -20,10 +20,10 @@ from CommunityInfrastructure.models import Group
 from Gallery.models import UserImage
 from UserAccounts.models import UserProfile
 
-from .forms import LeagueForm
+from .forms import LeagueForm,SeasonForm
 # from django.http import HttpResponseRedirect
 # from GameData.models import Games, Faction, Faction_Type, Sub_Faction
-from .models import League  # ,Season, PlayerSeasonFaction, Round,Match
+from .models import League ,Season#, PlayerSeasonFaction, Round,Match
 
 
 def leagues(request):
@@ -149,37 +149,18 @@ class LeagueEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class LeagueDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """only staff or primary admins can delete leagues"""
     model = League
-    # success_url = reverse_lazy('groups top')
 
-    # context_object_name = 'group'
-    # permission_required = ('staff')
-
-    # probably need custom delete logic
-    # def delete(self, request, *args, **kwargs):
-    #     group = self.get_object()
-    #     group_primary_admins = group.group_primary_admins.all()
-    #     group_secondary_admins = group.group_secondary_admins.all()
-
-    #     # remove permissions for admins before deleting
-    #     for admin in group_primary_admins:
-    #         admin.groups_managed_primary.remove(group)
-    #         # if the list is now empty they also need their permissions removed
-    #         if not admin.groups_managed_primary.all():
-    #             prim_admin_group = PermGroup.objects.get(
-    #                 name='Primary Group Admin')
-    #             admin.userprofile.user.groups.remove(prim_admin_group)
-    #     for admin in group_secondary_admins:
-    #         admin.groups_managed_secondary.remove(group)
-    #         # if the list is now empty they also need their permissions removed
-    #         if not admin.groups_managed_secondary.all():
-    #             sec_admin_group = PermGroup.objects.get(
-    #                 name='Secondary Group Admin')
-    #             admin.userprofile.user.groups.remove(sec_admin_group)
-
-    #     return super().delete(self, request, *args, **kwargs)
 
     def test_func(self):
-        if self.request.user.is_staff or self.request.user == self.get_object().userprofile:
+        """only primary admins and staff can delete"""
+        try:
+            league = League.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff or (
+            self.request.user.profile.linked_admin_profile
+                in league.group_primary_admins.all()):
             return True
         return False
 
@@ -194,10 +175,92 @@ class LeagueView(DetailView):
     """Viewing leagues is public"""
     model = League
 
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in the leaguenav QuerySet and searchbar sets
-        # context['league_nav'] = leagues_nav
-        context['group'] = self.object.group
-        return context
+
+
+class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """url param is the league the season belongs to"""
+    model = Season
+    form_class = SeasonForm
+    permission_required = ('staff')
+
+    def test_func(self):
+
+        try:
+            parent_league = League.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff or (
+                self.request.user.profile.linked_admin_profile \
+                    in parent_league.group.group_primary_admins.all()):
+            return True
+        return False
+
+
+    def form_valid(self, form):
+        # group_id cannot be null so we must add it to the form info
+        parent_league = League.objects.get(pk=self.kwargs['pk'])
+        form.instance.league = parent_league
+        form.instance.season_active = False
+        form.instance.registration_active = True
+
+        return super().form_valid(form)
+
+
+class SeasonEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """only staff and the primary admins can edit."""
+    model = Season
+    form_class = SeasonForm
+
+    def test_func(self):
+        """only primary admins and staff can edit"""
+        try:
+            season = Season.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff or (
+            (self.request.user.profile.linked_admin_profile
+            in season.league.group.group_primary_admins.all())
+            or
+            (self.request.user.profile.linked_admin_profile
+            in season.league.group.group_secondary_admins.all())
+            ):
+            return True
+        return False
+
+
+
+
+class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """only staff or primary admins can delete leagues"""
+    model = Season
+
+
+    def test_func(self):
+        """only primary admins and staff can edit"""
+        try:
+            season = Season.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff or (
+            (self.request.user.profile.linked_admin_profile
+            in season.league.group.group_primary_admins.all())
+            or
+            (self.request.user.profile.linked_admin_profile
+            in season.league.group.group_secondary_admins.all())
+            ):
+            return True
+        return False
+
+    def get_success_url(self):
+        url = reverse('group info', args=[
+                      'region', self.object.league.group.slug(), self.object.league.group.id])
+
+        return url
+
+
+class SeasonView(DetailView):
+    """Viewing leagues is public"""
+    model = Season

@@ -49,13 +49,18 @@ class Season(models.Model):
     season_active = models.BooleanField(default=False)
     allow_repeat_matches = models.BooleanField(default=False)
     registration_active = models.BooleanField(default=True)
-    use_names = models.BooleanField(default=True)
+    registration_key = models.CharField(max_length=10)
+    # use_names = models.BooleanField(default=True)
     league = models.ForeignKey(
         League, on_delete=models.CASCADE, related_name='child_season')
 
     def __str__(self):
         return str(self.league.league_name) + " " + str(self.season_name)
 
+    def get_absolute_url(self):
+        """returns 'season details'"""
+        return reverse('season details',
+            kwargs={'league': slugify(self.league.league_name), 'pk': self.pk})
 
 # # depricated phase this out
 # class Player(models.Model):

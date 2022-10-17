@@ -5,15 +5,17 @@
 {% load markdownify %}
 
 <h1>
-{{league}}
+{{season.league}}
 </h1>
 
 
 <p>
-{{league.league_description|markdownify}}
+{{season.league.league_description|markdownify}}
 </p>
 
-<p>info about current season here</p>
+<h2>{{season}}</h2>
+
+<p>info about rounds here</p>
 
 {% endblock %}
 
@@ -21,27 +23,7 @@
 <!-- SIDEBAR Left -->
 {% block navbar_left_content %}
 
-<div class="panel-heading">
-  <h3>Seasons:</h3>
-</div>
-
-<div class='panel-body'>
-
-  {%if league.child_season.all%}
-    <ul>
-      {%for season in league.child_season.all %}
-        <li><a href="{% url 'season details' season.id league.league_name %}">{{season}}</a></li>
-      {%endfor%}
-    </ul>
-  {%else%}
-    <ul>No Seasons Currently Registered</ul>
-  {%endif%}
-
-</div>
-
-
-
-<a href="{% url 'group info' 'Region' league.group.slug league.group.id %}">
+<a href="{% url 'league details' season.league.id season.league|slugify %}">
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
 </svg>Return to {{league.group}}</a>
@@ -53,8 +35,8 @@
 
 {% comment %} {% include 'CommunityInfrastructure/sidebar_right.html' %} {% endcomment %}
 <h2>League Admins:</h2>
-{%if league.admins_managing.all %}
-  {%for admin in league.admins_managing.all %}
+{%if season.league.admins_managing.all %}
+  {%for admin in season.league.admins_managing.all %}
     {{admin}}: {{admin.userprofile.user.first_name}} {{admin.userprofile.user.last_name}}<br>
   {%endfor%}
 {%else%}
@@ -62,25 +44,15 @@
 {%endif%}
 
 {% comment %} need to create the relation link in league creation then worry about this {% endcomment %}
-{%if request.user.is_staff or league.group|is_primary_admin:request.user %}
+{%if request.user.is_staff or season.league.group|is_primary_admin:request.user %}
 
 <div class="panel-heading">
   <h3>League Administration Panel</h3>
 </div>
 
-{%if not league.child_season.all%}
-<ul>
-  
-  <a href="{% url 'create season' league.id %}">Create an initial Season</a>
- 
-</ul>
-{%else%}
-seasons exist, new round button?
-{%endif%}
+<a href="{% url 'edit season' season.pk %}">Edit Season</a>
 <br>
-<a href="{% url 'edit league' league.pk %}">Edit League</a>
-<br>
-<a href="{% url 'delete league' league.pk %}">Delete League</a>
+<a href="{% url 'delete season' season.pk %}">Delete Season</a>
 
 {%endif%}
 

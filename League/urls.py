@@ -1,7 +1,9 @@
 from django.urls import path
 
 # from . import views
-from .views import leagues,LeagueCreate,LeagueEdit,LeagueDelete,LeagueView
+from .views import (LeagueCreate, LeagueDelete, LeagueEdit, LeagueView,
+                    SeasonCreate, SeasonDelete, SeasonEdit, SeasonView,
+                    leagues)
 
 urlpatterns = [
 
@@ -10,10 +12,10 @@ path('<int:pk>/create', LeagueCreate.as_view(),name='create league'),
 path('<int:pk>/edit', LeagueEdit.as_view(),name='edit league'),
 path('delete/<int:pk>', LeagueDelete.as_view(),name='delete league'),
 path('<int:pk>/<str:league>/', LeagueView.as_view(), name='league details'),
-    # path('season/<int:pk>/create', LeagueCreate.as_view(), name='create league'),
-    # path('season/<int:pk>/edit', LeagueEdit.as_view(), name='edit league'),
-    # path('season/<int:pk>/delete', LeagueDelete.as_view(), name='delete league'),
-    # path('<int:pk>/<str:league>/', LeagueView.as_view(), name='league details'),
+path('season/<int:pk>/create', SeasonCreate.as_view(), name='create season'),
+path('season/<int:pk>/edit', SeasonEdit.as_view(), name='edit season'),
+path('season/<int:pk>/delete', SeasonDelete.as_view(), name='delete season'),
+path('season/<int:pk>/<str:league>/', SeasonView.as_view(), name='season details'),
 
     # path('new_season',views.new_season, name='new season'),
     # path('save_season',views.save_season, name='save season'),
