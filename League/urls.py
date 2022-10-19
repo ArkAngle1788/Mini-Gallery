@@ -3,7 +3,7 @@ from django.urls import path
 # from . import views
 from .views import (LeagueCreate, LeagueDelete, LeagueEdit, LeagueView,
                     SeasonCreate, SeasonDelete, SeasonEdit, SeasonView,
-                    leagues)
+                    SeasonRegister,leagues)
 
 urlpatterns = [
 
@@ -16,6 +16,7 @@ path('season/<int:pk>/create', SeasonCreate.as_view(), name='create season'),
 path('season/<int:pk>/edit', SeasonEdit.as_view(), name='edit season'),
 path('season/<int:pk>/delete', SeasonDelete.as_view(), name='delete season'),
 path('season/<int:pk>/<str:league>/', SeasonView.as_view(), name='season details'),
+path('season/<int:pk>/<str:league>/register',SeasonRegister.as_view(),name='season register'),
 
     # path('new_season',views.new_season, name='new season'),
     # path('save_season',views.save_season, name='save season'),

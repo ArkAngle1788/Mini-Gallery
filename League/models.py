@@ -46,6 +46,7 @@ class Season(models.Model):
     """a season has a maximum number of rounds if repeat machups are not allowed"""
     # for example (ELD40k-Escalation) season 2
     season_name = models.CharField(max_length=50)
+    scoring_instructions = models.CharField(max_length=1000)
     season_active = models.BooleanField(default=False)
     allow_repeat_matches = models.BooleanField(default=False)
     registration_active = models.BooleanField(default=True)
@@ -77,21 +78,20 @@ class Season(models.Model):
 
 class PlayerSeasonFaction(models.Model):
     """tracks season information for a player including score"""
-    player = models.ForeignKey(
-        'UserAccounts.UserProfile', on_delete=models.CASCADE, related_name='player_psf')
+    profile = models.ForeignKey(
+        'UserAccounts.UserProfile', on_delete=models.CASCADE, related_name='psf')
     faction = models.ForeignKey(Faction, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='player_faction')
     sub_faction = models.ForeignKey(SubFaction, on_delete=models.SET_NULL, null=True, blank=True,
                                     related_name='player_sub_faction')
     season = models.ForeignKey(Season, on_delete=models.CASCADE,
-                               null=True, blank=True, related_name='player_season')
+                               null=True, blank=True, related_name='players_in_season')
 
     # this is updated in save_matchup
     previous_opponents = models.ManyToManyField(
         'UserAccounts.UserProfile', blank=True, related_name='previous_opponents')
 
     score = models.IntegerField(default=0)
-    scoring_instructions = models.CharField(max_length=1000)
     wlrecord = models.CharField(max_length=100, default="-")
 
     # each time a new round is created this will need to be reset to False
@@ -100,7 +100,7 @@ class PlayerSeasonFaction(models.Model):
     matched = models.BooleanField(default=False)
 
     def __str__(self):
-        player_name = self.player.user
+        player_name = str(self.profile.user)
         season_name = str(self.season)
         faction_name = str(self.faction)
         title = player_name + "   ------    " + \
@@ -110,6 +110,11 @@ class PlayerSeasonFaction(models.Model):
 
         # admin panel uses this so we want full information
         return title
+
+    def get_absolute_url(self):
+        """returns 'season details'"""
+        return reverse('season details',
+            kwargs={'league': slugify(self.season.league.league_name), 'pk': self.season.pk})
 
 
 class Round(models.Model):
@@ -149,7 +154,7 @@ class Match(models.Model):
 
     def __str__(self):
 
-        if self.round.season.use_names:
+        if self.round.season.league.display_name:
             matchup = str(self.round) + ": " + str(self.player1) + \
                 " vs. " + str(self.player2)
         else:

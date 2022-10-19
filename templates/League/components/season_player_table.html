@@ -1,0 +1,20 @@
+<table class="table table-bordered table-hover" style="width:100%">
+    <thead class="thead-light">
+      <tr>
+        <th>Player</th>
+        <th>Faction</th>
+        <th>W/L Record</th>
+        <th>Points</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for psf in season.players_in_season.all %}
+      <tr>
+        <td>{{psf.profile}}</td>
+        <td>{{psf.faction}}{% if psf.sub_faction %} -- {{psf.sub_faction}}{% endif %}</td>
+        <td>{{psf.wlrecord}}</td>
+        <td>{{psf.score}}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>

@@ -2,13 +2,14 @@
 from django import forms
 from django.db.models import Q
 from django_select2.forms import Select2MultipleWidget, Select2Widget
+from GameData.models import Faction, SubFaction
 from UserAccounts.models import AdminProfile
 
 # from django.core.exceptions import ValidationError
-from .models import League, Season
+from .models import League, PlayerSeasonFaction, Season
 
-basicattrs = {'class': 'bg-white'}
-default_format = {'style': 'width: 90%'}
+basicattrs = {'class': 'bg-white','style':'width:40%'}
+default_format = {'style': 'width: 40%'}
 
 
 class LeagueAdminsWidget(Select2MultipleWidget):
@@ -37,7 +38,9 @@ class LeagueForm(forms.ModelForm):
         self.fields['admin_options'].queryset = self.admin_list
 
     admin_options = forms.ModelMultipleChoiceField(
-        queryset=admin_list, widget=LeagueAdminsWidget(default_format))
+        queryset=admin_list,
+        widget=LeagueAdminsWidget(default_format),
+        label="Select Admins")
 
     class Meta:
         model = League
@@ -65,3 +68,34 @@ class SeasonForm(forms.ModelForm):
             'allow_repeat_matches': forms.CheckboxInput,
 
         }
+
+
+class SeasonRegisterForm(forms.ModelForm):
+    """ text """
+
+    registration_key= forms.CharField(
+        widget=forms.TextInput(basicattrs),
+        help_text="get this code from a league admin")
+    faction = forms.ModelChoiceField(
+        queryset=None,
+        widget=Select2Widget(default_format),
+        empty_label=None)
+    sub_faction = forms.ModelChoiceField(
+        queryset=None,
+        widget=Select2Widget(default_format),
+        empty_label='',
+        help_text="choose if appropriate",
+        required=False)
+
+    class Meta:
+        model = PlayerSeasonFaction
+        fields = ["faction", "sub_faction","registration_key"]
+
+    def __init__(self,  *args, **kwargs):
+        league = kwargs.pop('league')
+        super(SeasonRegisterForm, self).__init__(*args, **kwargs)
+
+        self.fields['faction'].queryset = Faction.objects.filter(
+                                                            faction_type__system=league.system)
+        self.fields['sub_faction'].queryset = SubFaction.objects.filter(
+                                                                    faction__faction_type__system=league.system)

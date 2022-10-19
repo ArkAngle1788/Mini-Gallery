@@ -15,15 +15,16 @@ from django.urls import reverse
 # from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.core.exceptions import ValidationError
 
 from CommunityInfrastructure.models import Group
 from Gallery.models import UserImage
 from UserAccounts.models import UserProfile
 
-from .forms import LeagueForm,SeasonForm
+from .forms import LeagueForm,SeasonForm,SeasonRegisterForm
 # from django.http import HttpResponseRedirect
 # from GameData.models import Games, Faction, Faction_Type, Sub_Faction
-from .models import League ,Season#, PlayerSeasonFaction, Round,Match
+from .models import League,Season, PlayerSeasonFaction#, Round,Match
 
 
 def leagues(request):
@@ -181,7 +182,6 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """url param is the league the season belongs to"""
     model = Season
     form_class = SeasonForm
-    permission_required = ('staff')
 
     def test_func(self):
 
@@ -264,3 +264,52 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class SeasonView(DetailView):
     """Viewing leagues is public"""
     model = Season
+
+
+# for create round to be a valid call registration must be closed since createing a round will also create matchups.
+# we can probably pass a parameter with the create round request that designates if we want to have manual or automatic matchmaking
+
+
+
+class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """url param is the season to register for"""
+    model = PlayerSeasonFaction
+    form_class = SeasonRegisterForm
+
+    def test_func(self):
+
+        try:
+            parent_league = Season.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff or (
+                self.request.user.profile.linked_admin_profile \
+                    in parent_league.group.group_primary_admins.all()):
+            return True
+        return False
+
+
+    def form_valid(self, form):
+        # group_id cannot be null so we must add it to the form info
+
+        key=form.cleaned_data['registration_key']
+        season=Season.objects.get(pk=self.kwargs['pk'])
+        if key!=season.registration_key:
+            form.add_error('registration_key',ValidationError(('Invalid value'), code='invalid'))
+            return super().form_invalid(form)
+
+        form.instance.profile = self.request.user.profile
+        form.instance.season = season
+
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        kwargs.update({
+            'league': Season.objects.get(pk=self.kwargs['pk']).league
+        })
+        return kwargs
