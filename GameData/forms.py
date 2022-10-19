@@ -73,7 +73,7 @@ class SubFactionForm(forms.ModelForm):
         model = SubFaction
         fields = "__all__"
         widgets = {
-            'factions': FactionWidget(basicattrs),
+            'faction': FactionWidget(basicattrs),
             'faction_name': forms.TextInput(textfieldattrs),
         }
 

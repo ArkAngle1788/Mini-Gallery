@@ -27,7 +27,7 @@
   {%if group.leagues_managed.all%}
     <ul>
       {%for league in group.leagues_managed.all %}
-        <li><a href="{% url 'league details' league.id league.league_name %}">{{league.league_name}}</a></li>
+        <li><a href="{% url 'league details' league.id league.league_name|slugify %}">{{league.league_name}}</a></li>
       {%endfor%}
     </ul>
   {%else%}

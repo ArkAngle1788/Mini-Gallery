@@ -30,7 +30,7 @@
   {%if league.child_season.all%}
     <ul>
       {%for season in league.child_season.all %}
-        <li><a href="{% url 'season details' season.id league.league_name %}">{{season}}</a></li>
+        <li><a href="{% url 'season details' season.id league.league_name|slugify %}">{{season.season_name}}</a></li>
       {%endfor%}
     </ul>
   {%else%}

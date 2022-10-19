@@ -45,7 +45,7 @@ class Faction(models.Model):
 class SubFaction(models.Model):
     """subfactions are children of factions"""
 
-    factions = models.ForeignKey(
+    faction = models.ForeignKey(
         Faction, on_delete=models.CASCADE, related_name='faction_sub_faction')
     faction_name = models.CharField(max_length=100, unique=True)
 
