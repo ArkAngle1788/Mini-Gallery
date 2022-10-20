@@ -31,26 +31,26 @@
 
 
 
+{%if season.registration_active%}
 
+  {%if season.players_in_season.all %}
+    {% cycle '' 'You are registered!' as var %}
+    {%for psf in season.players_in_season.all %}
+      {%if request.user.profile == psf.profile %}
+        {%cycle var%}
+      {%endif%}
+    {%endfor%}
 
-{%if season.players_in_season.all %}
-  {% cycle '' 'You are registered!' as var %}
-  {%for psf in season.players_in_season.all %}
-    {%if request.user.profile == psf.profile %}
-      {%cycle var%}
+    {%if var == 'You are registered!'%}
+      
+    {%else%}
+      <a href="{% url 'season register' season.id season.league.league_name|slugify %}">Register for this season of the league!</a>
     {%endif%}
-  {%endfor%}
-
-
-  {%if var == 'You are registered!'%}
-    
   {%else%}
     <a href="{% url 'season register' season.id season.league.league_name|slugify %}">Register for this season of the league!</a>
   {%endif%}
-{%else%}
-  <a href="{% url 'season register' season.id season.league.league_name|slugify %}">Register for this season of the league!</a>
-{%endif%}
 
+{%endif%}
 
 
 {% endblock %}
