@@ -13,7 +13,25 @@
 {{league.league_description|markdownify}}
 </p>
 
-<p>info about current season here</p>
+
+{%if reverse_seasons%}
+
+  {% with reverse_seasons|slice:":2" as my_var %}
+
+    {%if my_var.1%}
+      <h3>{{my_var.1.season_name}}</h3>
+      {% include 'League/components/season_player_table.html' with season=my_var.1%}
+    {%else%}
+    <h3>{{my_var.0.season_name}}</h3>
+      {% include 'League/components/season_player_table.html' with season=my_var.0%}
+    {%endif%}
+
+
+
+  {%endwith%}
+ 
+{%endif%}
+
 
 {% endblock %}
 
@@ -27,9 +45,9 @@
 
 <div class='panel-body'>
 
-  {%if league.child_season.all%}
+  {%if reverse_seasons%}
     <ul>
-      {%for season in league.child_season.all %}
+      {%for season in reverse_seasons|dictsort:"id" %}
         <li><a href="{% url 'season details' season.id league.league_name|slugify %}">{{season.season_name}}</a></li>
       {%endfor%}
     </ul>
@@ -51,6 +69,43 @@
 <!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
+
+
+{%if reverse_seasons%}
+
+  {% with reverse_seasons|first as season %}
+
+    {%if season.registration_active%}
+    <h4>Registration is active for {{season.season_name}}</h4>
+      {%if season.players_in_season.all %}
+        {% cycle '' 'You are registered!' as var %}
+        {%for psf in season.players_in_season.all %}
+          {%if request.user.profile == psf.profile %}
+            {%cycle var%}
+          {%endif%}
+        {%endfor%}
+
+
+        {%if var == 'You are registered!'%}
+          
+        {%else%}
+          <a href="{% url 'season register' season.id season.league.league_name|slugify %}">Register for this season of the league!</a>
+        {%endif%}
+      {%else%}
+        <a href="{% url 'season register' season.id season.league.league_name|slugify %}">Register for this season of the league!</a>
+      {%endif%}
+    {%else%}
+    error
+    {%endif%}
+
+
+
+  {%endwith%}
+
+{%endif%}
+
+
+
 {% comment %} {% include 'CommunityInfrastructure/sidebar_right.html' %} {% endcomment %}
 <h2>League Admins:</h2>
 {%if league.admins_managing.all %}
@@ -68,7 +123,7 @@
   <h3>League Administration Panel</h3>
 </div>
 
-{%if not league.child_season.all%}
+{%if not reverse_seasons%}
 <ul>
   
   <a href="{% url 'create season' league.id %}">Create an initial Season</a>

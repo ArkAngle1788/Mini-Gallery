@@ -177,6 +177,14 @@ class LeagueView(DetailView):
     model = League
 
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in the leaguenav QuerySet
+        # context['league_nav'] = leagues_nav
+        # context['news']=calculate_news_bar()
+        context['reverse_seasons'] = self.object.child_season.all().order_by('-pk')
+        return context
 
 class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """url param is the league the season belongs to"""
@@ -279,15 +287,14 @@ class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
 
         try:
-            parent_league = Season.objects.get(pk=self.kwargs['pk'])
+            season = Season.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
-        if self.request.user.is_staff or (
-                self.request.user.profile.linked_admin_profile \
-                    in parent_league.group.group_primary_admins.all()):
-            return True
-        return False
+        if not season.registration_active:
+            return False
+
+        return True
 
 
     def form_valid(self, form):
