@@ -2,12 +2,13 @@
 # from Gallery.models import Professional
 # from ContentPost.models import ContentPost
 # from django.contrib.auth.decorators import login_required
+from itertools import count
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import render
 from django.urls import reverse
-# from django.contrib import messages
+from django.contrib import messages
 # from django.urls import reverse_lazy
 # from .custom_functions import *
 # from django.db.models import Q
@@ -17,14 +18,15 @@ from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.core.exceptions import ValidationError
 
+
 from CommunityInfrastructure.models import Group
 from Gallery.models import UserImage
 from UserAccounts.models import UserProfile
 
-from .forms import LeagueForm,SeasonForm,SeasonRegisterForm
+from .forms import LeagueForm,SeasonForm,SeasonRegisterForm,RoundForm
 # from django.http import HttpResponseRedirect
 # from GameData.models import Games, Faction, Faction_Type, Sub_Faction
-from .models import League,Season, PlayerSeasonFaction#, Round,Match
+from .models import League,Season, PlayerSeasonFaction, Round#,Match
 
 
 def leagues(request):
@@ -61,7 +63,7 @@ class LeagueCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """can only be created by staff. fields support markdown"""
     model = League
     form_class = LeagueForm
-    permission_required = ('staff')
+
 
     def test_func(self):
 
@@ -112,8 +114,11 @@ class LeagueEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             raise Http404(f'{error}') from error
 
         if self.request.user.is_staff or (
-            self.request.user.profile.linked_admin_profile
-                in league.group_primary_admins.all()):
+            (self.request.user.profile.linked_admin_profile
+             in league.group.group_primary_admins.all())
+            or
+            (league in self.request.user.profile.leagues_managed.all())
+        ):
             return True
         return False
 
@@ -198,9 +203,7 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
-        if self.request.user.is_staff or (
-                self.request.user.profile.linked_admin_profile \
-                    in parent_league.group.group_primary_admins.all()):
+        if parent_league in self.request.user.profile.leagues_managed.all():
             return True
         return False
 
@@ -227,13 +230,7 @@ class SeasonEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
-        if self.request.user.is_staff or (
-            (self.request.user.profile.linked_admin_profile
-            in season.league.group.group_primary_admins.all())
-            or
-            (self.request.user.profile.linked_admin_profile
-            in season.league.group.group_secondary_admins.all())
-            ):
+        if season.league in self.request.user.profile.leagues_managed.all():
             return True
         return False
 
@@ -255,9 +252,6 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if self.request.user.is_staff or (
             (self.request.user.profile.linked_admin_profile
             in season.league.group.group_primary_admins.all())
-            or
-            (self.request.user.profile.linked_admin_profile
-            in season.league.group.group_secondary_admins.all())
             ):
             return True
         return False
@@ -320,3 +314,90 @@ class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             'league': Season.objects.get(pk=self.kwargs['pk']).league
         })
         return kwargs
+
+
+class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """can only be created by staff. fields support markdown"""
+    model = Round
+    form_class = RoundForm
+
+
+
+    def test_func(self):
+        """only primary admins and staff can edit"""
+        try:
+            season = Season.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+
+        if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
+            return True
+        return False
+
+
+    def form_valid(self, form):
+        # group_id cannot be null so we must add it to the form info
+
+        season = Season.objects.get(pk=self.kwargs['pk'])
+
+        if form.cleaned_data['automate_matchmaking']:
+            if season.seasons_rounds.all():
+                if  (season.seasons_rounds.order_by('pk').last().round_number
+                    >=
+                    (season.players_in_season.count()-1)):
+                    messages.error(
+                        self.request,
+                        'Automatic Matchmaking Does not support this many rounds. Rematches Will Occur.')
+                    return super().form_invalid(form)
+
+
+        form.instance.season = season
+        print(season.seasons_rounds)
+        if season.seasons_rounds.all():
+            print("errror")
+            form.instance.round_number=season.seasons_rounds.count()+1
+        else:
+            print("round number is 1: ")
+            form.instance.round_number=1
+        print(form.instance.round_number)
+        redirect_url=super().form_valid(form)
+
+
+
+        if form.cleaned_data['automate_matchmaking']:
+            pass
+
+        return redirect_url
+
+
+class RoundEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """only staff and the primary admins can edit."""
+    model = Round
+    form_class = RoundForm
+
+    def test_func(self):
+        """only primary admins and staff can edit"""
+        try:
+            round = Round.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if round.season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
+            return True
+        return False
+
+
+
+class RoundView(DetailView):
+    """Viewing leagues is public"""
+    model = Round
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in the leaguenav QuerySet
+        # context['league_nav'] = leagues_nav
+        # context['news']=calculate_news_bar()
+
+        return context

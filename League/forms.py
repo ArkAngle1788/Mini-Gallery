@@ -6,7 +6,7 @@ from GameData.models import Faction, SubFaction
 from UserAccounts.models import AdminProfile
 
 # from django.core.exceptions import ValidationError
-from .models import League, PlayerSeasonFaction, Season
+from .models import League, PlayerSeasonFaction, Season,Round
 
 basicattrs = {'class': 'bg-white','style':'width:40%'}
 default_format = {'style': 'width: 40%'}
@@ -99,3 +99,14 @@ class SeasonRegisterForm(forms.ModelForm):
                                                             faction_type__system=league.system)
         self.fields['sub_faction'].queryset = SubFaction.objects.filter(
                                                                     faction__faction_type__system=league.system)
+
+
+class RoundForm(forms.ModelForm):
+    """ text """
+    automate_matchmaking = forms.BooleanField(widget=forms.CheckboxInput(),required=False)
+    class Meta:
+        model = Round
+        fields = ["round_details"]
+        widgets = {
+            'round_details': forms.TextInput(basicattrs),
+        }

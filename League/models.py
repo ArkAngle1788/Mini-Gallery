@@ -118,7 +118,10 @@ class PlayerSeasonFaction(models.Model):
 
 
 class Round(models.Model):
-    """rounds consist of matches populated by all players"""
+    """
+    rounds consist of matches populated by all players
+    round_number is tracked to make displaying the round easy
+    """
     round_number = models.IntegerField()
     round_details = models.CharField(max_length=250, default='')
     season = models.ForeignKey(
@@ -129,10 +132,9 @@ class Round(models.Model):
 
     # this tells us where to go after we directly edit the round info
     def get_absolute_url(self):
-        """returns 'manage leagues' with league pk param"""
-        url = reverse('manage leagues')
-        url += f"?league={self.season.league.pk}"
-        return url
+        """returns 'round details'"""
+        return reverse('round details',
+            kwargs={'league': slugify(self.season.league.league_name), 'pk': self.pk})
 
 
 class Match(models.Model):

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% load user_group_admin_check_filters %}
+{% load markdownify %}
+
+<h1>
+{{round.season.league}}
+</h1>
+
+
+<h2>{{round.season}}</h2>
+
+<h3>{{round.round_name}}</h3>
+
+<p>{{round.round_details}}</p>
+
+
+<h3>Standings:</h3>
+
+{% include 'League/components/season_player_table.html' with season=round.season%}
+
+<br>
+
+
+{%if round.season.registration_active%}
+
+  {%if round.season.players_in_season.all %}
+    {% cycle '' 'You are registered!' as var %}
+    {%for psf in round.season.players_in_season.all %}
+      {%if request.user.profile == psf.profile %}
+        {%cycle var%}
+      {%endif%}
+    {%endfor%}
+
+    {%if var == 'You are registered!'%}
+      
+    {%else%}
+      <a href="{% url 'season register' round.season.id round.season.league.league_name|slugify %}">Register for this season of the league!</a>
+    {%endif%}
+  {%else%}
+    <a href="{% url 'season register' round.season.id round.season.league.league_name|slugify %}">Register for this season of the league!</a>
+  {%endif%}
+
+{%endif%}
+
+
+{% endblock %}
+
+
+<!-- SIDEBAR Left -->
+{% block navbar_left_content %}
+
+<div class="panel-heading">
+  <h3>Matches:</h3>
+</div>
+
+<div class='panel-body'>
+
+  {%if reverse_seasons%}
+    <ul>
+      {%for season in reverse_seasons|dictsort:"id" %}
+        <li><a href="{% url 'season details' season.id league.league_name|slugify %}">{{season.season_name}}</a></li>
+      {%endfor%}
+    </ul>
+  {%else%}
+    <ul>No Seasons Currently Registered</ul>
+  {%endif%}
+
+</div>
+
+<a href="{% url 'season details' round.season.id round.season.league|slugify %}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+</svg>Return to {{round.season}}</a>
+
+{%endblock%}
+
+<!-- SIDEBAR Right -->
+{% block navbar_right_content %}
+
+
+<h2>League Admins:</h2>
+{%if round.season.league.admins_managing.all %}
+  {%for admin in round.season.league.admins_managing.all %}
+    {{admin}}: {{admin.userprofile.user.first_name}} {{admin.userprofile.user.last_name}}<br>
+  {%endfor%}
+{%else%}
+  <br>No Admins
+{%endif%}
+
+
+{%if request.user.is_staff or round.season.league.group|is_primary_admin:request.user %}
+
+<div class="panel-heading">
+  <h3>League Administration Panel</h3>
+</div>
+
+<a href="{% url 'edit round' round.pk %}">Edit Round</a>
+
+{%endif%}
+
+{%endblock%}
