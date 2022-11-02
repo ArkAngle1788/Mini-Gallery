@@ -2,13 +2,14 @@
 from django import forms
 from django.db.models import Q
 from django_select2.forms import Select2MultipleWidget, Select2Widget
+
 from GameData.models import Faction, SubFaction
 from UserAccounts.models import AdminProfile
 
 # from django.core.exceptions import ValidationError
-from .models import League, PlayerSeasonFaction, Season,Round
+from .models import League, Match, PlayerSeasonFaction, Round, Season
 
-basicattrs = {'class': 'bg-white','style':'width:40%'}
+basicattrs = {'class': 'bg-white', 'style': 'width:40%'}
 default_format = {'style': 'width: 40%'}
 
 
@@ -33,7 +34,7 @@ class LeagueForm(forms.ModelForm):
             Q(id__in=group_var.group_primary_admins.all())
             |
             Q(id__in=group_var.group_secondary_admins.all())
-            )
+        )
 
         self.fields['admin_options'].queryset = self.admin_list
 
@@ -73,7 +74,7 @@ class SeasonForm(forms.ModelForm):
 class SeasonRegisterForm(forms.ModelForm):
     """ text """
 
-    registration_key= forms.CharField(
+    registration_key = forms.CharField(
         widget=forms.TextInput(basicattrs),
         help_text="get this code from a league admin")
     faction = forms.ModelChoiceField(
@@ -89,24 +90,70 @@ class SeasonRegisterForm(forms.ModelForm):
 
     class Meta:
         model = PlayerSeasonFaction
-        fields = ["faction", "sub_faction","registration_key"]
+        fields = ["faction", "sub_faction", "registration_key"]
 
     def __init__(self,  *args, **kwargs):
         league = kwargs.pop('league')
         super(SeasonRegisterForm, self).__init__(*args, **kwargs)
 
         self.fields['faction'].queryset = Faction.objects.filter(
-                                                            faction_type__system=league.system)
+            faction_type__system=league.system)
         self.fields['sub_faction'].queryset = SubFaction.objects.filter(
-                                                                    faction__faction_type__system=league.system)
+            faction__faction_type__system=league.system)
 
 
 class RoundForm(forms.ModelForm):
     """ text """
-    automate_matchmaking = forms.BooleanField(widget=forms.CheckboxInput(),required=False)
+    automate_matchmaking = forms.BooleanField(
+        widget=forms.CheckboxInput(), required=False)
+
     class Meta:
         model = Round
         fields = ["round_details"]
         widgets = {
             'round_details': forms.TextInput(basicattrs),
         }
+
+
+class MatchForm(forms.ModelForm):
+    """ text """
+
+    class Meta:
+        model = Match
+        fields = ["player1", "player2"]
+        widgets = {
+            'player1': Select2Widget,
+            'player2': Select2Widget,
+        }
+
+    def __init__(self,  *args, **kwargs):
+        season = kwargs.pop('season')
+        super(MatchForm, self).__init__(*args, **kwargs)
+
+        self.fields['player1'].queryset = PlayerSeasonFaction.objects.filter(
+            season=season).filter(matched=False)
+        self.fields['player2'].queryset = PlayerSeasonFaction.objects.filter(
+            season=season).filter(matched=False)
+
+
+class MatchEditForm(forms.ModelForm):
+    """ text """
+
+    class Meta:
+        model = Match
+        fields = ["winner", "player1_score", "player2_score"]
+        widgets = {
+            'winner': Select2Widget,
+        }
+
+    def __init__(self,  *args, **kwargs):
+
+        player1 = kwargs.pop('player1')
+        player2 = kwargs.pop('player2')
+        super(MatchEditForm, self).__init__(*args, **kwargs)
+
+        self.fields['winner'].queryset = PlayerSeasonFaction.objects.filter(
+            Q(id=player1.id)
+            |
+            Q(id=player2.id)
+        )

@@ -143,13 +143,13 @@ class Match(models.Model):
         Round, on_delete=models.CASCADE, related_name='round_matches')
 
     player1 = models.ForeignKey(
-        'UserAccounts.UserProfile', on_delete=models.SET_NULL,
+        PlayerSeasonFaction, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='player1')
     player2 = models.ForeignKey(
-        'UserAccounts.UserProfile', on_delete=models.SET_NULL,
+        PlayerSeasonFaction, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='player2')
     winner = models.ForeignKey(
-        'UserAccounts.UserProfile', on_delete=models.SET_NULL,
+        PlayerSeasonFaction, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='winner')
     player1_score = models.IntegerField(default=0)
     player2_score = models.IntegerField(default=0)
@@ -160,6 +160,14 @@ class Match(models.Model):
             matchup = str(self.round) + ": " + str(self.player1) + \
                 " vs. " + str(self.player2)
         else:
-            matchup = str(self.round) + ": " + str(self.player1.user) + \
-                " vs. " + str(self.player2.user)
+            matchup = str(self.round) + ": " + str(self.player1.profile) + \
+                " vs. " + str(self.player2.profile)
         return matchup
+
+
+    def get_absolute_url(self):
+        """returns 'round details'"""
+        return reverse('round details',
+                    kwargs={
+                        'league': slugify(self.round.season.league.league_name),
+                        'pk': self.round.pk})

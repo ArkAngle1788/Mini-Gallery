@@ -14,8 +14,14 @@
 
 <h2>{{season}}</h2>
 
-<p>info about rounds here</p>
+<h4>Current Round:</h4>
 
+  {% with season.seasons_rounds.all|dictsortreversed:"id"|first as most_recent_round %}
+    Round {{most_recent_round.round_number}}
+    {%if most_recent_round.round_matches.all%}
+      {% include 'League/components/matchups_table.html' with round=most_recent_round%}
+    {%endif%}
+  {%endwith%}
 
 {%if season.players_in_season.all %}
 <h3>Players registered:</h3>

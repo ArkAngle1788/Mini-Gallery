@@ -2,13 +2,15 @@
 # from Gallery.models import Professional
 # from ContentPost.models import ContentPost
 # from django.contrib.auth.decorators import login_required
-from itertools import count
+# from itertools import count
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.core.exceptions import (ImproperlyConfigured, ObjectDoesNotExist,
+                                    ValidationError)
 from django.http import Http404
 from django.shortcuts import render
+from django.template.defaultfilters import slugify
 from django.urls import reverse
-from django.contrib import messages
 # from django.urls import reverse_lazy
 # from .custom_functions import *
 # from django.db.models import Q
@@ -16,17 +18,16 @@ from django.contrib import messages
 # from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.core.exceptions import ValidationError
-
 
 from CommunityInfrastructure.models import Group
 from Gallery.models import UserImage
 from UserAccounts.models import UserProfile
 
-from .forms import LeagueForm,SeasonForm,SeasonRegisterForm,RoundForm
+from .forms import (LeagueForm, MatchEditForm, MatchForm, RoundForm,
+                    SeasonForm, SeasonRegisterForm)
 # from django.http import HttpResponseRedirect
 # from GameData.models import Games, Faction, Faction_Type, Sub_Faction
-from .models import League,Season, PlayerSeasonFaction, Round#,Match
+from .models import League, Match, PlayerSeasonFaction, Round, Season
 
 
 def leagues(request):
@@ -64,7 +65,6 @@ class LeagueCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = League
     form_class = LeagueForm
 
-
     def test_func(self):
 
         try:
@@ -73,8 +73,8 @@ class LeagueCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             raise Http404(f'{error}') from error
 
         if self.request.user.is_staff or (
-                self.request.user.profile.linked_admin_profile \
-                    in owning_group.group_primary_admins.all()):
+            self.request.user.profile.linked_admin_profile
+                in owning_group.group_primary_admins.all()):
             return True
         return False
 
@@ -156,7 +156,6 @@ class LeagueDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """only staff or primary admins can delete leagues"""
     model = League
 
-
     def test_func(self):
         """only primary admins and staff can delete"""
         try:
@@ -181,7 +180,6 @@ class LeagueView(DetailView):
     """Viewing leagues is public"""
     model = League
 
-
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
@@ -191,13 +189,14 @@ class LeagueView(DetailView):
         context['reverse_seasons'] = self.object.child_season.all().order_by('-pk')
         return context
 
+
 class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """url param is the league the season belongs to"""
     model = Season
     form_class = SeasonForm
 
     def test_func(self):
-
+        """must manage league to access"""
         try:
             parent_league = League.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
@@ -206,7 +205,6 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if parent_league in self.request.user.profile.leagues_managed.all():
             return True
         return False
-
 
     def form_valid(self, form):
         # group_id cannot be null so we must add it to the form info
@@ -224,7 +222,7 @@ class SeasonEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = SeasonForm
 
     def test_func(self):
-        """only primary admins and staff can edit"""
+        """must manage league to access"""
         try:
             season = Season.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
@@ -235,12 +233,9 @@ class SeasonEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return False
 
 
-
-
 class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """only staff or primary admins can delete leagues"""
     model = Season
-
 
     def test_func(self):
         """only primary admins and staff can edit"""
@@ -251,8 +246,8 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
         if self.request.user.is_staff or (
             (self.request.user.profile.linked_admin_profile
-            in season.league.group.group_primary_admins.all())
-            ):
+             in season.league.group.group_primary_admins.all())
+        ):
             return True
         return False
 
@@ -266,11 +261,6 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class SeasonView(DetailView):
     """Viewing leagues is public"""
     model = Season
-
-
-# for create round to be a valid call registration must be closed since createing a round will also create matchups.
-# we can probably pass a parameter with the create round request that designates if we want to have manual or automatic matchmaking
-
 
 
 class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -290,14 +280,14 @@ class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
         return True
 
-
     def form_valid(self, form):
         # group_id cannot be null so we must add it to the form info
 
-        key=form.cleaned_data['registration_key']
-        season=Season.objects.get(pk=self.kwargs['pk'])
-        if key!=season.registration_key:
-            form.add_error('registration_key',ValidationError(('Invalid value'), code='invalid'))
+        key = form.cleaned_data['registration_key']
+        season = Season.objects.get(pk=self.kwargs['pk'])
+        if key != season.registration_key:
+            form.add_error('registration_key', ValidationError(
+                ('Invalid value'), code='invalid'))
             return super().form_invalid(form)
 
         form.instance.profile = self.request.user.profile
@@ -321,20 +311,22 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Round
     form_class = RoundForm
 
-
-
     def test_func(self):
-        """only primary admins and staff can edit"""
+        """must manage league to access"""
         try:
             season = Season.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
+        if season.registration_active:
+            messages.error(
+                self.request,
+                'Creating a round can only be done when registration is closed.')
+            return False
 
         if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
             return True
         return False
-
 
     def form_valid(self, form):
         # group_id cannot be null so we must add it to the form info
@@ -343,27 +335,25 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
         if form.cleaned_data['automate_matchmaking']:
             if season.seasons_rounds.all():
-                if  (season.seasons_rounds.order_by('pk').last().round_number
+                if (season.seasons_rounds.order_by('pk').last().round_number
                     >=
-                    (season.players_in_season.count()-1)):
+                        (season.players_in_season.count()-1)):
                     messages.error(
                         self.request,
-                        'Automatic Matchmaking Does not support this many rounds. Rematches Will Occur.')
+                        'Automatic Matchmaking Does not support this many rounds. \
+                            Rematches Will Occur.')
                     return super().form_invalid(form)
-
 
         form.instance.season = season
         print(season.seasons_rounds)
         if season.seasons_rounds.all():
             print("errror")
-            form.instance.round_number=season.seasons_rounds.count()+1
+            form.instance.round_number = season.seasons_rounds.count()+1
         else:
             print("round number is 1: ")
-            form.instance.round_number=1
+            form.instance.round_number = 1
         print(form.instance.round_number)
-        redirect_url=super().form_valid(form)
-
-
+        redirect_url = super().form_valid(form)
 
         if form.cleaned_data['automate_matchmaking']:
             pass
@@ -377,21 +367,143 @@ class RoundEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = RoundForm
 
     def test_func(self):
-        """only primary admins and staff can edit"""
-        try:
-            round = Round.objects.get(pk=self.kwargs['pk'])
-        except ObjectDoesNotExist as error:
-            raise Http404(f'{error}') from error
+        """must manage league to access"""
 
-        if round.season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
+        if (
+                round.season.league
+                in
+                self.request.user.profile.linked_admin_profile.leagues_managed.all()):
             return True
         return False
 
 
-
 class RoundView(DetailView):
-    """Viewing leagues is public"""
+    """Viewing rounds is public"""
     model = Round
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in the leaguenav QuerySet
+        # context['league_nav'] = leagues_nav
+        # context['news']=calculate_news_bar()
+
+        return context
+
+
+class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """comment"""
+    model = Match
+    form_class = MatchForm
+
+    def test_func(self):
+        """must manage league to access"""
+        try:
+            round_var = Round.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if (round_var.season.league
+            in
+                self.request.user.profile.linked_admin_profile.leagues_managed.all()):
+            return True
+        return False
+
+    def form_valid(self, form):
+        # group_id cannot be null so we must add it to the form info
+        if form.cleaned_data['player1'] == form.cleaned_data['player2']:
+            form.add_error('player2', ValidationError(
+                ('A player cannot be matched against themselves'), code='invalid'))
+            return super().form_invalid(form)
+        round_var = Round.objects.get(pk=self.kwargs['pk'])
+        form.instance.round = round_var
+
+        return_url = super().form_valid(form)
+
+        self.object.player1.matched = True
+        self.object.player2.matched = True
+        self.object.player1.save()
+        self.object.player2.save()
+
+        return return_url
+
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        kwargs.update({
+            'season': Round.objects.get(pk=self.kwargs['pk']).season
+        })
+        return kwargs
+
+
+class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """must manage league to access"""
+    model = Match
+    form_class = MatchEditForm
+
+    def test_func(self):
+        """must manage league to access"""
+        try:
+            match = Match.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if (match.round.season.league
+            in
+                self.request.user.profile.linked_admin_profile.leagues_managed.all()):
+            return True
+        return False
+
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        kwargs.update({
+            'player1': self.object.player1,
+            'player2': self.object.player2
+        })
+        return kwargs
+
+
+class MatchDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """only staff or primary admins can delete leagues"""
+    model = Match
+
+    def test_func(self):
+        """must manage league to access"""
+        try:
+            match = Match.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if (match.round.season.league
+            in
+                self.request.user.profile.linked_admin_profile.leagues_managed.all()):
+            return True
+        return False
+
+    def form_valid(self, form):
+
+        self.object.player1.matched = False
+        self.object.player2.matched = False
+        self.object.player1.save()
+        self.object.player2.save()
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        url = reverse('round details', args=[
+                      self.object.round.id, slugify(self.object.round.season.league)])
+
+        return url
+
+
+class MatchView(DetailView):
+    """Viewing Matches is public"""
+    model = Match
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context

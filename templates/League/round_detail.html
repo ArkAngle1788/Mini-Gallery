@@ -11,9 +11,15 @@
 
 <h2>{{round.season}}</h2>
 
-<h3>{{round.round_name}}</h3>
+<h3>Round {{round.round_number}}</h3>
 
 <p>{{round.round_details}}</p>
+
+
+
+  {%if round.round_matches.all%}
+    {% include 'League/components/matchups_table.html'%}
+  {%endif%}
 
 
 <h3>Standings:</h3>
@@ -57,14 +63,14 @@
 
 <div class='panel-body'>
 
-  {%if reverse_seasons%}
+  {%if round.round_matches.all%}
     <ul>
-      {%for season in reverse_seasons|dictsort:"id" %}
-        <li><a href="{% url 'season details' season.id league.league_name|slugify %}">{{season.season_name}}</a></li>
+      {%for match in round.round_matches.all|dictsort:"id" %}
+        <li><a href="{% url 'match details' match.id match.round.season.league.league_name|slugify %}">{{match.player1}} vs. {{match.player2}}</a></li>
       {%endfor%}
     </ul>
   {%else%}
-    <ul>No Seasons Currently Registered</ul>
+    <ul>No Matches Currently Registered</ul>
   {%endif%}
 
 </div>
@@ -97,6 +103,7 @@
 </div>
 
 <a href="{% url 'edit round' round.pk %}">Edit Round</a>
+<a href="{% url 'create match' round.pk %}">Create Match</a>
 
 {%endif%}
 

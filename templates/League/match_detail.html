@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% load user_group_admin_check_filters %}
+{% load markdownify %}
+
+<h1>
+{{match.round.season.league}}
+</h1>
+
+
+<h2>{{match.round.season}}</h2>
+
+<h3>Round {{match.round.round_number}}</h3>
+
+<h4>Match Details</h4>
+
+<p>{{match}}</p>
+
+
+<h3>Standings:</h3>
+
+{% include 'League/components/season_player_table.html' with season=match.round.season%}
+
+<br>
+
+
+{%if match.round.season.registration_active%}
+
+  {%if match.round.season.players_in_season.all %}
+    {% cycle '' 'You are registered!' as var %}
+    {%for psf in match.round.season.players_in_season.all %}
+      {%if request.user.profile == psf.profile %}
+        {%cycle var%}
+      {%endif%}
+    {%endfor%}
+
+    {%if var == 'You are registered!'%}
+      
+    {%else%}
+      <a href="{% url 'season register' match.round.season.id match.round.season.league.league_name|slugify %}">Register for this season of the league!</a>
+    {%endif%}
+  {%else%}
+    <a href="{% url 'season register' match.round.season.id match.round.season.league.league_name|slugify %}">Register for this season of the league!</a>
+  {%endif%}
+
+{%endif%}
+
+
+{% endblock %}
+
+
+<!-- SIDEBAR Left -->
+{% block navbar_left_content %}
+
+<div class="panel-heading">
+  <h3>Matches:</h3>
+</div>
+
+<div class='panel-body'>
+
+  {%if match.round.round_matches.all%}
+    <ul>
+      {%for match_var in match.round.round_matches.all|dictsort:"id" %}
+        <li><a href="{% url 'match details' match_var.id match_var.round.season.league.league_name|slugify %}">{{match_var.player1}} vs. {{match_var.player2}}</a></li>
+      {%endfor%}
+    </ul>
+  {%else%}
+    <ul>No Matches Currently Registered</ul>
+  {%endif%}
+
+</div>
+
+<a href="{% url 'round details' match.round.id match.round.season.league|slugify %}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+</svg>Return to {{match.round.round_name}}</a>
+
+{%endblock%}
+
+<!-- SIDEBAR Right -->
+{% block navbar_right_content %}
+
+
+<h2>League Admins:</h2>
+{%if match.round.season.league.admins_managing.all %}
+  {%for admin in match.round.season.league.admins_managing.all %}
+    {{admin}}: {{admin.userprofile.user.first_name}} {{admin.userprofile.user.last_name}}<br>
+  {%endfor%}
+{%else%}
+  <br>No Admins
+{%endif%}
+
+
+{%if request.user.is_staff or match.round.season.league.group|is_primary_admin:request.user %}
+
+<div class="panel-heading">
+  <h3>League Administration Panel</h3>
+</div>
+
+<a href="{% url 'edit match' match.pk %}">Edit Match</a>
+<a href="{% url 'delete match' match.pk %}">Delete Match</a>
+
+{%endif%}
+
+{%endblock%}

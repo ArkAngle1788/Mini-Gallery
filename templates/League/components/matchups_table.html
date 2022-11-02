@@ -1,0 +1,22 @@
+<table class="table table-bordered table-hover" style="width:100%">
+      <thead class="thead-light">
+        <tr>
+          <th>Player</th>
+          <th>Faction</th>
+          <th>--</th>
+          <th>Faction</th>
+          <th>Player</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for match in round.round_matches.all %}
+        <tr>
+          <td>{{match.player1.profile}}</td>
+          <td>{{match.player1.faction}}{% if match.player1.sub_faction %} -- {{match.player1.sub_faction}}{% endif %}</td>
+          <td>VS.</td>
+          <td>{{match.player2.faction}}{% if match.player2.sub_faction %} -- {{match.player2.sub_faction}}{% endif %}</td>
+          <td>{{match.player2.profile}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
