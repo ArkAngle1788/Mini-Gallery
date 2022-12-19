@@ -57,6 +57,8 @@ class Season(models.Model):
 
     def __str__(self):
         return str(self.league.league_name) + " " + str(self.season_name)
+    def concise_str(self):
+        return str(self.season_name)
 
     def get_absolute_url(self):
         """returns 'season details'"""
@@ -110,6 +112,16 @@ class PlayerSeasonFaction(models.Model):
 
         # admin panel uses this so we want full information
         return title
+    def concise_str(self):
+        player_name = str(self.profile.user)
+        season_name = str(self.season.concise_str())
+        faction_name = str(self.faction)
+        title = player_name + "   ------    " + \
+            season_name + "   ------   " + faction_name
+        if self.sub_faction:
+            title = title + "   ------   " + str(self.sub_faction)
+
+        return title
 
     def get_absolute_url(self):
         """returns 'season details'"""
@@ -129,6 +141,8 @@ class Round(models.Model):
 
     def __str__(self):
         return str(self.season) + " Round " + str((self.round_number))
+    def concise_str(self):
+        return "Round " + str((self.round_number))
 
     # this tells us where to go after we directly edit the round info
     def get_absolute_url(self):
@@ -164,6 +178,14 @@ class Match(models.Model):
                 " vs. " + str(self.player2.profile)
         return matchup
 
+    def concise_str(self):
+        if self.round.season.league.display_name:
+            matchup = str(self.player1.profile.user.username) + \
+                " vs. " + str(self.player2.profile.user.username)
+        else:
+            matchup = str(self.player1.profile) + \
+                " vs. " + str(self.player2.profile)
+        return matchup
 
     def get_absolute_url(self):
         """returns 'round details'"""

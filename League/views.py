@@ -307,7 +307,10 @@ class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
 class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    """can only be created by staff. fields support markdown"""
+    """
+    fields support markdown
+    locks in the previous rounds w:l record string
+    """
     model = Round
     form_class = RoundForm
 
@@ -439,7 +442,9 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
 class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    """must manage league to access"""
+    """
+    W:L record string is not generated until the round is closed
+    """
     model = Match
     form_class = MatchEditForm
 

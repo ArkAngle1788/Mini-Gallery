@@ -144,6 +144,8 @@ class MatchEditForm(forms.ModelForm):
         fields = ["winner", "player1_score", "player2_score"]
         widgets = {
             'winner': Select2Widget,
+            'player1_score':forms.NumberInput(basicattrs),
+            'player2_score':forms.NumberInput(basicattrs),
         }
 
     def __init__(self,  *args, **kwargs):
@@ -157,3 +159,4 @@ class MatchEditForm(forms.ModelForm):
             |
             Q(id=player2.id)
         )
+
