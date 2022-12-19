@@ -20,7 +20,7 @@
       <!-- this was the original code before i just manually built the link to get the parameters I wanted. -->
       {% include "socialaccount/snippets/provider_list.html" with process="login" scope="pages_show_list,pages_read_engagement,pages_manage_posts" %}
       {%endcomment%}
-      <li><a href="https://nl.purplesquid.ca/accounts/facebook/login/?process=login&scope=pages_show_list%2Cpages_read_engagement%2Cpages_manage_posts&next=/organizations/paintingstudio/{{studio.slug}}/{{studio.id}}">Facebook</a></li>
+      <li><a href="/accounts/facebook/login/?process=login&scope=pages_show_list%2Cpages_read_engagement%2Cpages_manage_posts&next=/organizations/paintingstudio/{{studio.slug}}/{{studio.id}}">Facebook</a></li>
     </ul>
   </div>
 
