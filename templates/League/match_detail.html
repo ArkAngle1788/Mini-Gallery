@@ -15,8 +15,36 @@
 
 <h4>Match Details</h4>
 
-<p>{{match}}</p>
+<div class="row">
 
+  <div class="col-md-5 gy-3"align='center'>
+    <b><u>{{match.player1.profile}}</u></b>
+    <br>
+    {{match.player1.faction}}
+    <br>
+    {%if match.player1.sub_faction == null %}{%else%}{{match.player1.sub_faction}}{%endif%}
+    <br>
+    Points:{{match.player1_score}}
+  </div>
+  <div class="col-md-2 gy-3"align='center'>
+    <b><u>VS</u></b>
+    <br>
+    <br>
+    <u>Winner:</u>
+    <br>
+    {%if match.winner == null %}Undecided{%else%}{{match.winner.profile}}{%endif%}
+  </div>
+  <div class="col-md-5 gy-3"align='center'>
+    <b><u>{{match.player2.profile}}</u></b>
+    <br>
+    {{match.player2.faction}}
+    <br>
+    {%if match.player2.sub_faction == null %}{%else%}{{match.player2.sub_faction}}{%endif%}
+    <br>
+    Points:{{match.player2_score}}
+  </div>
+
+</div>
 
 <h3>Standings:</h3>
 
@@ -62,7 +90,14 @@
   {%if match.round.round_matches.all%}
     <ul>
       {%for match_var in match.round.round_matches.all|dictsort:"id" %}
-        <li><a href="{% url 'match details' match_var.id match_var.round.season.league.league_name|slugify %}">{{match_var.player1}} vs. {{match_var.player2}}</a></li>
+      <li>
+        {%if match_var == match %}
+          <b>{{match_var.concise_str}}</b>
+        {%else%}
+          <a href="{% url 'match details' match_var.id match_var.round.season.league.league_name|slugify %}">{{match_var.concise_str}}</a>
+        {%endif%}
+          
+        </li>
       {%endfor%}
     </ul>
   {%else%}
@@ -74,7 +109,7 @@
 <a href="{% url 'round details' match.round.id match.round.season.league|slugify %}">
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
-</svg>Return to {{match.round.round_name}}</a>
+</svg>Return to {{match.round.concise_str}}</a>
 
 {%endblock%}
 

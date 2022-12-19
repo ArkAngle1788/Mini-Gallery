@@ -10,13 +10,25 @@
       </thead>
       <tbody>
       {% for match in round.round_matches.all %}
-        <tr>
+        <tr data-href="{%url 'match details' match.id match.round.season.league.league_name|slugify%}">
+          
           <td>{{match.player1.profile}}</td>
           <td>{{match.player1.faction}}{% if match.player1.sub_faction %} -- {{match.player1.sub_faction}}{% endif %}</td>
           <td>VS.</td>
           <td>{{match.player2.faction}}{% if match.player2.sub_faction %} -- {{match.player2.sub_faction}}{% endif %}</td>
           <td>{{match.player2.profile}}</td>
+          
         </tr>
       {% endfor %}
       </tbody>
     </table>
+
+  
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script>
+      $('tr[data-href]').on("click", function() {
+        document.location = $(this).data('href');
+      });
+    </script>
+
