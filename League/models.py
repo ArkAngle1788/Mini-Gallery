@@ -113,6 +113,7 @@ class PlayerSeasonFaction(models.Model):
         # admin panel uses this so we want full information
         return title
     def concise_str(self):
+        """prints less verbose PSF info"""
         player_name = str(self.profile.user)
         season_name = str(self.season.concise_str())
         faction_name = str(self.faction)
@@ -142,6 +143,7 @@ class Round(models.Model):
     def __str__(self):
         return str(self.season) + " Round " + str((self.round_number))
     def concise_str(self):
+        """prints Round X"""
         return "Round " + str((self.round_number))
 
     # this tells us where to go after we directly edit the round info
@@ -179,6 +181,7 @@ class Match(models.Model):
         return matchup
 
     def concise_str(self):
+        """prints name vs. name"""
         if self.round.season.league.display_name:
             matchup = str(self.player1.profile.user.username) + \
                 " vs. " + str(self.player2.profile.user.username)

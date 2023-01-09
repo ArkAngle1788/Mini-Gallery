@@ -15,36 +15,37 @@
 
 <h4>Match Details</h4>
 
-<div class="row">
 
-  <div class="col-md-5 gy-3"align='center'>
-    <b><u>{{match.player1.profile}}</u></b>
-    <br>
-    {{match.player1.faction}}
-    <br>
-    {%if match.player1.sub_faction == null %}{%else%}{{match.player1.sub_faction}}{%endif%}
-    <br>
-    Points:{{match.player1_score}}
-  </div>
-  <div class="col-md-2 gy-3"align='center'>
-    <b><u>VS</u></b>
-    <br>
-    <br>
-    <u>Winner:</u>
-    <br>
-    {%if match.winner == null %}Undecided{%else%}{{match.winner.profile}}{%endif%}
-  </div>
-  <div class="col-md-5 gy-3"align='center'>
-    <b><u>{{match.player2.profile}}</u></b>
-    <br>
-    {{match.player2.faction}}
-    <br>
-    {%if match.player2.sub_faction == null %}{%else%}{{match.player2.sub_faction}}{%endif%}
-    <br>
-    Points:{{match.player2_score}}
-  </div>
 
-</div>
+<table class="table table-bordered table-hover" style="width:100%">
+  <thead class="thead-light">
+    <tr>
+      <th>Player</th>
+      <th>Faction</th>
+      <th>Points</th>
+      <th>--</th>
+      <th>Faction</th>
+      <th>Player</th>
+      <th>Points</th>
+      <th>Winner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr data-href="{%url 'match details' match.id match.round.season.league.league_name|slugify%}">
+      
+      <td>{{match.player1.profile}}</td>
+      <td>{{match.player1.faction}}{% if match.player1.sub_faction %} -- {{match.player1.sub_faction}}{% endif %}</td>
+      <td>{{match.player1_score}}</td>
+      <td>VS.</td>
+      <td>{{match.player2.faction}}{% if match.player2.sub_faction %} -- {{match.player2.sub_faction}}{% endif %}</td>
+      <td>{{match.player2.profile}}</td>
+      <td>{{match.player2_score}}</td>
+      <td>{%if match.winner %}{{match.winner.profile}}{%else%}Match Not Played{%endif%}</td>
+      
+      
+    </tr>
+  </tbody>
+</table>
 
 <h3>Standings:</h3>
 

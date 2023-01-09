@@ -125,6 +125,7 @@ class MatchForm(forms.ModelForm):
             'player1': Select2Widget,
             'player2': Select2Widget,
         }
+        
 
     def __init__(self,  *args, **kwargs):
         season = kwargs.pop('season')
@@ -139,6 +140,9 @@ class MatchForm(forms.ModelForm):
 class MatchEditForm(forms.ModelForm):
     """ text """
 
+    player1_name='player1'
+    player2_name='player2'
+
     class Meta:
         model = Match
         fields = ["winner", "player1_score", "player2_score"]
@@ -148,12 +152,15 @@ class MatchEditForm(forms.ModelForm):
             'player2_score':forms.NumberInput(basicattrs),
         }
 
+
     def __init__(self,  *args, **kwargs):
 
         player1 = kwargs.pop('player1')
         player2 = kwargs.pop('player2')
+ 
         super(MatchEditForm, self).__init__(*args, **kwargs)
-
+        self.fields['player1_score'].label=player1.profile
+        self.fields['player2_score'].label=player2.profile
         self.fields['winner'].queryset = PlayerSeasonFaction.objects.filter(
             Q(id=player1.id)
             |
