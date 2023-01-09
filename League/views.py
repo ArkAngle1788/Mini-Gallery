@@ -8,14 +8,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import (ImproperlyConfigured, ObjectDoesNotExist,
                                     ValidationError)
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 # from django.urls import reverse_lazy
 # from .custom_functions import *
 # from django.db.models import Q
 # from django.http import HttpResponseNotFound
-# from django.views import View
+from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
@@ -449,16 +449,30 @@ class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = MatchEditForm
 
     def test_func(self):
-        """must manage league to access"""
+        """must be one of the two players in a match during the round or a league admin"""
         try:
             match = Match.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
+        if self.request.user.is_staff:
+            return True
+
         if (match.round.season.league
             in
                 self.request.user.profile.linked_admin_profile.leagues_managed.all()):
             return True
+
+        # users in a match can edit results while the match is the most recent
+        if match.player1 == self.request.user.profile.psf\
+            or match.player2 == self.request.user.profile.psf:
+            if match.round.season.seasons_rounds.last == match.round:
+                return True
+            messages.error(
+                self.request,
+                'You can only edit results for the current round. \
+                    Contact and Admin if old results are invalid.')
+
         return False
 
     def get_form_kwargs(self):
@@ -518,3 +532,31 @@ class MatchView(DetailView):
         # context['news']=calculate_news_bar()
 
         return context
+
+
+class SubmitResults(LoginRequiredMixin, View):
+    """
+    shows active registerd leagues or
+    redirects if there is only one
+    """
+
+    def get(self, request, *args, **kwargs):
+        """expects no args"""
+
+        matches = []
+
+        for psf in self.request.user.profile.psf.all():
+            if psf.season.season_active:
+                last_round = psf.season.seasons_rounds.all().last()
+                for match in last_round.round_matches.all():
+                    if request.user.profile == match.player1.profile\
+                        or request.user.profile == match.player2.profile:
+                        matches += [match]
+
+        if len(matches) == 1:
+            url = reverse('edit match', args=[matches[0].id])
+
+            return redirect(url)
+
+        return render(request, 'League/submit_results.html',
+                      {'matches': matches})

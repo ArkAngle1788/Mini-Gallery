@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h1>Submit Results</h1>
+
+{%if matches%}
+    {%for match in matches%}
+    <br>
+    {{match.round.season}}: <a href="{% url 'edit match' match.pk %}">{{match.concise_str}}</a>
+    {%endfor%}
+    <br>
+{%else%}
+    <p>You are not registered in any active leagues.</p>
+{%endif%}
+
+{% endblock %}
+
+
+<!-- SIDEBAR Left -->
+{% block navbar_left_content %}
+
+<p>left navbar</p>
+
+{%endblock%}
+
+<!-- SIDEBAR Right -->
+{% block navbar_right_content %}
+
+{% comment %} {% include 'CommunityInfrastructure/sidebar_right.html' %} {% endcomment %}
+
+{%endblock%}

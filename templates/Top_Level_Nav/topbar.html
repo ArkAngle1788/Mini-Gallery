@@ -13,6 +13,9 @@
         <a class="nav-link {% if '/' == request.path %} active{% endif %} " aria-current="page"href="{% url 'home' %}">Home</a>
         <a class="nav-link {% if '/gallery' in request.path %} active{% endif %}" href="{% url 'gallery home' %}?order=popularity">Gallery</a>
         <a class="nav-link {% if '/organizations' in request.path %} active{% endif %}" href="{% url 'groups top' %}">Groups & Organizations</a>
+
+        <a class="nav-link {% if '/submit_results' in request.path %} active{% endif %}" href="{% url 'submit results' %}">Submit Results</a>
+
         <a class="nav-link {% if '/news&content' in request.path %} active{% endif %}" href="{% url 'blog list' %}">Announcements</a>
         <a class="nav-link {% if '/about' in request.path %} active{% endif %}" href="{% url 'about' %}">About</a>
         <a class="nav-link {% if '/contact' in request.path %} active{% endif %}" href="{% url 'contact' %}">Contact</a>

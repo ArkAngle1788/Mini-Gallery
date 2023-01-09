@@ -5,7 +5,7 @@ from .views import (LeagueCreate, LeagueDelete, LeagueEdit, LeagueView,
                     SeasonCreate, SeasonDelete, SeasonEdit, SeasonView,
                     SeasonRegister, RoundCreate, RoundEdit, RoundView,
                     MatchCreateManual, MatchEdit, MatchDelete, MatchView,
-                    leagues)
+                    SubmitResults,leagues)
 
 urlpatterns = [
 
@@ -26,6 +26,7 @@ path('season/round/match/<int:pk>/manual_match',MatchCreateManual.as_view(),name
 path('season/round/match/<int:pk>/edit', MatchEdit.as_view(), name='edit match'),
 path('season/round/match/<int:pk>/delete', MatchDelete.as_view(), name='delete match'),
 path('season/round/match/details/<int:pk>/<str:league>',MatchView.as_view(), name='match details'),
+path('season/round/match/submit_results',SubmitResults.as_view(),name='submit results'),
 
 
 # path('manage_leagues',views.manage_leagues,name='manage leagues'),
