@@ -315,21 +315,48 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = RoundForm
 
     def test_func(self):
-        """must manage league to access"""
+        """must manage league or be staff to access"""
         try:
             season = Season.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
-        if season.registration_active:
-            messages.error(
-                self.request,
-                'Creating a round can only be done when registration is closed.')
-            return False
+        if self.request.user.is_staff:
+            return True
 
         if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
             return True
         return False
+
+    def get(self, request, *args, **kwargs):
+        """ensures you have closed registration before making new rounds"""
+
+        season = Season.objects.get(pk=self.kwargs['pk'])
+
+        if season.registration_active:
+            messages.error(
+                self.request,
+                'Creating a round can only be done when registration is closed.')
+
+            url = reverse('season details', args=[self.kwargs['pk'],slugify(Season.objects.get(pk=self.kwargs['pk']).league)])
+            return redirect(url)
+
+        return super().get(self,request,*args,**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """ensures you have closed registration before making new rounds"""
+
+        season = Season.objects.get(pk=self.kwargs['pk'])
+
+        if season.registration_active:
+            messages.error(
+                self.request,
+                'Creating a round can only be done when registration is closed.')
+
+            url = reverse('season details', args=[self.kwargs['pk'],slugify(Season.objects.get(pk=self.kwargs['pk']).league)])
+            return redirect(url)
+
+        return super().post(self,request,*args,**kwargs)
 
     def form_valid(self, form):
         # group_id cannot be null so we must add it to the form info
@@ -348,17 +375,16 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                     return super().form_invalid(form)
 
         form.instance.season = season
-        print(season.seasons_rounds)
+        # check if this is the first round being created
         if season.seasons_rounds.all():
-            print("errror")
+            # if rounds exist we also need to lock in the results of previous rounds
             form.instance.round_number = season.seasons_rounds.count()+1
         else:
-            print("round number is 1: ")
             form.instance.round_number = 1
-        print(form.instance.round_number)
         redirect_url = super().form_valid(form)
 
         if form.cleaned_data['automate_matchmaking']:
+            # this will create matches when implemented
             pass
 
         return redirect_url
