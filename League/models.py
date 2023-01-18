@@ -89,16 +89,17 @@ class PlayerSeasonFaction(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE,
                                null=True, blank=True, related_name='players_in_season')
 
-    # this is updated in save_matchup
-    previous_opponents = models.ManyToManyField(
-        'UserAccounts.UserProfile', blank=True, related_name='previous_opponents')
+    # next four variables are updated in round_create
+    # previous_opponents = models.ManyToManyField(
+    #     'League.PlayerSeasonFaction', blank=True, related_name='previous_opponents')
+    previous_opponents=models.ManyToManyField("self",blank=True)
 
     score = models.IntegerField(default=0)
     wlrecord = models.CharField(max_length=100, default="-")
 
     # each time a new round is created this will need to be reset to False
     # right now this should only be looked at for active players so the
-    # value can be true from previous rounds as long as it's reset each round
+    # value can be true from previous rounds as long as it's reset each round (currently reset when creating the next round)
     matched = models.BooleanField(default=False)
 
     def __str__(self):

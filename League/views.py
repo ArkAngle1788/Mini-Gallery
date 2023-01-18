@@ -378,14 +378,41 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         # check if this is the first round being created
         if season.seasons_rounds.all():
             # if rounds exist we also need to lock in the results of previous rounds
+
+            for match in season.seasons_rounds.last().round_matches.all():
+                match.player1.previous_opponents.add(match.player2)
+                match.player1.score+=match.player1_score
+                match.player1.matched=False
+
+                match.player2.previous_opponents.add(match.player1)
+                match.player2.score+=match.player2_score
+                match.player2.matched=False
+           
+                if match.winner==match.player1:
+                    match.player1.wlrecord+="W-" 
+                    match.player2.wlrecord+="L-"
+                else:
+                    match.player1.wlrecord+="L-"
+                    match.player2.wlrecord+="W-"
+
+                match.player1.save()
+                match.player2.save()
+
+                    # NEED TO ADD TIE LOGIC
+                    
+
+
+
             form.instance.round_number = season.seasons_rounds.count()+1
+
         else:
             form.instance.round_number = 1
+            # also close registration?
         redirect_url = super().form_valid(form)
 
         if form.cleaned_data['automate_matchmaking']:
             # this will create matches when implemented
-            pass
+            print('automate matchmaking here!')
 
         return redirect_url
 
@@ -444,6 +471,9 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             form.add_error('player2', ValidationError(
                 ('A player cannot be matched against themselves'), code='invalid'))
             return super().form_invalid(form)
+
+            # also check previously played
+
         round_var = Round.objects.get(pk=self.kwargs['pk'])
         form.instance.round = round_var
 
