@@ -466,6 +466,9 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return False
 
     def form_valid(self, form):
+
+        round_var = Round.objects.get(pk=self.kwargs['pk'])
+
         # group_id cannot be null so we must add it to the form info
         if form.cleaned_data['player1'] == form.cleaned_data['player2']:
             form.add_error('player2', ValidationError(
@@ -473,8 +476,14 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return super().form_invalid(form)
 
             # also check previously played
+        if not round_var.season.allow_repeat_matches:
+            # if form.cleaned_data['player1'].previous_opponents.conatins(form.cleaned_data['player2']):
+            if form.cleaned_data['player2'] in form.cleaned_data['player1'].previous_opponents.all():
+                form.add_error('player2', ValidationError(
+                    ('These players have already been matched against each other'), code='invalid'))
+                return super().form_invalid(form)
 
-        round_var = Round.objects.get(pk=self.kwargs['pk'])
+        
         form.instance.round = round_var
 
         return_url = super().form_valid(form)
