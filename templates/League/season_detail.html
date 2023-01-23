@@ -17,7 +17,11 @@
 <h4>Current Round:</h4>
 
   {% with season.seasons_rounds.all|dictsortreversed:"id"|first as most_recent_round %}
-    Round {{most_recent_round.round_number}}
+    {%if most_recent_round%}
+      Round {{most_recent_round.round_number}}
+    {%else%}
+      Season is still in registration
+    {%endif%}
     {%if most_recent_round.round_matches.all%}
       {% include 'League/components/matchups_table.html' with round=most_recent_round%}
     {%endif%}

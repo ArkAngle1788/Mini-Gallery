@@ -15,7 +15,7 @@
 
 <p>{{round.round_details}}</p>
 
-
+<h5>Click on a match to view details</h5>
 
   {%if round.round_matches.all%}
     {% include 'League/components/matchups_table.html'%}
@@ -58,19 +58,19 @@
 {% block navbar_left_content %}
 
 <div class="panel-heading">
-  <h3>Matches:</h3>
+  <h3>Rounds:</h3>
 </div>
 
 <div class='panel-body'>
 
-  {%if round.round_matches.all%}
+  {%if round.season.seasons_rounds.all%}
     <ul>
-      {%for match in round.round_matches.all|dictsort:"id" %}
-        <li><a href="{% url 'match details' match.id match.round.season.league.league_name|slugify %}">{{match.concise_str}}</a></li>
+      {%for round in round.season.seasons_rounds.all|dictsort:"id" %}
+        <li><a href="{% url 'round details' round.id round.season.league.league_name|slugify %}">Round {{round.round_number}}</a></li>
       {%endfor%}
     </ul>
   {%else%}
-    <ul>No Matches Currently Registered</ul>
+    <ul>No Rounds Currently Registered</ul>
   {%endif%}
 
 </div>
