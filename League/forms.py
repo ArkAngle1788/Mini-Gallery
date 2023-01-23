@@ -62,9 +62,10 @@ class SeasonForm(forms.ModelForm):
 
     class Meta:
         model = Season
-        fields = ["season_name", "allow_repeat_matches", "registration_key"]
+        fields = ["season_name",'registration_active', "allow_repeat_matches", "registration_key"]
         widgets = {
             'season_name': forms.TextInput(basicattrs),
+            'registration_active': forms.CheckboxInput,
             'registration_key': forms.TextInput(basicattrs),
             'allow_repeat_matches': forms.CheckboxInput,
 
@@ -157,7 +158,8 @@ class MatchEditForm(forms.ModelForm):
 
         player1 = kwargs.pop('player1')
         player2 = kwargs.pop('player2')
-        tie_psf = PlayerSeasonFaction.objects.get(profile__user__username='Tie')
+        tie_psf = PlayerSeasonFaction.objects.get(
+            profile__user__username='Tie',season=player1.season)
 
         super(MatchEditForm, self).__init__(*args, **kwargs)
         self.fields['player1_score'].label=player1.profile

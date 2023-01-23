@@ -11,8 +11,6 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 from django.urls import reverse
-# from django.urls import reverse_lazy
-# from .custom_functions import *
 # from django.db.models import Q
 # from django.http import HttpResponseNotFound
 from django.views import View
@@ -21,8 +19,10 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
 from CommunityInfrastructure.models import Group
 from Gallery.models import UserImage
-from UserAccounts.models import UserProfile
+from UserAccounts.models import AdminProfile, UserProfile
 
+# from django.urls import reverse_lazy
+from .custom_functions import auto_round_matches_basic
 from .forms import (LeagueForm, MatchEditForm, MatchForm, RoundForm,
                     SeasonForm, SeasonRegisterForm)
 # from django.http import HttpResponseRedirect
@@ -202,9 +202,17 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
-        if parent_league in self.request.user.profile.leagues_managed.all():
+        if self.request.user.is_staff:
+            return True
+
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+
+        if parent_league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
             return True
         return False
+
+
 
     def form_valid(self, form):
         # group_id cannot be null so we must add it to the form info
@@ -228,7 +236,13 @@ class SeasonEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
-        if season.league in self.request.user.profile.leagues_managed.all():
+        if self.request.user.is_staff:
+            return True
+
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+
+        if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
             return True
         return False
 
@@ -244,10 +258,14 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
-        if self.request.user.is_staff or (
-            (self.request.user.profile.linked_admin_profile
-             in season.league.group.group_primary_admins.all())
-        ):
+        if self.request.user.is_staff:
+            return True
+
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+
+        if self.request.user.profile.linked_admin_profile\
+            in season.league.group.group_primary_admins.all():
             return True
         return False
 
@@ -310,6 +328,15 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """
     fields support markdown
     locks in the previous rounds w:l record string
+
+    if automatic matchmaking fails a new round with no matches
+    will be created and manual matchmaking will need to be used
+
+    future development options exists to allow round delete to undo
+    psf updates for the round (only when deleting most recent) to allow
+    new attempts at autogeneration. this is not implemented right now
+    because the intention is to have automatchmaking stable enough that
+    it will only fail on rounds that require manual matchmaking.
     """
     model = Round
     form_class = RoundForm
@@ -415,8 +442,13 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         redirect_url = super().form_valid(form)
 
         if form.cleaned_data['automate_matchmaking']:
-            # this will create matches when implemented
-            print('automate matchmaking here!')
+
+            auto_matches_result=auto_round_matches_basic(season)
+
+            if auto_matches_result:
+                form.add_error('automate_matchmaking', ValidationError(
+                (auto_matches_result), code='invalid'))
+                return super().form_invalid(form)
 
         return redirect_url
 
@@ -557,14 +589,14 @@ class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
         # if there is not a tie no special processing neeeds to occur
         if form.cleaned_data['winner'].profile.user.username != "Tie":
-            super().form_valid(form)
+            return super().form_valid(form)
 
         if form.cleaned_data['player1_score'] != form.cleaned_data['player2_score']:
             form.add_error('player2_score', ValidationError(
                 ('Players must have the same score on a Tie'), code='invalid'))
             return super().form_invalid(form)
 
-        super().form_valid(form)
+        return super().form_valid(form)
 
 
 class MatchDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

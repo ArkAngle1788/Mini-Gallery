@@ -65,18 +65,6 @@ class Season(models.Model):
         return reverse('season details',
             kwargs={'league': slugify(self.league.league_name), 'pk': self.pk})
 
-# # depricated phase this out
-# class Player(models.Model):
-#     """depricated"""
-#     player_name = models.CharField(max_length=50, unique=True)
-
-#     def __str__(self):
-#         return self.player_name
-
-#     def get_name(self):
-#         """dep"""
-#         return self.player_name
-
 
 class PlayerSeasonFaction(models.Model):
     """tracks season information for a player including score"""
