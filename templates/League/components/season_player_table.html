@@ -8,13 +8,21 @@
       </tr>
     </thead>
     <tbody>
-    {% for psf in season.players_in_season.all %}
-      <tr>
-        <td>{{psf.profile}}</td>
-        <td>{{psf.faction}}{% if psf.sub_faction %} -- {{psf.sub_faction}}{% endif %}</td>
-        <td>{{psf.wlrecord}}</td>
-        <td>{{psf.score}}</td>
-      </tr>
-    {% endfor %}
+
+    {% with season.players_in_season.all|dictsortreversed:"score" as player_list %}
+ 
+      {% for psf in player_list %}
+        {% if psf.profile.user.username != 'Tie' %}
+          <tr>
+            <td>{{psf.profile}}</td>
+            <td>{{psf.faction}}{% if psf.sub_faction %} -- {{psf.sub_faction}}{% endif %}</td>
+            <td>{{psf.wlrecord}}</td>
+            <td>{{psf.score}}</td>
+          </tr>
+        {%else%}
+          {%comment%}tie does not get displayed on sumary screens{%endcomment%}
+        {%endif%}
+      {% endfor %}
+    {% endwith %}
     </tbody>
   </table>

@@ -125,16 +125,16 @@ class MatchForm(forms.ModelForm):
             'player1': Select2Widget,
             'player2': Select2Widget,
         }
-        
+
 
     def __init__(self,  *args, **kwargs):
         season = kwargs.pop('season')
         super(MatchForm, self).__init__(*args, **kwargs)
 
         self.fields['player1'].queryset = PlayerSeasonFaction.objects.filter(
-            season=season).filter(matched=False)
+            season=season).filter(matched=False).exclude(profile__user__username='Tie')
         self.fields['player2'].queryset = PlayerSeasonFaction.objects.filter(
-            season=season).filter(matched=False)
+            season=season).filter(matched=False).exclude(profile__user__username='Tie')
 
 
 class MatchEditForm(forms.ModelForm):
@@ -157,7 +157,8 @@ class MatchEditForm(forms.ModelForm):
 
         player1 = kwargs.pop('player1')
         player2 = kwargs.pop('player2')
- 
+        tie_psf = PlayerSeasonFaction.objects.get(profile__user__username='Tie')
+
         super(MatchEditForm, self).__init__(*args, **kwargs)
         self.fields['player1_score'].label=player1.profile
         self.fields['player2_score'].label=player2.profile
@@ -165,5 +166,6 @@ class MatchEditForm(forms.ModelForm):
             Q(id=player1.id)
             |
             Q(id=player2.id)
+            |
+            Q(id=tie_psf.id)
         )
-

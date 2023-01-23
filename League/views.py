@@ -1,4 +1,4 @@
-# from UserAccounts.models import UserProfile
+
 # from Gallery.models import Professional
 # from ContentPost.models import ContentPost
 # from django.contrib.auth.decorators import login_required
@@ -338,10 +338,11 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 self.request,
                 'Creating a round can only be done when registration is closed.')
 
-            url = reverse('season details', args=[self.kwargs['pk'],slugify(Season.objects.get(pk=self.kwargs['pk']).league)])
+            url = reverse('season details', args=[self.kwargs['pk'], slugify(
+                Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
 
-        return super().get(self,request,*args,**kwargs)
+        return super().get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """ensures you have closed registration before making new rounds"""
@@ -353,10 +354,11 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 self.request,
                 'Creating a round can only be done when registration is closed.')
 
-            url = reverse('season details', args=[self.kwargs['pk'],slugify(Season.objects.get(pk=self.kwargs['pk']).league)])
+            url = reverse('season details', args=[self.kwargs['pk'], slugify(
+                Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
 
-        return super().post(self,request,*args,**kwargs)
+        return super().post(self, request, *args, **kwargs)
 
     def form_valid(self, form):
         # group_id cannot be null so we must add it to the form info
@@ -381,32 +383,34 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
             for match in season.seasons_rounds.last().round_matches.all():
                 match.player1.previous_opponents.add(match.player2)
-                match.player1.score+=match.player1_score
-                match.player1.matched=False
+                match.player1.score += match.player1_score
+                match.player1.matched = False
 
                 match.player2.previous_opponents.add(match.player1)
-                match.player2.score+=match.player2_score
-                match.player2.matched=False
-           
-                if match.winner==match.player1:
-                    match.player1.wlrecord+="W-" 
-                    match.player2.wlrecord+="L-"
+                match.player2.score += match.player2_score
+                match.player2.matched = False
+
+                if match.winner == match.player1:
+                    match.player1.wlrecord += "W-"
+                    match.player2.wlrecord += "L-"
+                elif match.winner == match.player2:
+                    match.player1.wlrecord += "L-"
+                    match.player2.wlrecord += "W-"
                 else:
-                    match.player1.wlrecord+="L-"
-                    match.player2.wlrecord+="W-"
+                    match.player1.wlrecord += "T-"
+                    match.player2.wlrecord += "T-"
 
                 match.player1.save()
                 match.player2.save()
 
-                    # NEED TO ADD TIE LOGIC
-                    
-
-
-
             form.instance.round_number = season.seasons_rounds.count()+1
 
         else:
+            # if there are no rounds create the first round and add the tie player
             form.instance.round_number = 1
+            tie_psf = PlayerSeasonFaction(
+                profile=UserProfile.objects.get('user__username'), season=season)
+            tie_psf.save()
             # also close registration?
         redirect_url = super().form_valid(form)
 
@@ -475,15 +479,13 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 ('A player cannot be matched against themselves'), code='invalid'))
             return super().form_invalid(form)
 
-            # also check previously played
         if not round_var.season.allow_repeat_matches:
-            # if form.cleaned_data['player1'].previous_opponents.conatins(form.cleaned_data['player2']):
-            if form.cleaned_data['player2'] in form.cleaned_data['player1'].previous_opponents.all():
+            if form.cleaned_data['player2']\
+                    in form.cleaned_data['player1'].previous_opponents.all():
                 form.add_error('player2', ValidationError(
                     ('These players have already been matched against each other'), code='invalid'))
                 return super().form_invalid(form)
 
-        
         form.instance.round = round_var
 
         return_url = super().form_valid(form)
@@ -530,7 +532,7 @@ class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
         # users in a match can edit results while the match is the most recent
         if match.player1 == self.request.user.profile.psf\
-            or match.player2 == self.request.user.profile.psf:
+                or match.player2 == self.request.user.profile.psf:
             if match.round.season.seasons_rounds.last == match.round:
                 return True
             messages.error(
@@ -550,6 +552,19 @@ class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             'player2': self.object.player2
         })
         return kwargs
+
+    def form_valid(self, form):
+
+        # if there is not a tie no special processing neeeds to occur
+        if form.cleaned_data['winner'].profile.user.username != "Tie":
+            super().form_valid(form)
+
+        if form.cleaned_data['player1_score'] != form.cleaned_data['player2_score']:
+            form.add_error('player2_score', ValidationError(
+                ('Players must have the same score on a Tie'), code='invalid'))
+            return super().form_invalid(form)
+
+        super().form_valid(form)
 
 
 class MatchDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -615,7 +630,7 @@ class SubmitResults(LoginRequiredMixin, View):
                 last_round = psf.season.seasons_rounds.all().last()
                 for match in last_round.round_matches.all():
                     if request.user.profile == match.player1.profile\
-                        or request.user.profile == match.player2.profile:
+                            or request.user.profile == match.player2.profile:
                         matches += [match]
 
         if len(matches) == 1:
