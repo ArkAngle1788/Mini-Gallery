@@ -67,8 +67,12 @@ class SeasonForm(forms.ModelForm):
             'season_name': forms.TextInput(basicattrs),
             'registration_active': forms.CheckboxInput,
             'registration_key': forms.TextInput(basicattrs),
-            'allow_repeat_matches': forms.CheckboxInput,
+            'allow_repeat_matches': forms.CheckboxInput(),
 
+        }
+        help_texts = {
+            'allow_repeat_matches': 'If repeat matches are not allowed and there \
+                are a odd number of players byes will be available for matchmaking',
         }
 
 
@@ -107,6 +111,7 @@ class RoundForm(forms.ModelForm):
     """ text """
     automate_matchmaking = forms.BooleanField(
         widget=forms.CheckboxInput(), required=False)
+    
 
     class Meta:
         model = Round

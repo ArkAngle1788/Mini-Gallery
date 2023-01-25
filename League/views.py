@@ -433,12 +433,19 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             form.instance.round_number = season.seasons_rounds.count()+1
 
         else:
-            # if there are no rounds create the first round and add the tie player
+            # if there are no rounds create the first round
+            # and create matchmaking support players
             form.instance.round_number = 1
+
+            if PlayerSeasonFaction.objects.filter(season=season).count()%2 !=0 and season.allow_repeat_matches==False:
+                bye_psf = PlayerSeasonFaction(
+                    profile=UserProfile.objects.get(user__username='Bye'), season=season)
+                bye_psf.save()
+
             tie_psf = PlayerSeasonFaction(
-                profile=UserProfile.objects.get('user__username'), season=season)
+                profile=UserProfile.objects.get(user__username='Tie'), season=season)
             tie_psf.save()
-            # also close registration?
+            
         redirect_url = super().form_valid(form)
 
         if form.cleaned_data['automate_matchmaking']:

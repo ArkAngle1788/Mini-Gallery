@@ -130,7 +130,7 @@
  
 </ul>
 {%else%}
-seasons exist, new round button?
+  <a href="{% url 'create season' league.id %}">Create an New Season</a>
 {%endif%}
 <br>
 <a href="{% url 'edit league' league.pk %}">Edit League</a>
