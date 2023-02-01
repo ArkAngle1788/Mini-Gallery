@@ -213,6 +213,67 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return False
 
 
+    def league_logic_test(self,request, *args, **kwargs):
+        """
+        tests if a new season is allowed to be created
+        """
+
+        league = League.objects.get(pk=self.kwargs['pk'])
+        leagues_seasons=league.child_season.all()
+
+        if leagues_seasons.last().registration_active:
+            messages.error(
+                self.request,
+                'The previous season is still in registration.')
+            return False
+
+        if leagues_seasons.count()>1:
+            iterate_var=0
+            for entry in leagues_seasons:
+                if entry==leagues_seasons.last():
+                    round_list=leagues_seasons[iterate_var-1].seasons_rounds.all()
+                    if round_list:
+                        match_list=round_list.last().round_matches.all()
+                        if match_list:
+                            for match in match_list:
+                                if not match.winner:
+                                    messages.error(
+                                        self.request,
+                                        'There are unresolved matches in a previous season.')
+                                    return False
+                        else:
+                            messages.error(
+                                self.request,
+                                'There is an unfinished round in a previous season.')
+                            return False
+                    else:
+                        messages.error(
+                            self.request,
+                            'A previous season does not have any rounds')
+                        return False
+                iterate_var+=1
+        return True
+
+    def get(self, request, *args, **kwargs):
+        """checks to make sure creating a new season is allowed"""
+
+        if not self.league_logic_test(self,request,*args,**kwargs):
+            url = reverse('league details', args=[self.kwargs['pk'], slugify(
+                League.objects.get(pk=self.kwargs['pk']))])
+            return redirect(url)
+
+        return super().get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """checks to make sure creating a new season is allowed"""
+
+        if not self.league_logic_test(self,request,*args,**kwargs):
+            url = reverse('league details', args=[self.kwargs['pk'], slugify(
+                League.objects.get(pk=self.kwargs['pk']))])
+            return redirect(url)
+
+        return super().post(self, request, *args, **kwargs)
+
 
     def form_valid(self, form):
         # group_id cannot be null so we must add it to the form info
@@ -356,16 +417,51 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return True
         return False
 
-    def get(self, request, *args, **kwargs):
-        """ensures you have closed registration before making new rounds"""
+    def league_logic_test(self,request, *args, **kwargs):
+        """
+        tests if a new round is allowed to be created
+        """
 
         season = Season.objects.get(pk=self.kwargs['pk'])
+        leagues_seasons=season.league.child_season.all()
 
         if season.registration_active:
             messages.error(
                 self.request,
                 'Creating a round can only be done when registration is closed.')
+            return False
 
+        if leagues_seasons.count()>1:
+            iterate_var=0
+            for entry in leagues_seasons:
+                if entry==season:
+                    round_list=leagues_seasons[iterate_var-1].seasons_rounds.all()
+                    if round_list:
+                        match_list=round_list.last().round_matches.all()
+                        if match_list:
+                            for match in match_list:
+                                if not match.winner:
+                                    messages.error(
+                                        self.request,
+                                        'There are unresolved matches in the previous season.')
+                                    return False
+                        else:
+                            messages.error(
+                                self.request,
+                                'There is an unfinished round in the previous season.')
+                            return False
+                    else:
+                        messages.error(
+                            self.request,
+                            'The previous season does not have any rounds')
+                        return False
+                iterate_var+=1
+        return True
+
+    def get(self, request, *args, **kwargs):
+        """ensures you have closed registration before making new rounds"""
+
+        if not self.league_logic_test(self,request,*args,**kwargs):
             url = reverse('season details', args=[self.kwargs['pk'], slugify(
                 Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
@@ -375,13 +471,7 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def post(self, request, *args, **kwargs):
         """ensures you have closed registration before making new rounds"""
 
-        season = Season.objects.get(pk=self.kwargs['pk'])
-
-        if season.registration_active:
-            messages.error(
-                self.request,
-                'Creating a round can only be done when registration is closed.')
-
+        if not self.league_logic_test(self,request,*args,**kwargs):
             url = reverse('season details', args=[self.kwargs['pk'], slugify(
                 Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
@@ -447,6 +537,19 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             tie_psf = PlayerSeasonFaction(
                 profile=UserProfile.objects.get(user__username='Tie'), season=season)
             tie_psf.save()
+
+            leagues_seasons=season.league.child_season.all()
+
+            if leagues_seasons.count()>1:
+                iterate_var=0
+                for entry in leagues_seasons:
+                    if entry==season:
+                        leagues_seasons[iterate_var-1].season_active=False
+                        leagues_seasons[iterate_var-1].save()
+                    iterate_var+=1
+
+            season.season_active=True
+            season.save()
 
         redirect_url = super().form_valid(form)
 
