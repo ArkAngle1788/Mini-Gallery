@@ -229,7 +229,7 @@ class GroupAddAdmin(LoginRequiredMixin, UserPassesTestMixin, View):
 
         for admin_pk in selected_primary_admins_pk:
             admin_userprofile = UserProfile.objects.get(id=admin_pk)
-            print(admin_userprofile)
+            # print(admin_userprofile)
             if hasattr(admin_userprofile, 'linked_admin_profile'):
 
                 admin_userprofile.linked_admin_profile.groups_managed_primary.add(

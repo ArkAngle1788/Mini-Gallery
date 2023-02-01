@@ -308,6 +308,7 @@ class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 ('Invalid value'), code='invalid'))
             return super().form_invalid(form)
 
+
         form.instance.profile = self.request.user.profile
         form.instance.season = season
 
@@ -437,7 +438,8 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             # and create matchmaking support players
             form.instance.round_number = 1
 
-            if PlayerSeasonFaction.objects.filter(season=season).count()%2 !=0 and season.allow_repeat_matches==False:
+            if PlayerSeasonFaction.objects.filter(season=season).count()%2 !=0\
+                    and season.allow_repeat_matches is False:
                 bye_psf = PlayerSeasonFaction(
                     profile=UserProfile.objects.get(user__username='Bye'), season=season)
                 bye_psf.save()
@@ -445,7 +447,7 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             tie_psf = PlayerSeasonFaction(
                 profile=UserProfile.objects.get(user__username='Tie'), season=season)
             tie_psf.save()
-            
+
         redirect_url = super().form_valid(form)
 
         if form.cleaned_data['automate_matchmaking']:
