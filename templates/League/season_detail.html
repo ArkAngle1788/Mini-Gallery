@@ -28,9 +28,14 @@
   {%endwith%}
 
 {%if season.players_in_season.all %}
-<h3>Players registered:</h3>
 
-{% include 'League/components/season_player_table.html' %}
+  {%if not season.season_active and season.seasons_rounds.all%}
+    <h3>Final Standings:</h3>
+  {%else%}
+    <h3>Players registered:</h3>
+  {%endif%}
+
+  {% include 'League/components/season_player_table.html' %}
 
 {%else%}
   <br>No participants registered
@@ -114,6 +119,8 @@
 <a href="{% url 'create round' season.pk %}">Create New Round</a>
 <br>
 <a href="{% url 'edit season' season.pk %}">Edit Season</a>
+<br>
+<a href="{% url 'close season' season.pk %}">Close Season</a>
 <br>
 <a href="{% url 'delete season' season.pk %}">Delete Season</a>
 

@@ -307,6 +307,112 @@ class SeasonEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         return False
 
+class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    shows active registerd leagues or
+    redirects if there is only one
+    """
+
+    def test_func(self):
+        """must manage league to access"""
+        try:
+            season = Season.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff:
+            return True
+
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+
+        if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
+            return True
+        return False
+
+    def season_logic_test(self,request,*args,**kwargs):
+        """
+        makes sure you are allowed to close the season
+        """
+        season = Season.objects.get(pk=self.kwargs['pk'])
+
+
+        round_list=season.seasons_rounds.all()
+        if round_list:
+            match_list=round_list.last().round_matches.all()
+            if match_list:
+                for match in match_list:
+                    if not match.winner:
+                        messages.error(
+                            self.request,
+                            'There are unresolved matches in the season.')
+                        return False
+            else:
+                messages.error(
+                    self.request,
+                    'There is an unfinished round in the season.')
+                return False
+        else:
+            messages.error(
+                self.request,
+                'The season does not have any rounds')
+            return False
+
+
+    def get(self,request,*args,**kwargs):
+        """expects no args"""
+
+        if not self.season_logic_test(self,request):
+            url = reverse('season details', args=[self.kwargs['pk'], slugify(
+                Season.objects.get(pk=self.kwargs['pk']).league)])
+            return redirect(url)
+
+        return render(request, 'League/close_season.html')
+
+
+    def post(self, request, *args, **kwargs):
+        """expects no args"""
+        season = Season.objects.get(pk=self.kwargs['pk'])
+
+        if not self.season_logic_test(self,request):
+            url = reverse('season details', args=[self.kwargs['pk'], slugify(
+                Season.objects.get(pk=self.kwargs['pk']).league)])
+            return redirect(url)
+
+
+        for match in season.seasons_rounds.last().round_matches.all():
+            match.player1.previous_opponents.add(match.player2)
+            match.player1.score += match.player1_score
+            match.player1.matched = False
+
+            match.player2.previous_opponents.add(match.player1)
+            match.player2.score += match.player2_score
+            match.player2.matched = False
+
+            if match.winner == match.player1:
+                match.player1.wlrecord += "W-"
+                match.player2.wlrecord += "L-"
+            elif match.winner == match.player2:
+                match.player1.wlrecord += "L-"
+                match.player2.wlrecord += "W-"
+            else:
+                match.player1.wlrecord += "T-"
+                match.player2.wlrecord += "T-"
+
+            match.player1.save()
+            match.player2.save()
+
+        season.season_active=False
+        season.save()
+
+        messages.success(
+            self.request,
+            'Season Closed')
+
+        url = reverse('season details', args=[self.kwargs['pk'], slugify(
+                Season.objects.get(pk=self.kwargs['pk']).league)])
+        return redirect(url)
+
 
 class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """only staff or primary admins can delete leagues"""
@@ -435,27 +541,29 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             iterate_var=0
             for entry in leagues_seasons:
                 if entry==season:
-                    round_list=leagues_seasons[iterate_var-1].seasons_rounds.all()
-                    if round_list:
-                        match_list=round_list.last().round_matches.all()
-                        if match_list:
-                            for match in match_list:
-                                if not match.winner:
-                                    messages.error(
-                                        self.request,
-                                        'There are unresolved matches in the previous season.')
-                                    return False
-                        else:
-                            messages.error(
-                                self.request,
-                                'There is an unfinished round in the previous season.')
-                            return False
-                    else:
+                    if leagues_seasons[iterate_var-1].season_active:
                         messages.error(
                             self.request,
-                            'The previous season does not have any rounds')
+                            'The previous season is still active')
                         return False
                 iterate_var+=1
+
+        round_list=season.seasons_rounds.all()
+        if round_list:
+            match_list=round_list.last().round_matches.all()
+            if match_list:
+                for match in match_list:
+                    if not match.winner:
+                        messages.error(
+                            self.request,
+                            'There are unresolved matches in the current round.')
+                        return False
+            else:
+                messages.error(
+                    self.request,
+                    'The last round in unfinished.')
+                return False
+
         return True
 
     def get(self, request, *args, **kwargs):
@@ -508,7 +616,11 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 match.player2.score += match.player2_score
                 match.player2.matched = False
 
-                if match.winner == match.player1:
+                print(match.winner.profile.user.username)
+                if match.winner.profile.user.username == "Bye":
+                    match.player1.wlrecord += "B-"
+                    match.player2.wlrecord += "B-"
+                elif match.winner == match.player1:
                     match.player1.wlrecord += "W-"
                     match.player2.wlrecord += "L-"
                 elif match.winner == match.player2:
@@ -573,6 +685,9 @@ class RoundEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         """must manage league to access"""
 
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+
         if (
                 round.season.league
                 in
@@ -606,6 +721,9 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             round_var = Round.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
+
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
 
         if (round_var.season.league
             in
@@ -669,21 +787,22 @@ class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if self.request.user.is_staff:
             return True
 
-        if (match.round.season.league
-            in
-                self.request.user.profile.linked_admin_profile.leagues_managed.all()):
-            return True
+        if AdminProfile.objects.filter(userprofile__user=self.request.user):
+            if (match.round.season.league
+                in
+                    self.request.user.profile.linked_admin_profile.leagues_managed.all()):
+                return True
+
 
         # users in a match can edit results while the match is the most recent
-        if match.player1 == self.request.user.profile.psf\
-                or match.player2 == self.request.user.profile.psf:
-            if match.round.season.seasons_rounds.last == match.round:
+        if match.player1.profile == self.request.user.profile\
+                or match.player2.profile == self.request.user.profile:
+            if match.round.season.seasons_rounds.last() == match.round:
                 return True
             messages.error(
                 self.request,
                 'You can only edit results for the current round. \
                     Contact and Admin if old results are invalid.')
-
         return False
 
     def get_form_kwargs(self):
@@ -721,6 +840,9 @@ class MatchDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             match = Match.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
+
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
 
         if (match.round.season.league
             in

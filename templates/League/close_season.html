@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h1>Close Season</h1>
+
+<form method="post" >{% csrf_token %}
+    Are you sure you want to close the Season?
+    <input type="submit" value="Save">
+</form>
+
+{% endblock %}
+
+
+<!-- SIDEBAR Left -->
+{% block navbar_left_content %}
+
+<p>left navbar</p>
+
+{%endblock%}
+
+<!-- SIDEBAR Right -->
+{% block navbar_right_content %}
+
+
+{%endblock%}
