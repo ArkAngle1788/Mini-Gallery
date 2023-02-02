@@ -116,7 +116,9 @@
 
 <!-- SIDEBAR Right -->
 {% block navbar_right_content %}
-
+{% if match.player1.profile == request.user.profile or match.player2.profile == request.user.profile %}
+  <a href="{% url 'edit match' match.pk %}">Submit or Update results</a>
+{%endif%}
 
 <h2>League Admins:</h2>
 {%if match.round.season.league.admins_managing.all %}

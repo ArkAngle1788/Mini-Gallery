@@ -12,7 +12,7 @@
     {% with season.players_in_season.all|dictsortreversed:"score" as player_list %}
  
       {% for psf in player_list %}
-        {% if psf.profile.user.username != 'Tie' %}
+        {% if psf.profile.user.username != 'Tie' and psf.profile.user.username != 'Bye' %}
           <tr>
             <td>{{psf.profile}}</td>
             <td>{{psf.faction}}{% if psf.sub_faction %} -- {{psf.sub_faction}}{% endif %}</td>
