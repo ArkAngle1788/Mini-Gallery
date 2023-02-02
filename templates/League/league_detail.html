@@ -15,10 +15,10 @@
 
 
 {%if reverse_seasons%}
-
+{{reverse_seasons}}
   {% with reverse_seasons|slice:":2" as my_var %}
 
-    {%if my_var.1%}
+    {%if my_var.1.season_active%}
       <h3>{{my_var.1.season_name}}</h3>
       {% include 'League/components/season_player_table.html' with season=my_var.1%}
     {%else%}
