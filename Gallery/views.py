@@ -18,6 +18,8 @@ from google.cloud import storage
 
 from CommunityInfrastructure.custom_functions import studio_official_send
 from ContentPost.custom_functions import calculate_news_bar
+# from GameData.models import Unit_Type,Faction_Type,Faction,Sub_Faction
+from League.models import Match
 
 from .filters import ImageFilter
 from .forms import (ColourForm, ColourPriorityForm, UpdateSubImages,
@@ -25,11 +27,6 @@ from .forms import (ColourForm, ColourPriorityForm, UpdateSubImages,
 from .models import (Colour, ColourPriority, TempImage, UserImage,
                      UserSubImage, get_upload_to, sub_get_upload_to)
 
-# from GameData.models import Unit_Type,Faction_Type,Faction,Sub_Faction
-# from League.models import League
-
-
-# from django.contrib.auth.decorators import login_required
 
 
 class GalleryListView(FilterView):
@@ -90,6 +87,7 @@ class GalleryUploadMultipart(PermissionRequiredMixin, LoginRequiredMixin, Create
     image_choices = []
     # this allows us to toggle the addionional relevant funcionality in CommunityInfrastructure
     studio_official_upload = False
+    match_upload = False
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -105,6 +103,9 @@ class GalleryUploadMultipart(PermissionRequiredMixin, LoginRequiredMixin, Create
     def form_valid(self, form):
         self.image_choices = []
         form.instance.uploader = self.request.user  # add this data first then validate
+        if self.match_upload:
+            match = Match.objects.get(pk=self.kwargs['pk'])
+            form.instance.match = match
         valid_object = super().form_valid(form)  # then run original form_valid
         files_uploaded = self.request.FILES.getlist('subimage')
 
@@ -203,7 +204,7 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin, LoginRequiredMixin,
             try:
                 if os.environ['GOOGLE_APPLICATION_CREDENTIALS']:
                     cloud = True
-            except ImproperlyConfigured:
+            except KeyError:
                 pass
 
             imagename_str = default_storage.get_available_name(
@@ -226,7 +227,7 @@ class GalleryUploadMultipartConfirm(PermissionRequiredMixin, LoginRequiredMixin,
         try:
             if os.environ['GOOGLE_APPLICATION_CREDENTIALS']:
                 cloud = True
-        except ImproperlyConfigured:
+        except KeyError:
             pass
 
         imagename_str = default_storage.get_available_name(imagename_str, 80)
@@ -280,6 +281,8 @@ class GalleryMultipleUpload(PermissionRequiredMixin, LoginRequiredMixin, CreateV
     uploadedimagelist = ''
     # this allows us to toggle the addionional relevant funcionality in CommunityInfrastructure
     studio_official_upload = False
+    # this allows us to toggle match specific uploads
+    match_upload = False
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -303,6 +306,10 @@ class GalleryMultipleUpload(PermissionRequiredMixin, LoginRequiredMixin, CreateV
         files_uploaded = self.request.FILES.getlist('image')
         for image_file in files_uploaded:
 
+            if self.match_upload:
+                match = Match.objects.get(pk=self.kwargs['pk'])
+                form.instance.match = match
+
             form.instance.image = image_file
             # need to do a false commit because we're
             # saving m2m relations before the data is commited
@@ -312,6 +319,7 @@ class GalleryMultipleUpload(PermissionRequiredMixin, LoginRequiredMixin, CreateV
             form.save_m2m()
             if self.studio_official_upload:
                 studio_official_send(self, newimage)
+
 
             if self.uploadedimagelist == '':
                 self.uploadedimagelist += str(newimage.pk)

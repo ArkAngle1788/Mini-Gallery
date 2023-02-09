@@ -67,6 +67,18 @@ Mini-Gallery -Detail
       {%endfor%}
 
   {%endif%}
+
+  {% if image.source %}
+    <h3>Source:</h3>
+        <a href="{% url 'season details' image.source.id image.source.league.league_name|slugify %}">{{image.source}}</a><br>
+  {%endif%}
+
+  {% if image.match %}
+  <h3>Match:</h3>
+      <a href="{% url 'match details' image.match.id image.match.round.season.league.league_name|slugify %}">{{image.match.concise_str}}</a><br>
+{%endif%}
+
+
   {% if image.unit_type.all %}
     <h3>Models Present:</h3>
       {%for unit_type in image.unit_type.all%}
@@ -90,7 +102,7 @@ Mini-Gallery -Detail
 
       {%for studio in image.paintingstudio.all %}
           <li>
-            <a href="{%url 'painting studio' studio.slug studio.id %}?order=popularity">{{studio}} (Internal Link)</a>
+            <a href="{%url 'painting studio' studio.slug studio.id %}?order=popularity&studio_official=on&paintingstudio={{studio.id}}">{{studio}} (Internal Link)</a>
             <a class='studio_page' href="{{studio.Studio_page}}">Visit Studio Page (External Link)</a>
           </li>
       {%endfor%}

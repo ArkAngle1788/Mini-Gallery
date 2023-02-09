@@ -17,14 +17,18 @@ from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
+from CommunityInfrastructure.custom_functions import (check_league_admin,
+                                                      check_primary_admin)
 from CommunityInfrastructure.models import Group
 from Gallery.models import UserImage
+from Gallery.views import GalleryMultipleUpload, GalleryUploadMultipart
 from UserAccounts.models import AdminProfile, UserProfile
 
 # from django.urls import reverse_lazy
-from .custom_functions import auto_round_matches_basic
-from .forms import (LeagueForm, MatchEditForm, MatchForm, RoundForm,
-                    SeasonForm, SeasonRegisterForm)
+from .custom_functions import auto_round_matches_basic, match_permission_check
+from .forms import (LeagueForm, MatchEditForm, MatchForm,
+                    MatchUploadMultipleImages,MatchUploadMultipartImages, RoundForm, SeasonForm,
+                    SeasonRegisterForm)
 # from django.http import HttpResponseRedirect
 # from GameData.models import Games, Faction, Faction_Type, Sub_Faction
 from .models import League, Match, PlayerSeasonFaction, Round, Season
@@ -357,11 +361,12 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
                 self.request,
                 'The season does not have any rounds')
             return False
+        return True
 
 
     def get(self,request,*args,**kwargs):
         """expects no args"""
-
+        print("test")
         if not self.season_logic_test(self,request):
             url = reverse('season details', args=[self.kwargs['pk'], slugify(
                 Season.objects.get(pk=self.kwargs['pk']).league)])
@@ -548,6 +553,16 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                         return False
                 iterate_var+=1
 
+        number_of_players=PlayerSeasonFaction.objects.filter(season=season).exclude(
+            profile__user__username="Tie").exclude(profile__user__username="Bye").count()
+
+        if season.seasons_rounds.count() >= number_of_players-1 and\
+                season.allow_repeat_matches is False:
+            messages.error(
+                self.request,
+                'There cannot be additional rounds without repeat matchups')
+            return False
+
         round_list=season.seasons_rounds.all()
         if round_list:
             match_list=round_list.last().round_matches.all()
@@ -616,7 +631,6 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 match.player2.score += match.player2_score
                 match.player2.matched = False
 
-                print(match.winner.profile.user.username)
                 if match.winner.profile.user.username == "Bye":
                     match.player1.wlrecord += "B-"
                     match.player2.wlrecord += "B-"
@@ -689,7 +703,7 @@ class RoundEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return False
 
         if (
-                round.season.league
+                self.get_object().season.league
                 in
                 self.request.user.profile.linked_admin_profile.leagues_managed.all()):
             return True
@@ -787,11 +801,11 @@ class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if self.request.user.is_staff:
             return True
 
-        if AdminProfile.objects.filter(userprofile__user=self.request.user):
-            if (match.round.season.league
-                in
-                    self.request.user.profile.linked_admin_profile.leagues_managed.all()):
-                return True
+        if check_primary_admin(match.round.season.league.group,self.request.user):
+            return True
+
+        if check_league_admin(match.round.season.league,self.request.user):
+            return True
 
 
         # users in a match can edit results while the match is the most recent
@@ -876,6 +890,7 @@ class MatchView(DetailView):
         # Add in the leaguenav QuerySet
         # context['league_nav'] = leagues_nav
         # context['news']=calculate_news_bar()
+        context['match_images']=UserImage.objects.filter(match=self.object)
 
         return context
 
@@ -906,3 +921,52 @@ class SubmitResults(LoginRequiredMixin, View):
 
         return render(request, 'League/submit_results.html',
                       {'matches': matches})
+
+class MatchImageUpload(UserPassesTestMixin, GalleryMultipleUpload):
+    """
+    GalleryMultipuleUpload will handle setting the image as official
+    and sending signals as long as we set
+    studio_official_upload to True to enable the functionality
+
+    Only staff and studio admin can upload
+    """
+    match_upload = True
+    form_class = MatchUploadMultipleImages
+
+    def test_func(self):
+        return match_permission_check(Match.objects.get(pk=self.kwargs['pk']),self.request.user)
+
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        kwargs.update({
+            'source': Match.objects.get(pk=self.kwargs['pk']).round.season
+        })
+        return kwargs
+
+
+class MatchImageUploadMultipart(UserPassesTestMixin, GalleryUploadMultipart):
+    """
+    GalleryMultipuleMultipart will handle setting the image as official
+    and sending signals as long as we set studio_official_upload
+    to True to enable the functionality
+
+    Only staff and studio admin can upload
+    """
+    match_upload = True
+    form_class = MatchUploadMultipartImages
+
+    def test_func(self):
+        return match_permission_check(Match.objects.get(pk=self.kwargs['pk']),self.request.user)
+
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        kwargs.update({
+            'source': Match.objects.get(pk=self.kwargs['pk']).round.season
+        })
+        return kwargs

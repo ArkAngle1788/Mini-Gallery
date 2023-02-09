@@ -5,6 +5,7 @@ from django_select2.forms import Select2MultipleWidget, Select2Widget
 
 from GameData.models import Faction, SubFaction
 from UserAccounts.models import AdminProfile
+from Gallery.forms import UploadMultipleImages, UploadImagesMultipart
 
 # from django.core.exceptions import ValidationError
 from .models import League, Match, PlayerSeasonFaction, Round, Season
@@ -37,6 +38,12 @@ class LeagueForm(forms.ModelForm):
         )
 
         self.fields['admin_options'].queryset = self.admin_list
+        active_admins = []
+        for admin in self.fields['admin_options'].queryset.all():
+            if admin in kwargs['instance'].admins_managing.all():
+                active_admins += [admin.id]
+
+        self.initial['admin_options'] = active_admins
 
     admin_options = forms.ModelMultipleChoiceField(
         queryset=admin_list,
@@ -62,7 +69,8 @@ class SeasonForm(forms.ModelForm):
 
     class Meta:
         model = Season
-        fields = ["season_name",'registration_active', "allow_repeat_matches", "registration_key"]
+        fields = ["season_name", 'registration_active',
+                  "allow_repeat_matches", "registration_key"]
         widgets = {
             'season_name': forms.TextInput(basicattrs),
             'registration_active': forms.CheckboxInput,
@@ -111,7 +119,6 @@ class RoundForm(forms.ModelForm):
     """ text """
     automate_matchmaking = forms.BooleanField(
         widget=forms.CheckboxInput(), required=False)
-    
 
     class Meta:
         model = Round
@@ -132,7 +139,6 @@ class MatchForm(forms.ModelForm):
             'player2': Select2Widget,
         }
 
-
     def __init__(self,  *args, **kwargs):
         season = kwargs.pop('season')
         super(MatchForm, self).__init__(*args, **kwargs)
@@ -146,29 +152,28 @@ class MatchForm(forms.ModelForm):
 class MatchEditForm(forms.ModelForm):
     """ text """
 
-    player1_name='player1'
-    player2_name='player2'
+    player1_name = 'player1'
+    player2_name = 'player2'
 
     class Meta:
         model = Match
         fields = ["winner", "player1_score", "player2_score"]
         widgets = {
             'winner': Select2Widget,
-            'player1_score':forms.NumberInput(basicattrs),
-            'player2_score':forms.NumberInput(basicattrs),
+            'player1_score': forms.NumberInput(basicattrs),
+            'player2_score': forms.NumberInput(basicattrs),
         }
-
 
     def __init__(self,  *args, **kwargs):
 
         player1 = kwargs.pop('player1')
         player2 = kwargs.pop('player2')
         tie_psf = PlayerSeasonFaction.objects.get(
-            profile__user__username='Tie',season=player1.season)
+            profile__user__username='Tie', season=player1.season)
 
         super(MatchEditForm, self).__init__(*args, **kwargs)
-        self.fields['player1_score'].label=player1.profile
-        self.fields['player2_score'].label=player2.profile
+        self.fields['player1_score'].label = player1.profile
+        self.fields['player2_score'].label = player2.profile
         self.fields['winner'].queryset = PlayerSeasonFaction.objects.filter(
             Q(id=player1.id)
             |
@@ -176,3 +181,19 @@ class MatchEditForm(forms.ModelForm):
             |
             Q(id=tie_psf.id)
         )
+
+
+class MatchUploadMultipleImages(UploadMultipleImages):
+
+    def __init__(self,  *args, **kwargs):
+        season_var = kwargs.pop('source')
+        super(MatchUploadMultipleImages, self).__init__(*args, **kwargs)
+
+        self.initial['source'] = season_var.pk
+
+class MatchUploadMultipartImages(UploadImagesMultipart):
+    def __init__(self,  *args, **kwargs):
+        season_var = kwargs.pop('source')
+        super(MatchUploadMultipartImages, self).__init__(*args, **kwargs)
+
+        self.initial['source'] = season_var.pk

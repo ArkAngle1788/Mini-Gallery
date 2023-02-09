@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from CommunityInfrastructure.models import City, PaintingStudio
 from GameData.models import Faction, FactionType, Game, SubFaction, UnitType
-from League.models import Season
+from League.models import Season,Match
 
 
 class Conversion(models.Model):
@@ -139,6 +139,11 @@ class UserImage(models.Model):
     # linking to season should acomplish all that
     source = models.ForeignKey(Season, blank=True, null=True,
                                on_delete=models.SET_NULL, related_name='image_source')
+    # match has a lot of overlap with source but there are
+    # different situations where you would use one and not the other
+    # (for examples pictures from a source that do not belong to a match)
+    match = models.ForeignKey(Match, blank=True, null=True,
+                               on_delete=models.SET_NULL, related_name='image_source_match')
 
     popularity = models.ManyToManyField(
         get_user_model(), blank=True, related_name='liked_images')

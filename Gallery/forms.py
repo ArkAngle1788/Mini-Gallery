@@ -35,7 +35,7 @@ class UploadImages(forms.ModelForm):
         model = UserImage
         fields = ['image', 'image_title', 'system',
                   'faction_type', 'factions', 'sub_factions',
-                  'colours', 'conversion', 'unit_type',
+                  'source','colours', 'conversion', 'unit_type',
                   'scale', 'paintingstudio', 'owner', 'location']
         widgets = {
             'image_title': forms.TextInput(attrs={'class': 'bg-white'}),
@@ -43,6 +43,7 @@ class UploadImages(forms.ModelForm):
             'faction_type': Select2MultipleWidget,
             'factions': Select2MultipleWidget,
             'sub_factions': Select2MultipleWidget,
+            'source': Select2Widget,
             'colours': Select2MultipleWidget,
             'conversion': Select2MultipleWidget,
             'unit_type': Select2MultipleWidget,
@@ -103,7 +104,7 @@ class UploadImagesMultipart(forms.ModelForm):
         model = UserImage
         fields = ['subimage', 'image_title', 'system',
                   'faction_type', 'factions', 'sub_factions',
-                  'colours', 'conversion', 'unit_type', 'scale',
+                  'source','colours', 'conversion', 'unit_type', 'scale',
                   'paintingstudio', 'owner', 'location']
         widgets = {
             'image_title': forms.TextInput(attrs={'class': 'bg-white'}),
@@ -111,6 +112,7 @@ class UploadImagesMultipart(forms.ModelForm):
             'faction_type': Select2MultipleWidget,
             'factions': Select2MultipleWidget,
             'sub_factions': Select2MultipleWidget,
+            'source': Select2Widget,
             'colours': Select2MultipleWidget,
             'conversion': Select2MultipleWidget,
             'unit_type': Select2MultipleWidget,
@@ -165,7 +167,7 @@ class UploadMultipleImages(forms.ModelForm):
     class Meta:
         model = UserImage
         fields = ['image', 'image_title', 'system', 'faction_type', 'factions', 'sub_factions',
-                  'colours', 'conversion', 'unit_type', 'scale',
+                  'source','colours', 'conversion', 'unit_type', 'scale',
                   'paintingstudio', 'owner', 'location']
         widgets = {
             'image_title': forms.TextInput(attrs={'class': 'bg-white'}),
@@ -173,6 +175,7 @@ class UploadMultipleImages(forms.ModelForm):
             'faction_type': Select2MultipleWidget,
             'factions': Select2MultipleWidget,
             'sub_factions': Select2MultipleWidget,
+            'source': Select2Widget,
             'colours': Select2MultipleWidget,
             'conversion': Select2MultipleWidget,
             'unit_type': Select2MultipleWidget,
