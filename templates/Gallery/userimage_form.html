@@ -38,9 +38,9 @@ Gallery Image Upload
   <img class="image-center-fit" src="{{image.image.url}}" style="max-width: 100%; max-height: 100%;">
 
   <form action="{%url 'subimage update' image.pk%}" method="post" enctype="multipart/form-data">{% csrf_token %}
-
+aaaa
     {{subimage_form.image.label}}
-    {{subimage_form.image}}
+    {{subimage_form.image}}this was the add image button before i think? not sure why its broken
     <br><br>
     {% if current_subimages %}
       {{subimage_form.sub.label}}

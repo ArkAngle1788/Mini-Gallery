@@ -1,6 +1,4 @@
 from django import template
-from CommunityInfrastructure.models import Group
-# from .models import
 
 register = template.Library()
 
@@ -20,7 +18,3 @@ def is_secondary_admin(group,user):
             return True
     return False
 
-@register.filter
-def simple_test(var):
-
-    return "var"

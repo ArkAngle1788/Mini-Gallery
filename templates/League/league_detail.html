@@ -15,7 +15,7 @@
 
 
 {%if reverse_seasons%}
-{{reverse_seasons}}
+
   {% with reverse_seasons|slice:":2" as my_var %}
 
     {%if my_var.1.season_active%}
@@ -95,7 +95,7 @@
         <a href="{% url 'season register' season.id season.league.league_name|slugify %}">Register for this season of the league!</a>
       {%endif%}
     {%else%}
-    error
+      Registration Closed
     {%endif%}
 
 

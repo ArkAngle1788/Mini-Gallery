@@ -967,6 +967,7 @@ class CountryCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
         context['filter_form'] = image_filter
         return context
 
+
 class RegionCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     """adds a new region to the DB can be done with anyone with the add_region permission"""
     model = Region

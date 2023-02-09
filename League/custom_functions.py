@@ -137,3 +137,24 @@ def auto_round_matches_basic(season):
     # we retun false on successful completion b/c if we fail we return a string
     # and we need to be able to clearly differientiate from that
     return False
+
+
+def match_permission_check(match,user):
+    """
+    Makes sure you are part of a season to upload match pictures
+    Returns True if user has valid permissions and false otherwise
+    """
+    if user.is_staff:
+        return True
+
+    if user.profile in (match.player1.profile,match.player2.profile):
+        return True
+
+    group=match.round.season.league.group
+    for admin in group.group_primary_admins.all():
+        if admin.userprofile == user.profile:
+            return True
+    for admin in group.group_secondary_admins.all():
+        if admin.userprofile == user.profile:
+            return True
+    return False

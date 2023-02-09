@@ -5,7 +5,7 @@ from .views import (LeagueCreate, LeagueDelete, LeagueEdit, LeagueView,
                     SeasonCreate, SeasonDelete, SeasonEdit, SeasonView,
                     SeasonRegister, SeasonClose, RoundCreate, RoundEdit, RoundView,
                     MatchCreateManual, MatchEdit, MatchDelete, MatchView,
-                    SubmitResults,leagues)
+                    SubmitResults,MatchImageUpload,MatchImageUploadMultipart,leagues)
 
 urlpatterns = [
 
@@ -28,6 +28,8 @@ path('season/round/match/<int:pk>/edit', MatchEdit.as_view(), name='edit match')
 path('season/round/match/<int:pk>/delete', MatchDelete.as_view(), name='delete match'),
 path('season/round/match/details/<int:pk>/<str:league>',MatchView.as_view(), name='match details'),
 path('season/round/match/submit_results',SubmitResults.as_view(),name='submit results'),
+path('season/round/match/<int:pk>/upload_image',MatchImageUpload.as_view(),name='upload match image'),
+path('season/round/match/<int:pk>/upload_multipart',MatchImageUploadMultipart.as_view(),name='upload match multipart'),
 
 
 ]
