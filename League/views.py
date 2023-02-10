@@ -2,26 +2,26 @@
 # from Gallery.models import Professional
 # from ContentPost.models import ContentPost
 # from django.contrib.auth.decorators import login_required
-from django.db.models import Count  # used for sorting likes
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import (ImproperlyConfigured, ObjectDoesNotExist,
                                     ValidationError)
+from django.db.models import Count  # used for sorting likes
+from django.db.models import QuerySet
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 from django.urls import reverse
-from django.db.models import QuerySet
 # from django.http import HttpResponseNotFound
 from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django_filters.views import FilterView
-from Gallery.filters import ImageFilter
 
 from CommunityInfrastructure.custom_functions import (check_league_admin,
                                                       check_primary_admin)
 from CommunityInfrastructure.models import Group
+from Gallery.filters import ImageFilter
 from Gallery.models import UserImage
 from Gallery.views import GalleryMultipleUpload, GalleryUploadMultipart
 from UserAccounts.models import AdminProfile, UserProfile
@@ -29,8 +29,8 @@ from UserAccounts.models import AdminProfile, UserProfile
 # from django.urls import reverse_lazy
 from .custom_functions import auto_round_matches_basic, match_permission_check
 from .forms import (LeagueForm, MatchEditForm, MatchForm,
-                    MatchUploadMultipleImages,MatchUploadMultipartImages, RoundForm, SeasonForm,
-                    SeasonRegisterForm)
+                    MatchUploadMultipartImages, MatchUploadMultipleImages,
+                    RoundForm, SeasonForm, SeasonRegisterForm)
 # from django.http import HttpResponseRedirect
 # from GameData.models import Games, Faction, Faction_Type, Sub_Faction
 from .models import League, Match, PlayerSeasonFaction, Round, Season
@@ -218,14 +218,13 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return True
         return False
 
-
-    def league_logic_test(self,request, *args, **kwargs):
+    def league_logic_test(self, request, *args, **kwargs):
         """
         tests if a new season is allowed to be created
         """
 
         league = League.objects.get(pk=self.kwargs['pk'])
-        leagues_seasons=league.child_season.all()
+        leagues_seasons = league.child_season.all()
 
         if leagues_seasons.last().registration_active:
             messages.error(
@@ -233,13 +232,14 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 'The previous season is still in registration.')
             return False
 
-        if leagues_seasons.count()>1:
-            iterate_var=0
+        if leagues_seasons.count() > 1:
+            iterate_var = 0
             for entry in leagues_seasons:
-                if entry==leagues_seasons.last():
-                    round_list=leagues_seasons[iterate_var-1].seasons_rounds.all()
+                if entry == leagues_seasons.last():
+                    round_list = leagues_seasons[iterate_var -
+                                                 1].seasons_rounds.all()
                     if round_list:
-                        match_list=round_list.last().round_matches.all()
+                        match_list = round_list.last().round_matches.all()
                         if match_list:
                             for match in match_list:
                                 if not match.winner:
@@ -257,13 +257,13 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                             self.request,
                             'A previous season does not have any rounds')
                         return False
-                iterate_var+=1
+                iterate_var += 1
         return True
 
     def get(self, request, *args, **kwargs):
         """checks to make sure creating a new season is allowed"""
 
-        if not self.league_logic_test(self,request,*args,**kwargs):
+        if not self.league_logic_test(self, request, *args, **kwargs):
             url = reverse('league details', args=[self.kwargs['pk'], slugify(
                 League.objects.get(pk=self.kwargs['pk']))])
             return redirect(url)
@@ -273,13 +273,12 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def post(self, request, *args, **kwargs):
         """checks to make sure creating a new season is allowed"""
 
-        if not self.league_logic_test(self,request,*args,**kwargs):
+        if not self.league_logic_test(self, request, *args, **kwargs):
             url = reverse('league details', args=[self.kwargs['pk'], slugify(
                 League.objects.get(pk=self.kwargs['pk']))])
             return redirect(url)
 
         return super().post(self, request, *args, **kwargs)
-
 
     def form_valid(self, form):
         # group_id cannot be null so we must add it to the form info
@@ -313,6 +312,7 @@ class SeasonEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         return False
 
+
 class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     shows active registerd leagues or
@@ -336,16 +336,15 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
             return True
         return False
 
-    def season_logic_test(self,request,*args,**kwargs):
+    def season_logic_test(self, request, *args, **kwargs):
         """
         makes sure you are allowed to close the season
         """
         season = Season.objects.get(pk=self.kwargs['pk'])
 
-
-        round_list=season.seasons_rounds.all()
+        round_list = season.seasons_rounds.all()
         if round_list:
-            match_list=round_list.last().round_matches.all()
+            match_list = round_list.last().round_matches.all()
             if match_list:
                 for match in match_list:
                     if not match.winner:
@@ -365,27 +364,24 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
             return False
         return True
 
-
-    def get(self,request,*args,**kwargs):
+    def get(self, request, *args, **kwargs):
         """expects no args"""
         print("test")
-        if not self.season_logic_test(self,request):
+        if not self.season_logic_test(self, request):
             url = reverse('season details', args=[self.kwargs['pk'], slugify(
                 Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
 
         return render(request, 'League/close_season.html')
 
-
     def post(self, request, *args, **kwargs):
         """expects no args"""
         season = Season.objects.get(pk=self.kwargs['pk'])
 
-        if not self.season_logic_test(self,request):
+        if not self.season_logic_test(self, request):
             url = reverse('season details', args=[self.kwargs['pk'], slugify(
                 Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
-
 
         for match in season.seasons_rounds.last().round_matches.all():
             match.player1.previous_opponents.add(match.player2)
@@ -409,7 +405,7 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
             match.player1.save()
             match.player2.save()
 
-        season.season_active=False
+        season.season_active = False
         season.save()
 
         messages.success(
@@ -417,7 +413,7 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
             'Season Closed')
 
         url = reverse('season details', args=[self.kwargs['pk'], slugify(
-                Season.objects.get(pk=self.kwargs['pk']).league)])
+            Season.objects.get(pk=self.kwargs['pk']).league)])
         return redirect(url)
 
 
@@ -439,7 +435,7 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return False
 
         if self.request.user.profile.linked_admin_profile\
-            in season.league.group.group_primary_admins.all():
+                in season.league.group.group_primary_admins.all():
             return True
         return False
 
@@ -448,11 +444,6 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
                       'region', self.object.league.group.slug(), self.object.league.group.id])
 
         return url
-
-
-# class SeasonView(DetailView):
-#     """Viewing leagues is public"""
-#     model = Season
 
 
 class SeasonView(FilterView):
@@ -470,23 +461,12 @@ class SeasonView(FilterView):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
 
-        season_var=Season.objects.get(pk=self.kwargs['pk'])
-        # zone = None#self.kwargs['zone']
+        season_var = Season.objects.get(pk=self.kwargs['pk'])
 
-        # if group_var.location_city:
-        #     zone=group_var.location_city
-        # elif group_var.location_region:
-        #     zone=group_var.location_region
-        # elif group_var.location_country:
-        #     zone=group_var.location_country
-        # else:
-        #     raise ImproperlyConfigured
-
-        # context['currentzonestr'] = zone
         image_filter = ImageFilter(
             self.request.GET, queryset=UserImage.objects.all())
         context['filter_form'] = image_filter
-        context['season']=season_var
+        context['season'] = season_var
         return context
 
     def get_queryset(self):
@@ -507,9 +487,8 @@ class SeasonView(FilterView):
                     source__pk=self.kwargs['pk']).annotate(
                         num_likes=Count('popularity')).order_by('-num_likes', 'id')
 
-
-                    # qs.annotate(num_likes=Count('popularity')
-                    #              ).order_by('-num_likes', 'id')
+                # qs.annotate(num_likes=Count('popularity')
+                #              ).order_by('-num_likes', 'id')
             except ObjectDoesNotExist as error:
                 raise Http404(f'{error}') from error
         else:
@@ -553,7 +532,6 @@ class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             form.add_error('registration_key', ValidationError(
                 ('Invalid value'), code='invalid'))
             return super().form_invalid(form)
-
 
         form.instance.profile = self.request.user.profile
         form.instance.season = season
@@ -602,13 +580,13 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return True
         return False
 
-    def league_logic_test(self,request, *args, **kwargs):
+    def league_logic_test(self, request, *args, **kwargs):
         """
         tests if a new round is allowed to be created
         """
 
         season = Season.objects.get(pk=self.kwargs['pk'])
-        leagues_seasons=season.league.child_season.all()
+        leagues_seasons = season.league.child_season.all()
 
         if season.registration_active:
             messages.error(
@@ -616,18 +594,18 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 'Creating a round can only be done when registration is closed.')
             return False
 
-        if leagues_seasons.count()>1:
-            iterate_var=0
+        if leagues_seasons.count() > 1:
+            iterate_var = 0
             for entry in leagues_seasons:
-                if entry==season:
+                if entry == season:
                     if leagues_seasons[iterate_var-1].season_active:
                         messages.error(
                             self.request,
                             'The previous season is still active')
                         return False
-                iterate_var+=1
+                iterate_var += 1
 
-        number_of_players=PlayerSeasonFaction.objects.filter(season=season).exclude(
+        number_of_players = PlayerSeasonFaction.objects.filter(season=season).exclude(
             profile__user__username="Tie").exclude(profile__user__username="Bye").count()
 
         if season.seasons_rounds.count() >= number_of_players-1 and\
@@ -637,9 +615,9 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 'There cannot be additional rounds without repeat matchups')
             return False
 
-        round_list=season.seasons_rounds.all()
+        round_list = season.seasons_rounds.all()
         if round_list:
-            match_list=round_list.last().round_matches.all()
+            match_list = round_list.last().round_matches.all()
             if match_list:
                 for match in match_list:
                     if not match.winner:
@@ -658,7 +636,7 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def get(self, request, *args, **kwargs):
         """ensures you have closed registration before making new rounds"""
 
-        if not self.league_logic_test(self,request,*args,**kwargs):
+        if not self.league_logic_test(self, request, *args, **kwargs):
             url = reverse('season details', args=[self.kwargs['pk'], slugify(
                 Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
@@ -668,7 +646,7 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def post(self, request, *args, **kwargs):
         """ensures you have closed registration before making new rounds"""
 
-        if not self.league_logic_test(self,request,*args,**kwargs):
+        if not self.league_logic_test(self, request, *args, **kwargs):
             url = reverse('season details', args=[self.kwargs['pk'], slugify(
                 Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
@@ -728,7 +706,7 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             # and create matchmaking support players
             form.instance.round_number = 1
 
-            if PlayerSeasonFaction.objects.filter(season=season).count()%2 !=0\
+            if PlayerSeasonFaction.objects.filter(season=season).count() % 2 != 0\
                     and season.allow_repeat_matches is False:
                 bye_psf = PlayerSeasonFaction(
                     profile=UserProfile.objects.get(user__username='Bye'), season=season)
@@ -738,28 +716,28 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 profile=UserProfile.objects.get(user__username='Tie'), season=season)
             tie_psf.save()
 
-            leagues_seasons=season.league.child_season.all()
+            leagues_seasons = season.league.child_season.all()
 
-            if leagues_seasons.count()>1:
-                iterate_var=0
+            if leagues_seasons.count() > 1:
+                iterate_var = 0
                 for entry in leagues_seasons:
-                    if entry==season:
-                        leagues_seasons[iterate_var-1].season_active=False
+                    if entry == season:
+                        leagues_seasons[iterate_var-1].season_active = False
                         leagues_seasons[iterate_var-1].save()
-                    iterate_var+=1
+                    iterate_var += 1
 
-            season.season_active=True
+            season.season_active = True
             season.save()
 
         redirect_url = super().form_valid(form)
 
         if form.cleaned_data['automate_matchmaking']:
 
-            auto_matches_result=auto_round_matches_basic(season)
+            auto_matches_result = auto_round_matches_basic(season)
 
             if auto_matches_result:
                 form.add_error('automate_matchmaking', ValidationError(
-                (auto_matches_result), code='invalid'))
+                    (auto_matches_result), code='invalid'))
                 return super().form_invalid(form)
 
         return redirect_url
@@ -875,12 +853,11 @@ class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if self.request.user.is_staff:
             return True
 
-        if check_primary_admin(match.round.season.league.group,self.request.user):
+        if check_primary_admin(match.round.season.league.group, self.request.user):
             return True
 
-        if check_league_admin(match.round.season.league,self.request.user):
+        if check_league_admin(match.round.season.league, self.request.user):
             return True
-
 
         # users in a match can edit results while the match is the most recent
         if match.player1.profile == self.request.user.profile\
@@ -964,7 +941,7 @@ class MatchView(DetailView):
         # Add in the leaguenav QuerySet
         # context['league_nav'] = leagues_nav
         # context['news']=calculate_news_bar()
-        context['match_images']=UserImage.objects.filter(match=self.object)
+        context['match_images'] = UserImage.objects.filter(match=self.object)
 
         return context
 
@@ -996,6 +973,7 @@ class SubmitResults(LoginRequiredMixin, View):
         return render(request, 'League/submit_results.html',
                       {'matches': matches})
 
+
 class MatchImageUpload(UserPassesTestMixin, GalleryMultipleUpload):
     """
     GalleryMultipuleUpload will handle setting the image as official
@@ -1008,7 +986,7 @@ class MatchImageUpload(UserPassesTestMixin, GalleryMultipleUpload):
     form_class = MatchUploadMultipleImages
 
     def test_func(self):
-        return match_permission_check(Match.objects.get(pk=self.kwargs['pk']),self.request.user)
+        return match_permission_check(Match.objects.get(pk=self.kwargs['pk']), self.request.user)
 
     def get_form_kwargs(self):
         """Return the keyword arguments for instantiating the form."""
@@ -1033,7 +1011,7 @@ class MatchImageUploadMultipart(UserPassesTestMixin, GalleryUploadMultipart):
     form_class = MatchUploadMultipartImages
 
     def test_func(self):
-        return match_permission_check(Match.objects.get(pk=self.kwargs['pk']),self.request.user)
+        return match_permission_check(Match.objects.get(pk=self.kwargs['pk']), self.request.user)
 
     def get_form_kwargs(self):
         """Return the keyword arguments for instantiating the form."""

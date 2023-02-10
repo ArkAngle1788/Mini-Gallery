@@ -9,13 +9,13 @@ from django.contrib.auth.mixins import (LoginRequiredMixin,
                                         UserPassesTestMixin)
 from django.contrib.auth.models import Group as PermGroup
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.db.models import Count  # used for sorting likes
 from django.db.models import Q, QuerySet
 from django.http import Http404
 from django.shortcuts import redirect, render  # , get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import (CreateView, DeleteView, ListView,
-                                  UpdateView)
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 # from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
 
@@ -32,7 +32,7 @@ from .custom_functions import studio_admin_check
 from .forms import (ApproveUserForm, CityForm, CountryForm, GroupForm,
                     RegionForm, SelectExport, StudioForm)
 
-from django.db.models import Count  # used for sorting likes
+
 def home(request):
     """Displays the site landing page"""
 
@@ -173,23 +173,31 @@ class Group(FilterView):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
 
-        group_var=CIgroup.objects.get(pk=self.kwargs['pk'])
-        zone = None#self.kwargs['zone']
+        group_var = CIgroup.objects.get(pk=self.kwargs['pk'])
+        zone = None  # self.kwargs['zone']
 
         if group_var.location_city:
-            zone=group_var.location_city
+            zone = group_var.location_city
         elif group_var.location_region:
-            zone=group_var.location_region
+            zone = group_var.location_region
         elif group_var.location_country:
-            zone=group_var.location_country
+            zone = group_var.location_country
         else:
             raise ImproperlyConfigured
 
+        if group_var.group_image_str:
+            img_pk_list=group_var.group_image_str.split(",")
+
+            obj_img_list=[]
+            for img_pk in img_pk_list:
+                obj_img_list+=[UserImage.objects.get(pk=img_pk)]
+
+            context['img_list']=obj_img_list
         context['currentzonestr'] = zone
         image_filter = ImageFilter(
             self.request.GET, queryset=UserImage.objects.all())
         context['filter_form'] = image_filter
-        context['group']=group_var
+        context['group'] = group_var
         return context
 
     def get_queryset(self):
@@ -210,9 +218,8 @@ class Group(FilterView):
                     source__league__group__pk=self.kwargs['pk']).annotate(
                         num_likes=Count('popularity')).order_by('-num_likes', 'id')
 
-
-                    # qs.annotate(num_likes=Count('popularity')
-                    #              ).order_by('-num_likes', 'id')
+                # qs.annotate(num_likes=Count('popularity')
+                #              ).order_by('-num_likes', 'id')
             except ObjectDoesNotExist as error:
                 raise Http404(f'{error}') from error
         else:
