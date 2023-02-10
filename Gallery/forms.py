@@ -66,7 +66,7 @@ class UpdateSubImages(forms.ModelForm):
         self.fields['sub'].choices = sub_images
 
     image = forms.ImageField(label='Add Sub Images',
-                             required=False, widget=forms.ClearableFileInput(
+                             required=False, widget=forms.FileInput(
                                  attrs={'multiple': True, 'class': 'text-text-sidebar'}),
                              help_text="<---Select Subimages here!")
     sub = forms.ChoiceField(required=False, label='Delete Images', choices=[])
