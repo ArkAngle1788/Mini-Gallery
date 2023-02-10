@@ -14,7 +14,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render  # , get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+from django.views.generic import (CreateView, DeleteView, ListView,
                                   UpdateView)
 # from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
@@ -32,7 +32,7 @@ from .custom_functions import studio_admin_check
 from .forms import (ApproveUserForm, CityForm, CountryForm, GroupForm,
                     RegionForm, SelectExport, StudioForm)
 
-
+from django.db.models import Count  # used for sorting likes
 def home(request):
     """Displays the site landing page"""
 
@@ -146,17 +146,88 @@ class GroupsByZone(ListView):
         return context
 
 
-class Group(DetailView):
-    """displays group details, sidebar will show leagues"""
-    model = CIgroup
-    context_object_name = 'group'
+# class Group(DetailView):
+#     """displays group details, sidebar will show leagues"""
+#     model = CIgroup
+#     context_object_name = 'group'
+
+#     def get_context_data(self, **kwargs):
+#         # Call the base implementation first to get a context
+#         context = super().get_context_data(**kwargs)
+#         zone = self.kwargs['zone']
+#         context['currentzonestr'] = zone
+#         return context
+
+class Group(FilterView):
+    """
+    displays group details, sidebar will show leagues
+    also shows all images tagged with a goup season as source
+    """
+    model = UserImage
+    filterset_class = ImageFilter
+    context_object_name = 'images'
+    paginate_by = 8
+    template_name = 'CommunityInfrastructure/group_detail.html'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
-        zone = self.kwargs['zone']
+
+        group_var=CIgroup.objects.get(pk=self.kwargs['pk'])
+        zone = None#self.kwargs['zone']
+
+        if group_var.location_city:
+            zone=group_var.location_city
+        elif group_var.location_region:
+            zone=group_var.location_region
+        elif group_var.location_country:
+            zone=group_var.location_country
+        else:
+            raise ImproperlyConfigured
+
         context['currentzonestr'] = zone
+        image_filter = ImageFilter(
+            self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form'] = image_filter
+        context['group']=group_var
         return context
+
+    def get_queryset(self):
+        """
+        Return the list of items for this view.
+        The return value must be an iterable and may be an instance of
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        if self.queryset is not None:
+            queryset = self.queryset
+            if isinstance(queryset, QuerySet):
+                queryset = queryset.all()
+        elif self.model is not None:
+
+            try:
+                # show the most popular images first
+                queryset = UserImage.objects.filter(
+                    source__league__group__pk=self.kwargs['pk']).annotate(
+                        num_likes=Count('popularity')).order_by('-num_likes', 'id')
+
+
+                    # qs.annotate(num_likes=Count('popularity')
+                    #              ).order_by('-num_likes', 'id')
+            except ObjectDoesNotExist as error:
+                raise Http404(f'{error}') from error
+        else:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} is missing a QuerySet. Define "
+                f"{self.__class__.__name__}.model, {self.__class__.__name__}.queryset, or override "
+                f"{self.__class__.__name__}.get_queryset()."
+            )
+        ordering = self.get_ordering()
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+
+        return queryset
 
 
 class GroupAddAdmin(LoginRequiredMixin, UserPassesTestMixin, View):

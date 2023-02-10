@@ -12,6 +12,16 @@
 {{group.group_description|markdownify}}
 </p>
 
+<br>
+<h3>Images tagged with: {{group}}</h3>
+
+{% include 'Gallery/gallery_display/pagination.html'%}
+
+{% include 'Gallery/gallery_display/display_images.html' with group=group %}
+
+<br>
+{% include 'Gallery/gallery_display/pagination.html'%}
+
 
 {% endblock %}
 
@@ -117,5 +127,7 @@
 </div>
 
 {% include 'CommunityInfrastructure/sidebar_right.html' %}
+
+{% include 'Gallery/gallery_display/image_filter_sidebar.html' %}
 
 {%endblock%}

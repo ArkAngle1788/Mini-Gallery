@@ -8,6 +8,7 @@ from django_select2.forms import Select2MultipleWidget, Select2Widget
 
 from CommunityInfrastructure.models import City, PaintingStudio
 from GameData.models import Faction, FactionType, Game, SubFaction, UnitType
+from League.models import Season
 
 from .models import ColourCatagory, Conversion, ScaleOfImage, UserImage
 
@@ -79,6 +80,8 @@ class ImageFilter(django_filters.FilterSet):
     ), conjoined=True, widget=Select2MultipleWidget(global_default))
     sub_factions = ModelMultipleChoiceFilter(queryset=SubFaction.objects.all(
     ), conjoined=True, widget=Select2MultipleWidget(global_default))
+    source = ModelMultipleChoiceFilter(
+        queryset=Season.objects.all(), widget=Select2MultipleWidget(global_default))
     colours = ModelMultipleChoiceFilter(queryset=ColourCatagory.objects.all(
     ), conjoined=True, widget=Select2MultipleWidget(global_default))
     conversion = ModelMultipleChoiceFilter(queryset=Conversion.objects.all(
@@ -115,5 +118,5 @@ class ImageFilter(django_filters.FilterSet):
         model = UserImage
         fields = [
             'order', 'fuzzy_search', 'title', 'system', 'faction_type',
-            'factions', 'sub_factions', 'colours', 'conversion',
+            'factions', 'sub_factions', 'source' ,'colours', 'conversion',
             'unit_type', 'scale', 'studio_official', 'paintingstudio', 'owner', 'location']
