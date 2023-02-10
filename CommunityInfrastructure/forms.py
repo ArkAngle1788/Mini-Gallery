@@ -100,15 +100,20 @@ class GroupForm(forms.ModelForm):
     """
     class Meta:
         model = CIgroup
-        fields = ['group_name', 'group_tag', 'group_description',
+        fields = ['group_name', 'group_tag', 'group_description','group_image_str',
                   'location_city', 'location_region', 'location_country']
         widgets = {
             'group_name': forms.TextInput(basicattrs),
             'group_tag': forms.TextInput(basicattrs),
             'group_description': forms.TextInput(basicattrs),
+            'group_image_str': forms.TextInput(basicattrs),
             'location_city': CityWidget,
             'location_region': RegionWidget,
             'location_country': CountryWidget,
+        }
+
+        helptext ={
+            'group_image_str':'Enter the id\'s of the images you want displayed seperated by commas'
         }
 
 

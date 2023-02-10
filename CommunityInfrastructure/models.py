@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
@@ -87,6 +88,17 @@ class Language(models.Model):
         return self.language
 
 
+def validate_even(value):
+
+    img_list = value.split(',')
+
+    for item in img_list:
+        try:
+            int(item)
+        except ValueError:
+            raise ValidationError('Invalid Format')
+
+
 class Group(models.Model):
     """
     Can only have one of
@@ -97,9 +109,10 @@ class Group(models.Model):
     # slug = models.SlugField(max_length=50)
     group_tag = models.CharField(max_length=50)
     group_description = models.CharField(max_length=600)
+    group_image_str = models.CharField(
+        max_length=50, null=True, validators=[validate_even])
     group_leagues = models.ManyToManyField(
         'League.League', blank=True, related_name='group_running')
-    
 
     # will need to have carefull app logic to ensure
     # only one of these gets set since that's how we will check for scope
