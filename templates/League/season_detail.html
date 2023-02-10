@@ -64,6 +64,15 @@
 
 {%endif%}
 
+<br>
+<h3>Images from {{season}}</h3>
+
+{% include 'Gallery/gallery_display/pagination.html'%}
+
+{% include 'Gallery/gallery_display/display_images.html' with season=season %}
+
+<br>
+{% include 'Gallery/gallery_display/pagination.html'%}
 
 {% endblock %}
 
@@ -125,5 +134,7 @@
 <a href="{% url 'delete season' season.pk %}">Delete Season</a>
 
 {%endif%}
+
+{% include 'Gallery/gallery_display/image_filter_sidebar.html' %}
 
 {%endblock%}

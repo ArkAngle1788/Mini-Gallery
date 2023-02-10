@@ -155,7 +155,9 @@ Mini-Gallery -Detail
   {% elif request.GET.profile %}
     <a class="nav-item nav-link" href="{% url 'profile' request.GET.profile %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Profile Page</a>
   {% elif request.GET.group %}
-    <a class="nav-item nav-link" href="{% url 'group info' 'region' 'name' request.GET.group %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Group Page</a>
+    <a class="nav-item nav-link" href="{% url 'group info' 'region' 'group' request.GET.group %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Group Page</a>
+  {% elif request.GET.season %}
+    <a class="nav-item nav-link" href="{% url 'season details' request.GET.season 'league' %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Season Page</a>
   {% else %}
     <a class="nav-item nav-link" href="{% url 'gallery home' %}?{% for key, value in request.GET.items %}{%if key == 'like' or key == 'unlike'%}{{key}}{%else%}&{{key}}={{value}}{%endif%}{%endfor%}">Return to Browse</a>
   {% endif %}

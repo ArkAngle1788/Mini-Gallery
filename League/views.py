@@ -2,7 +2,7 @@
 # from Gallery.models import Professional
 # from ContentPost.models import ContentPost
 # from django.contrib.auth.decorators import login_required
-# from itertools import count
+from django.db.models import Count  # used for sorting likes
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import (ImproperlyConfigured, ObjectDoesNotExist,
@@ -11,11 +11,13 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 from django.urls import reverse
-# from django.db.models import Q
+from django.db.models import QuerySet
 # from django.http import HttpResponseNotFound
 from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django_filters.views import FilterView
+from Gallery.filters import ImageFilter
 
 from CommunityInfrastructure.custom_functions import (check_league_admin,
                                                       check_primary_admin)
@@ -448,9 +450,81 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return url
 
 
-class SeasonView(DetailView):
-    """Viewing leagues is public"""
-    model = Season
+# class SeasonView(DetailView):
+#     """Viewing leagues is public"""
+#     model = Season
+
+
+class SeasonView(FilterView):
+    """
+    displays group details, sidebar will show leagues
+    also shows all images tagged with a goup season as source
+    """
+    model = UserImage
+    filterset_class = ImageFilter
+    context_object_name = 'images'
+    paginate_by = 8
+    template_name = 'League/season_detail.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        season_var=Season.objects.get(pk=self.kwargs['pk'])
+        # zone = None#self.kwargs['zone']
+
+        # if group_var.location_city:
+        #     zone=group_var.location_city
+        # elif group_var.location_region:
+        #     zone=group_var.location_region
+        # elif group_var.location_country:
+        #     zone=group_var.location_country
+        # else:
+        #     raise ImproperlyConfigured
+
+        # context['currentzonestr'] = zone
+        image_filter = ImageFilter(
+            self.request.GET, queryset=UserImage.objects.all())
+        context['filter_form'] = image_filter
+        context['season']=season_var
+        return context
+
+    def get_queryset(self):
+        """
+        Return the list of items for this view.
+        The return value must be an iterable and may be an instance of
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        if self.queryset is not None:
+            queryset = self.queryset
+            if isinstance(queryset, QuerySet):
+                queryset = queryset.all()
+        elif self.model is not None:
+
+            try:
+                # show the most popular images first
+                queryset = UserImage.objects.filter(
+                    source__pk=self.kwargs['pk']).annotate(
+                        num_likes=Count('popularity')).order_by('-num_likes', 'id')
+
+
+                    # qs.annotate(num_likes=Count('popularity')
+                    #              ).order_by('-num_likes', 'id')
+            except ObjectDoesNotExist as error:
+                raise Http404(f'{error}') from error
+        else:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} is missing a QuerySet. Define "
+                f"{self.__class__.__name__}.model, {self.__class__.__name__}.queryset, or override "
+                f"{self.__class__.__name__}.get_queryset()."
+            )
+        ordering = self.get_ordering()
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+
+        return queryset
 
 
 class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
