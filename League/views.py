@@ -226,13 +226,17 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         league = League.objects.get(pk=self.kwargs['pk'])
         leagues_seasons = league.child_season.all()
 
-        if leagues_seasons.last().registration_active:
-            messages.error(
-                self.request,
-                'The previous season is still in registration.')
-            return False
+        
 
         if leagues_seasons.count() > 1:
+
+            # we can't check this on the first season and it's only relevant if there's more than 1.
+            if leagues_seasons.last().registration_active:
+                messages.error(
+                    self.request,
+                    'The previous season is still in registration.')
+                return False
+
             iterate_var = 0
             for entry in leagues_seasons:
                 if entry == leagues_seasons.last():

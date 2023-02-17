@@ -38,12 +38,15 @@ class LeagueForm(forms.ModelForm):
         )
 
         self.fields['admin_options'].queryset = self.admin_list
-        active_admins = []
-        for admin in self.fields['admin_options'].queryset.all():
-            if admin in kwargs['instance'].admins_managing.all():
-                active_admins += [admin.id]
 
-        self.initial['admin_options'] = active_admins
+        # if instance will exist on edit but not create
+        if kwargs['instance']:
+            active_admins = []
+            for admin in self.fields['admin_options'].queryset.all():
+                if admin in kwargs['instance'].admins_managing.all():
+                    active_admins += [admin.id]
+
+            self.initial['admin_options'] = active_admins
 
     admin_options = forms.ModelMultipleChoiceField(
         queryset=admin_list,

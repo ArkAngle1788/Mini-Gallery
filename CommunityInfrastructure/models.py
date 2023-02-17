@@ -110,7 +110,7 @@ class Group(models.Model):
     group_tag = models.CharField(max_length=50)
     group_description = models.CharField(max_length=600)
     group_image_str = models.CharField(
-        max_length=50, null=True, validators=[validate_even])
+        max_length=50, null=True,blank=True, validators=[validate_even])
     group_leagues = models.ManyToManyField(
         'League.League', blank=True, related_name='group_running')
 
