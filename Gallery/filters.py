@@ -2,6 +2,7 @@ import django_filters
 from django.db.models import Count  # used for sorting likes
 from django.forms import RadioSelect
 from django.forms.widgets import CheckboxInput, TextInput
+from django_select2 import forms as s2forms
 from django_filters import (CharFilter, ModelChoiceFilter,
                             ModelMultipleChoiceFilter)
 from django_select2.forms import Select2MultipleWidget, Select2Widget
@@ -59,7 +60,37 @@ class OfficialStudioFilter(django_filters.BooleanFilter):
         # if value was false we do not want to change the queryset in any way so we just return it
         return qs
 
+class SelectFactionTypeWidget(s2forms.ModelSelect2Widget):
+    """searches against names and email"""
+    search_fields = [
+        "faction_name__icontains",
+        "system__game_system_name__icontains",
+    ]
 
+class SelectFactionWidget(s2forms.ModelSelect2Widget):
+    """searches against names and email"""
+    search_fields = [
+        "faction_name__icontains",
+        "faction_type__faction_name__icontains",
+        "faction_type__system__game_system_name__icontains",
+    ]
+
+class SelectSubFactionWidget(s2forms.ModelSelect2Widget):
+    """searches against names and email"""
+    search_fields = [
+        "faction_name__icontains",
+        "faction__faction_name__icontains",
+        "faction__faction_type__faction_name__icontains",
+        "faction__faction_type__system__game_system_name__icontains",
+
+    ]
+
+class SelectUnitWidget(s2forms.ModelSelect2Widget):
+    """searches against unit name and game system"""
+    search_fields = [
+        "unit_type__icontains",
+        "system__game_system_name__icontains",
+    ]
 
 class ImageFilter(django_filters.FilterSet):
     """
@@ -75,11 +106,11 @@ class ImageFilter(django_filters.FilterSet):
     system = ModelMultipleChoiceFilter(queryset=Game.objects.all(
     ), conjoined=True, widget=Select2MultipleWidget(global_default))
     faction_type = ModelMultipleChoiceFilter(queryset=FactionType.objects.all(
-    ), conjoined=True, widget=Select2MultipleWidget(global_default))
+    ), conjoined=True, widget=SelectFactionTypeWidget(global_default))
     factions = ModelMultipleChoiceFilter(queryset=Faction.objects.all(
-    ), conjoined=True, widget=Select2MultipleWidget(global_default))
+    ), conjoined=True, widget=SelectFactionWidget(global_default))
     sub_factions = ModelMultipleChoiceFilter(queryset=SubFaction.objects.all(
-    ), conjoined=True, widget=Select2MultipleWidget(global_default))
+    ), conjoined=True, widget=SelectSubFactionWidget(global_default))
     source = ModelMultipleChoiceFilter(
         queryset=Season.objects.all(), widget=Select2MultipleWidget(global_default))
     colours = ModelMultipleChoiceFilter(queryset=ColourCatagory.objects.all(
@@ -87,7 +118,8 @@ class ImageFilter(django_filters.FilterSet):
     conversion = ModelMultipleChoiceFilter(queryset=Conversion.objects.all(
     ), conjoined=True, widget=Select2MultipleWidget(global_default))
     unit_type = ModelMultipleChoiceFilter(queryset=UnitType.objects.all(
-    ), conjoined=True, widget=Select2MultipleWidget(global_default))
+    ), conjoined=True, widget=SelectUnitWidget(global_default))
+    # Select2MultipleWidget(global_default))
     scale = ModelChoiceFilter(
         queryset=ScaleOfImage.objects.all(), widget=Select2Widget(global_default))
     paintingstudio = ModelMultipleChoiceFilter(queryset=PaintingStudio.objects.all(
