@@ -2,6 +2,7 @@ from django import forms
 # from django.forms.widgets import TextInput
 from django_select2 import forms as s2forms
 
+
 from .models import Faction, FactionType, Game, SubFaction, UnitType
 
 # select2 can only have limited styling applied to it with classes.
@@ -11,7 +12,7 @@ basicattrs = {'style': 'width: 90%'}
 
 textfieldattrs = basicattrs.copy()
 textfieldattrs['class'] = 'bg-white'
-textfieldattrs['placeholder'] = 'input'
+textfieldattrs['placeholder'] = 'input text here'
 
 
 class GameWidget(s2forms.Select2Widget):
@@ -21,16 +22,19 @@ class GameWidget(s2forms.Select2Widget):
     ]
 
 
-class FactionWidget(s2forms.Select2Widget):
+class FactionTypeWidget(s2forms.ModelSelect2Widget):
     """name__icontains search, can be adapted"""
+    
     search_fields = [
+        'system__game_system_name__icontains',
         'faction_name__icontains',
     ]
+    
 
-
-class FactionTypeWidget(s2forms.Select2Widget):
+class FactionWidget(s2forms.ModelSelect2Widget):
     """name__icontains search, can be adapted"""
     search_fields = [
+        'faction_type__system__game_system_name__icontains',
         'faction_name__icontains',
     ]
 
@@ -86,4 +90,6 @@ class UnitTypeForm(forms.ModelForm):
         widgets = {
             'system': GameWidget(basicattrs),
             'unit_type': forms.TextInput(textfieldattrs),
+            'sub_faction': s2forms.Select2MultipleWidget,
+            'faction': s2forms.Select2MultipleWidget,
         }

@@ -39,7 +39,7 @@ Mini-Gallery -Detail
     <h3>Faction Type:</h3>
 
       {%for faction in image.faction_type.all %}
-        {{faction}}<br>
+        {{faction.simple_string}}<br>
       {%endfor%}
 
   {%endif%}
@@ -47,7 +47,7 @@ Mini-Gallery -Detail
     <h3>Faction:</h3>
 
       {%for faction in image.factions.all %}
-        {{faction}}<br>
+        {{faction.simple_string}}<br>
       {%endfor%}
 
   {%endif%}
@@ -55,7 +55,7 @@ Mini-Gallery -Detail
     <h3>Sub-Faction:</h3>
 
       {%for sub_faction in image.sub_factions.all %}
-        {{sub_faction}}<br>
+        {{sub_faction.simple_string}}<br>
       {%endfor%}
 
   {%endif%}
@@ -82,7 +82,7 @@ Mini-Gallery -Detail
   {% if image.unit_type.all %}
     <h3>Models Present:</h3>
       {%for unit_type in image.unit_type.all%}
-        {{unit_type}}<br>
+        {{unit_type.simple_string}}<br>
       {%endfor%}
   {%endif%}
   <br>

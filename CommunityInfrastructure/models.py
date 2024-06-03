@@ -89,6 +89,10 @@ class Language(models.Model):
 
 
 def validate_even(value):
+    """
+    what is this fuction name?
+    splits a list on ',' and checks that each item is an int
+    """
 
     img_list = value.split(',')
 

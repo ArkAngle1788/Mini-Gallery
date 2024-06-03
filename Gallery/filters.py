@@ -89,6 +89,8 @@ class SelectUnitWidget(s2forms.ModelSelect2Widget):
     """searches against unit name and game system"""
     search_fields = [
         "unit_type__icontains",
+        "faction__faction_name__icontains",
+        "sub_faction__faction_name__icontains",
         "system__game_system_name__icontains",
     ]
 

@@ -21,7 +21,13 @@ class FactionType(models.Model):
     faction_name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return self.faction_name
+        return self.faction_name+" ("+str(self.system)+")"
+    
+    def simple_string(self):
+        """
+        returns the name with no additional context information
+        """
+        return str(self.faction_name)
 
     def get_absolute_url(self):
         """returns 'manage image fields'"""
@@ -35,7 +41,13 @@ class Faction(models.Model):
     faction_name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return self.faction_name
+        return self.faction_name+" ("+self.faction_type.simple_string()+")"
+    
+    def simple_string(self):
+        """
+        returns the name with no additional context information
+        """
+        return str(self.faction_name)
 
     def get_absolute_url(self):
         """returns 'manage image fields'"""
@@ -50,7 +62,15 @@ class SubFaction(models.Model):
     faction_name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return self.faction_name
+        if self.faction.faction_name == self.faction_name:
+            return self.faction_name
+        return self.faction_name+" ["+str(self.faction.simple_string())+"]"
+    
+    def simple_string(self):
+        """
+        returns the name with no additional context information
+        """
+        return str(self.faction_name)
 
     def get_absolute_url(self):
         """returns 'manage image fields'"""
@@ -62,14 +82,39 @@ class UnitType(models.Model):
     UnitType currently only links to system
     """
     system = models.ForeignKey(Game, on_delete=models.CASCADE)
-    # getting this detailed would be nice but it depends on how easily
-    # we can dynamically adjust filtering options
-    # to take advantage of this level of detail
+
+
+    faction=models.ManyToManyField(Faction,blank=True,related_name='unit_faction')
+    sub_faction=models.ManyToManyField(
+        SubFaction,blank=True,related_name='unit_subfaction')
 
     unit_type = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return self.unit_type
+        output=self.unit_type
+        data=self.get_specific_faction()
+        if not data:
+            return output
+        for entry in self.get_specific_faction():
+            output+=" ("+str(entry.simple_string())+")"
+        return output 
+    
+    def simple_string(self):
+        """
+        returns the name with no additional context information
+        """
+        return str(self.unit_type)
+    
+    def get_specific_faction(self):
+        """
+        returns the most specific faction type (subfaction/faction)
+        or none if neither are defined
+        """
+        if self.sub_faction.all():
+            return self.sub_faction.all()
+        if self.faction.all():
+            return self.faction.all()
+        return None
 
     def get_absolute_url(self):
         """returns 'manage image fields'"""
