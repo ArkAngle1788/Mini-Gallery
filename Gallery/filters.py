@@ -60,14 +60,14 @@ class OfficialStudioFilter(django_filters.BooleanFilter):
         # if value was false we do not want to change the queryset in any way so we just return it
         return qs
 
-class SelectFactionTypeWidget(s2forms.ModelSelect2Widget):
+class SelectFactionTypeWidget(s2forms.ModelSelect2MultipleWidget):
     """searches against names and email"""
     search_fields = [
         "faction_name__icontains",
         "system__game_system_name__icontains",
     ]
 
-class SelectFactionWidget(s2forms.ModelSelect2Widget):
+class SelectFactionWidget(s2forms.ModelSelect2MultipleWidget):
     """searches against names and email"""
     search_fields = [
         "faction_name__icontains",
@@ -75,7 +75,7 @@ class SelectFactionWidget(s2forms.ModelSelect2Widget):
         "faction_type__system__game_system_name__icontains",
     ]
 
-class SelectSubFactionWidget(s2forms.ModelSelect2Widget):
+class SelectSubFactionWidget(s2forms.ModelSelect2MultipleWidget):
     """searches against names and email"""
     search_fields = [
         "faction_name__icontains",
@@ -85,7 +85,7 @@ class SelectSubFactionWidget(s2forms.ModelSelect2Widget):
 
     ]
 
-class SelectUnitWidget(s2forms.ModelSelect2Widget):
+class SelectUnitWidget(s2forms.ModelSelect2MultipleWidget):
     """searches against unit name and game system"""
     search_fields = [
         "unit_type__icontains",
