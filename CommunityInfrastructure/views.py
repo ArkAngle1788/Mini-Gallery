@@ -31,12 +31,39 @@ from UserAccounts.models import AdminProfile, UserProfile
 from .custom_functions import studio_admin_check
 from .forms import (ApproveUserForm, CityForm, CountryForm, GroupForm,
                     RegionForm, SelectExport, StudioForm)
-
+from random import randint
 
 def home(request):
     """Displays the site landing page"""
 
-    return render(request, 'CommunityInfrastructure/home.html', {'news': calculate_news_bar()})
+
+    # update notes with annotate/aggrigate if it's not already there
+    # popular_images = UserImage.objects.all().order_by('-popularity')[:5]
+    popular_images = UserImage.objects.annotate(Count('popularity')).order_by('-popularity__count')[:5]
+
+    
+
+
+    # random_object = UserImage.objects.all()[randint(
+    #     0, UserImage.objects.count() - 1)]
+
+    image_list = UserImage.objects.all()
+
+    r1=randint(0,image_list.count()-1)
+    r2=randint(0,image_list.count()-1)
+    r3=randint(0,image_list.count()-1)
+    r4=randint(0,image_list.count()-1)
+    r5=randint(0, image_list.count()-1)
+
+    random_images = [image_list[r1]]
+    random_images += [image_list[r2]]
+    random_images += [image_list[r3]]
+    random_images += [image_list[r4]]
+    random_images += [image_list[r5]]
+
+    return render(request, 'CommunityInfrastructure/home.html', {'news': calculate_news_bar(),'popular_images':popular_images,'random_images':random_images})
+
+
 
 
 def about(request):

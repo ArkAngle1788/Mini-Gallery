@@ -3,14 +3,25 @@
 
 <p><b>Website Test Version</b></p>
 
-<p>current active features are the gallery and the community groups pages</p>
+<h1 align='center'><a href="{% url 'gallery home' %}?order=popularity">Gallery</a></h1>
+<h4 align='center'><a href="{% url 'groups top' %}">Groups & Organizations</a></h1>
+  <p align='center'>league creation/registration/managment is currently offline</p>
 
-<h1><a href="{% url 'gallery home' %}?order=popularity">Gallery</a></h1>
 
-<h1><a href="{% url 'groups top' %}">Groups & Organizations</a></h1>
+<h3 align='center'> Most Popular Gallery Images</h3>
+
+{% include 'Gallery/gallery_display/display_images.html' with images=popular_images heightpxval=200 fullscreen_col_val=2 %}
+
+
+<br><br>
+<h3 align='center'>Random Gallery Images</h3>
+{% include 'Gallery/gallery_display/display_images.html' with images=random_images heightpxval=200 fullscreen_col_val=2 %}
+
+
+
 
 <br>
-<p>league creation/registration/managment is currently offline</p>
+
 <br>
 <br>
 {% endblock content %}

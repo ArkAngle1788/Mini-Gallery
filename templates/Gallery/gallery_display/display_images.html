@@ -1,12 +1,14 @@
 <div class="row">
   {%for image in images%}
-    <div class="col-md-6 gy-3"align='center'>
+    <div class="col-md-{{fullscreen_col_val}} gy-3"align='center'>
       <div class="card bg-gallery-card-bot">
         {% comment %} <div class="float-right card-img-overlay card-inverse">
           
         </div> {% endcomment %}
+
+        {% comment %} height: 350px; {% endcomment %}
         <a href="{% url 'image details' image.id %}?{% if source_studiodetail %}studio={{studio.id}}{%elif season%}season={{season.id}}{% elif source_profile %}profile={{profile.id}}{% elif group%}group={{group.id}}{% endif %}&{% for key, value in request.GET.items %}{{key}}={{value}}&{%endfor%}" class="card-link">
-          <img src="{{image.image.url}}" class="card-img-top img-thumbnail img-fluid bg-gallery-card-top"style="width: 100%; height: 350px; object-fit: contain;" alt="Image Failed to Load">
+          <img src="{{image.image.url}}" class="card-img-top img-thumbnail img-fluid bg-gallery-card-top"style="width: 100%; height: {{heightpxval}}px; object-fit: contain;" alt="Image Failed to Load">
         </a>
         <div class="card-body text-bright">
           <h5 class="card-title">
