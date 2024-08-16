@@ -39,7 +39,7 @@ def home(request):
 
     # update notes with annotate/aggrigate if it's not already there
     # popular_images = UserImage.objects.all().order_by('-popularity')[:5]
-    popular_images = UserImage.objects.annotate(Count('popularity')).order_by('-popularity__count')[:5]
+    popular_images = UserImage.objects.annotate(Count('popularity')).order_by('-popularity__count')[:6]
 
     
 
@@ -54,12 +54,14 @@ def home(request):
     r3=randint(0,image_list.count()-1)
     r4=randint(0,image_list.count()-1)
     r5=randint(0, image_list.count()-1)
+    r6=randint(0, image_list.count()-1)
 
     random_images = [image_list[r1]]
     random_images += [image_list[r2]]
     random_images += [image_list[r3]]
     random_images += [image_list[r4]]
     random_images += [image_list[r5]]
+    random_images += [image_list[r6]]
 
     return render(request, 'CommunityInfrastructure/home.html', {'news': calculate_news_bar(),'popular_images':popular_images,'random_images':random_images})
 
