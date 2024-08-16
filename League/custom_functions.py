@@ -144,6 +144,13 @@ def match_permission_check(match,user):
     Makes sure you are part of a season to upload match pictures
     Returns True if user has valid permissions and false otherwise
     """
+
+    try:
+        user.profile
+    except:
+        return False
+        
+
     if user.is_staff:
         return True
 
