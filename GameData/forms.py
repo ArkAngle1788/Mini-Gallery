@@ -1,7 +1,7 @@
 from django import forms
+from django.core.exceptions import ValidationError
 # from django.forms.widgets import TextInput
 from django_select2 import forms as s2forms
-
 
 from .models import Faction, FactionType, Game, SubFaction, UnitType
 
@@ -24,12 +24,12 @@ class GameWidget(s2forms.Select2Widget):
 
 class FactionTypeWidget(s2forms.ModelSelect2Widget):
     """name__icontains search, can be adapted"""
-    
+
     search_fields = [
         'system__game_system_name__icontains',
         'faction_name__icontains',
     ]
-    
+
 
 class FactionWidget(s2forms.ModelSelect2Widget):
     """name__icontains search, can be adapted"""
@@ -93,3 +93,10 @@ class UnitTypeForm(forms.ModelForm):
             'sub_faction': s2forms.Select2MultipleWidget,
             'faction': s2forms.Select2MultipleWidget,
         }
+    def clean(self):
+        cleaned_data = super().clean()
+        faction = cleaned_data.get("faction")
+        unit_type = cleaned_data.get("unit_type")
+        for unit in UnitType.objects.filter(faction__faction_name=faction[0].faction_name):
+            if unit.unit_type==unit_type:
+                raise ValidationError("This unit already exists within this faction")

@@ -22,7 +22,7 @@ class FactionType(models.Model):
 
     def __str__(self):
         return self.faction_name+" ("+str(self.system)+")"
-    
+
     def simple_string(self):
         """
         returns the name with no additional context information
@@ -42,7 +42,7 @@ class Faction(models.Model):
 
     def __str__(self):
         return self.faction_name+" ("+self.faction_type.simple_string()+")"
-    
+
     def simple_string(self):
         """
         returns the name with no additional context information
@@ -65,7 +65,7 @@ class SubFaction(models.Model):
         if self.faction.faction_name == self.faction_name:
             return self.faction_name
         return self.faction_name+" ["+str(self.faction.simple_string())+"]"
-    
+
     def simple_string(self):
         """
         returns the name with no additional context information
@@ -88,7 +88,8 @@ class UnitType(models.Model):
     sub_faction=models.ManyToManyField(
         SubFaction,blank=True,related_name='unit_subfaction')
 
-    unit_type = models.CharField(max_length=100, unique=True)
+    unit_type = models.CharField(max_length=100)
+
 
     def __str__(self):
         output=self.unit_type
@@ -97,14 +98,14 @@ class UnitType(models.Model):
             return output
         for entry in self.get_specific_faction():
             output+=" ("+str(entry.simple_string())+")"
-        return output 
-    
+        return output
+
     def simple_string(self):
         """
         returns the name with no additional context information
         """
         return str(self.unit_type)
-    
+
     def get_specific_faction(self):
         """
         returns the most specific faction type (subfaction/faction)
