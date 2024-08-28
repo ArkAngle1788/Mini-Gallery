@@ -76,6 +76,8 @@ class PlayerSeasonFaction(models.Model):
                                     related_name='player_sub_faction')
     season = models.ForeignKey(Season, on_delete=models.CASCADE,
                                null=True, blank=True, related_name='players_in_season')
+    
+    army_list = models.TextField()
 
     # next four variables are updated in round_create
     # previous_opponents = models.ManyToManyField(

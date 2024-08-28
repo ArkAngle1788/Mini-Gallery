@@ -106,7 +106,7 @@ class SeasonRegisterForm(forms.ModelForm):
 
     class Meta:
         model = PlayerSeasonFaction
-        fields = ["faction", "sub_faction", "registration_key"]
+        fields = ["faction", "sub_faction","army_list", "registration_key"]
 
     def __init__(self,  *args, **kwargs):
         league = kwargs.pop('league')

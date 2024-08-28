@@ -48,6 +48,32 @@
   </tbody>
 </table>
 
+
+<button class="btn btn-primary m-1" type="button" data-bs-toggle="collapse" data-bs-target="#army_list_table" aria-expanded="false" aria-controls="army_list_table">
+  View Army Lists
+</button>
+
+<div class="collapse" id="army_list_table">
+
+  <table class="table table-bordered table-hover" style="width:100%">
+    <thead class="thead-light">
+      <tr>
+        <th>{{match.player1.profile}}</th>
+        <th>{{match.player2.profile}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{match.player1.army_list|linebreaksbr}}</td>
+        <td>{{match.player2.army_list|linebreaks}}</td>      
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+
 <h3>Standings:</h3>
 
 {% include 'League/components/season_player_table.html' with season=match.round.season%}
