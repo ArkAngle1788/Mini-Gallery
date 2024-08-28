@@ -18,7 +18,11 @@
 <h5>Click on a match to view details</h5>
 
   {%if round.round_matches.all%}
-    {% include 'League/components/matchups_table.html'%}
+    <div class="row">
+      <div class="col-12 gy-3"align='center'style="overflow-x:auto;">
+        {% include 'League/components/matchups_table.html'%}
+      </div>
+    </div>
   {%endif%}
 
 
