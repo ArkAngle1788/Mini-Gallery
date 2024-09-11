@@ -116,6 +116,7 @@ Mini-Gallery -Detail
   {% if image.owner %}
     Content owner: {{image.owner}}<br>
   {%endif%}
+  Uploader: <a href="{%url 'profile' image.uploader.profile.pk %}">{{image.uploader}}</a><br>
   {% if image.location %}
     Location: {{image.location}}<br>
   {% endif %}

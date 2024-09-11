@@ -6,10 +6,12 @@ from django_select2 import forms as s2forms
 from django_filters import (CharFilter, ModelChoiceFilter,
                             ModelMultipleChoiceFilter)
 from django_select2.forms import Select2MultipleWidget, Select2Widget
+from django.contrib.auth import get_user_model
 
 from CommunityInfrastructure.models import City, PaintingStudio
 from GameData.models import Faction, FactionType, Game, SubFaction, UnitType
 from League.models import Season
+from UserAccounts.models import UserProfile
 
 from .models import ColourCatagory, Conversion, ScaleOfImage, UserImage
 
@@ -129,6 +131,7 @@ class ImageFilter(django_filters.FilterSet):
     ), conjoined=True, widget=Select2MultipleWidget(global_default))
     owner = CharFilter(label='Owner', field_name='owner', lookup_expr='icontains', widget=TextInput(
         {'style': 'width: 100%', 'placeholder': 'Name or Identifier'}))
+    uploader = ModelChoiceFilter(queryset=get_user_model().objects.all(), widget=Select2Widget(global_default))
     location = ModelChoiceFilter(
         queryset=City.objects.all(), widget=Select2Widget(global_default))
 
