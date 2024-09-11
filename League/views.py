@@ -37,7 +37,7 @@ from .models import League, Match, PlayerSeasonFaction, Round, Season
 
 
 def leagues(request):
-    """docstring"""
+    """this currently is some leftover debug fragment? why didn't I delete it when i finished whatever I was doing here?"""
 
     image = UserProfile.objects.all()
 
@@ -840,7 +840,7 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return kwargs
 
 
-class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class MatchEdit(UserPassesTestMixin, UpdateView):
     """
     W:L record string is not generated until the round is closed
     """
@@ -848,11 +848,31 @@ class MatchEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = MatchEditForm
 
     def test_func(self):
-        """must be one of the two players in a match during the round or a league admin"""
+        """
+        Must be logged in and then: must be one of the two players in a match during the round or a league admin
+        OR
+        can be logged out but then must have the qr_code_key
+        """
+
         try:
             match = Match.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
+
+        # checks for being logged out
+        if not self.request.user.is_authenticated:
+            code=self.request.GET.get('code')
+            try:
+                season=Season.objects.get(qr_code_key=code)
+                if season != match.round.season:
+                    return False
+                if match.round.season.seasons_rounds.last() == match.round:
+                    return True
+                return False
+            except:
+                return False
+
+        # checks for being logged in
 
         if self.request.user.is_staff:
             return True
@@ -975,6 +995,41 @@ class SubmitResults(LoginRequiredMixin, View):
             return redirect(url)
 
         return render(request, 'League/submit_results.html',
+                      {'matches': matches})
+    
+class SubmitResultsCode(View):
+    """
+    authenticates a qrcode url, if a match is also given it will redirect to match result submission passing along the code
+    """
+
+    def get(self, request, *args, **kwargs):
+        """
+        checks for the args code and match
+        if code is valid returns a list of matches for the latest round of the event with the code
+        if code and match are valid redirects to edit match
+        edit match handles validation this function only checks if the code matches any season
+        """
+
+        code=self.request.GET.get('code')
+        match=self.request.GET.get('match')
+
+        try:
+           season=Season.objects.get(qr_code_key=code)
+        except:
+            return render(request, 'League/submit_results_code.html')
+
+        if match:
+            try:
+                match_object=Match.objects.get(pk=match)              
+                url = reverse('edit match', args=[match_object.id])
+                url=url+"?code="+str(code)
+                return redirect(url)
+            except:
+                pass
+            
+        matches=Match.objects.filter(round=season.seasons_rounds.all().last())
+
+        return render(request, 'League/submit_results_code.html',
                       {'matches': matches})
 
 

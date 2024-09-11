@@ -52,6 +52,7 @@ class Season(models.Model):
     registration_active = models.BooleanField(default=True)
     registration_key = models.CharField(max_length=10)
     # use_names = models.BooleanField(default=True)
+    qr_code_key=models.CharField(max_length=10,unique=True,null=True)
     league = models.ForeignKey(
         League, on_delete=models.CASCADE, related_name='child_season')
 
