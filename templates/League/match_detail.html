@@ -114,11 +114,59 @@
 {% block navbar_left_content %}
 
 <div class="panel-heading">
+  <h5>{{match.round.season.league.league_name}}</h5>
   <h3>Matches:</h3>
 </div>
 
 <div class='panel-body'>
 
+
+  <ul align=left>
+    {%for loop_season in match.round.season.league.child_season.all%}
+          
+      <li><a href="{% url 'season details' loop_season.id loop_season.league.league_name|slugify %}">{{loop_season.season_name}}</a></li>
+        {%if loop_season == match.round.season%}  
+          <ul>
+            {%for loop_round in match.round.season.seasons_rounds.all|dictsort:"id" %}
+              {%if loop_round == match.round%}
+                <li><a href="{% url 'round details' loop_round.id loop_round.season.league.league_name|slugify %}">Round {{loop_round.round_number}}</a></li>
+
+
+                {%if match.round.round_matches.all%}
+                <ul>
+                  {%for match_var in match.round.round_matches.all|dictsort:"id" %}
+                  <li>
+                    {%if match_var == match %}
+                      <b>{{match_var.concise_str}}</b>
+                    {%else%}
+                      <a href="{% url 'match details' match_var.id match_var.round.season.league.league_name|slugify %}">{{match_var.concise_str}}</a>
+                    {%endif%}
+                      
+                    </li>
+                  {%endfor%}
+                </ul>
+                {%else%}
+                <ul>No Matches Currently Registered</ul>
+                {%endif%}
+
+
+
+
+              {%else%}
+              <li><a href="{% url 'round details' loop_round.id loop_round.season.league.league_name|slugify %}">Round {{loop_round.round_number}}</a></li>
+              {%endif%}
+            {%endfor%}
+          </ul>
+        {%endif%}
+            
+        
+    {%endfor%}
+  </ul>
+
+
+{% comment %} 
+
+  ------------------
   {%if match.round.round_matches.all%}
     <ul>
       {%for match_var in match.round.round_matches.all|dictsort:"id" %}
@@ -134,14 +182,38 @@
     </ul>
   {%else%}
     <ul>No Matches Currently Registered</ul>
-  {%endif%}
+  {%endif%} {% endcomment %}
 
 </div>
 
+<div align=left>
+
+  <a href="{% url 'league details' match.round.season.league.id match.round.season.league|slugify %}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+  </svg>Return to {{match.round.season.league}}</a>
+  
+  <br>
+  
+  <a href="{% url 'season details' match.round.season.id match.round.season.league|slugify %}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+  </svg>Return to {{match.round.season.season_name}}</a>
+
+  <br>
+
+  <a href="{% url 'round details' match.round.id match.round.season.league|slugify %}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="45" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+  </svg>Return to {{match.round.concise_str}}</a>
+  
+  </div>
+
+{% comment %} 
 <a href="{% url 'round details' match.round.id match.round.season.league|slugify %}">
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
-</svg>Return to {{match.round.concise_str}}</a>
+</svg>Return to {{match.round.concise_str}}</a> {% endcomment %}
 
 {%endblock%}
 
@@ -153,9 +225,9 @@
 
 {%if match|match_permission_check:request.user%}
   <br>
-  <a href="{% url 'upload match image' match.pk %}">Upload Image</a>
+  <a href="{% url 'upload match image' match.pk %}">Upload multipule Images</a>
   <br>
-  <a href="{% url 'upload match multipart' match.pk %}">Upload Image Set</a>
+  <a href="{% url 'upload match multipart' match.pk %}">Upload multipart Image</a>
 {%endif%}
 
 <h2>League Admins:</h2>

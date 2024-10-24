@@ -592,11 +592,16 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         season = Season.objects.get(pk=self.kwargs['pk'])
         leagues_seasons = season.league.child_season.all()
 
+        url = reverse('season details', args=[self.kwargs['pk'], slugify(
+        Season.objects.get(pk=self.kwargs['pk']).league)])
+
         if season.registration_active:
             messages.error(
                 self.request,
                 'Creating a round can only be done when registration is closed.')
-            return False
+            # redirect to the page to close registration instead of just bouncing
+            url = reverse('edit season', args=[self.kwargs['pk']])
+            return url
 
         if leagues_seasons.count() > 1:
             iterate_var = 0
@@ -606,7 +611,7 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                         messages.error(
                             self.request,
                             'The previous season is still active')
-                        return False
+                        return url
                 iterate_var += 1
 
         number_of_players = PlayerSeasonFaction.objects.filter(season=season).exclude(
@@ -617,7 +622,7 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             messages.error(
                 self.request,
                 'There cannot be additional rounds without repeat matchups')
-            return False
+            return url
 
         round_list = season.seasons_rounds.all()
         if round_list:
@@ -628,32 +633,32 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                         messages.error(
                             self.request,
                             'There are unresolved matches in the current round.')
-                        return False
+                        return url
             else:
                 messages.error(
                     self.request,
                     'The last round in unfinished.')
-                return False
+                return url
 
-        return True
+        return None
 
     def get(self, request, *args, **kwargs):
         """ensures you have closed registration before making new rounds"""
 
-        if not self.league_logic_test(self, request, *args, **kwargs):
-            url = reverse('season details', args=[self.kwargs['pk'], slugify(
-                Season.objects.get(pk=self.kwargs['pk']).league)])
-            return redirect(url)
+        redirect_url=self.league_logic_test(self, request, *args, **kwargs)
+        if redirect_url:
+            return redirect(redirect_url)
+        
 
         return super().get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """ensures you have closed registration before making new rounds"""
 
-        if not self.league_logic_test(self, request, *args, **kwargs):
-            url = reverse('season details', args=[self.kwargs['pk'], slugify(
-                Season.objects.get(pk=self.kwargs['pk']).league)])
-            return redirect(url)
+        redirect_url=self.league_logic_test(self, request, *args, **kwargs)
+        if redirect_url:
+            return redirect(redirect_url)
+
 
         return super().post(self, request, *args, **kwargs)
 

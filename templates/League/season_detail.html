@@ -85,12 +85,38 @@
 {% block navbar_left_content %}
 
 <div class="panel-heading">
+  <h5>{{season.league.league_name}}</h5>
   <h3>Rounds:</h3>
 </div>
 
 <div class='panel-body'>
 
-  {%if season.seasons_rounds.all%}
+
+  {% comment %} {{season.league.child_season.all}} {% endcomment %}
+<ul align=left>
+  {%for loop_season in season.league.child_season.all%}
+      
+
+        {%if loop_season == season%}
+        <li><strong><em><a href="{% url 'season details' loop_season.id loop_season.league.league_name|slugify %}">{{loop_season.season_name}}</a></strong></em></li>
+          {%if season.seasons_rounds.all%}
+          <ul>
+            {%for round in season.seasons_rounds.all|dictsort:"id" %}
+              <li><a href="{% url 'round details' round.id round.season.league.league_name|slugify %}">Round {{round.round_number}}</a></li>
+            {%endfor%}
+          </ul>
+          {%else%}
+            <ul>
+              <li>No Rounds Currently Registered</li>
+            </ul>
+          {%endif%}
+        {%else%}
+        <li><a href="{% url 'season details' loop_season.id loop_season.league.league_name|slugify %}">{{loop_season.season_name}}</a></li>
+        {%endif%}
+  {%endfor%}
+</ul>
+
+  {% comment %} {%if season.seasons_rounds.all%}
     <ul>
       {%for round in season.seasons_rounds.all|dictsort:"id" %}
         <li><a href="{% url 'round details' round.id round.season.league.league_name|slugify %}">Round {{round.round_number}}</a></li>
@@ -98,7 +124,7 @@
     </ul>
   {%else%}
     <ul>No Rounds Currently Registered</ul>
-  {%endif%}
+  {%endif%} {% endcomment %}
 
 </div>
 

@@ -4,12 +4,12 @@
 {% load user_group_admin_check_filters %}
 {% load markdownify %}
 
-<h1>
+{% comment %} <h1>
 {{round.season.league}}
 </h1>
 
 
-<h2>{{round.season}}</h2>
+<h2>{{round.season}}</h2> {% endcomment %}
 
 <h3>Round {{round.round_number}}</h3>
 
@@ -62,10 +62,35 @@
 {% block navbar_left_content %}
 
 <div class="panel-heading">
+  <h5>{{round.season.league.league_name}}</h5>
   <h3>Rounds:</h3>
 </div>
 
 <div class='panel-body'>
+
+  <ul align=left>
+    {%for loop_season in round.season.league.child_season.all%}
+          
+      <li><a href="{% url 'season details' loop_season.id loop_season.league.league_name|slugify %}">{{loop_season.season_name}}</a></li>
+        {%if loop_season == round.season%}  
+          <ul>
+            {%for loop_round in round.season.seasons_rounds.all|dictsort:"id" %}
+              {%if loop_round == round%}
+              <li><b>Round {{loop_round.round_number}}</b></li>
+              {%else%}
+              <li><a href="{% url 'round details' loop_round.id loop_round.season.league.league_name|slugify %}">Round {{loop_round.round_number}}</a></li>
+              {%endif%}
+            {%endfor%}
+          </ul>
+        {%endif%}
+            
+        
+    {%endfor%}
+  </ul>
+
+
+
+{% comment %} 
 
   {%if round.season.seasons_rounds.all%}
     <ul>
@@ -75,14 +100,25 @@
     </ul>
   {%else%}
     <ul>No Rounds Currently Registered</ul>
-  {%endif%}
+  {%endif%} {% endcomment %}
 
 </div>
 
-<a href="{% url 'season details' round.season.id round.season.league|slugify %}">
+<div align=left>
+
+<a href="{% url 'league details' round.season.league.id round.season.league|slugify %}">
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
-</svg>Return to {{round.season}}</a>
+</svg>Return to {{round.season.league}}</a>
+
+<br>
+
+<a href="{% url 'season details' round.season.id round.season.league|slugify %}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+</svg>Return to {{round.season.season_name}}</a>
+
+</div>
 
 {%endblock%}
 
