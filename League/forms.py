@@ -1,4 +1,3 @@
-
 from django import forms
 from django.db.models import Q
 from django_select2.forms import Select2MultipleWidget, Select2Widget
@@ -25,7 +24,10 @@ class LeagueAdminsWidget(Select2MultipleWidget):
 
 
 class LeagueForm(forms.ModelForm):
-    """ text """
+    """
+    form for configuring League
+    has special logic for selecting managing admins
+    """
     admin_list = None
 
     def __init__(self,  *args, **kwargs):
@@ -68,7 +70,7 @@ class LeagueForm(forms.ModelForm):
 
 
 class SeasonForm(forms.ModelForm):
-    """ text """
+    """ 4 fields """
 
     class Meta:
         model = Season
@@ -88,7 +90,7 @@ class SeasonForm(forms.ModelForm):
 
 
 class SeasonRegisterForm(forms.ModelForm):
-    """ text """
+    """ custom logic to only show relevant factons and subfactions """
 
     registration_key = forms.CharField(
         widget=forms.TextInput(basicattrs),
@@ -103,6 +105,8 @@ class SeasonRegisterForm(forms.ModelForm):
         empty_label='',
         help_text="choose if appropriate",
         required=False)
+
+
 
     class Meta:
         model = PlayerSeasonFaction
@@ -119,7 +123,7 @@ class SeasonRegisterForm(forms.ModelForm):
 
 
 class RoundForm(forms.ModelForm):
-    """ text """
+    """ description only """
     automate_matchmaking = forms.BooleanField(
         widget=forms.CheckboxInput(), required=False)
 
@@ -132,7 +136,7 @@ class RoundForm(forms.ModelForm):
 
 
 class MatchForm(forms.ModelForm):
-    """ text """
+    """ excludes tie from options """
 
     class Meta:
         model = Match
@@ -153,7 +157,7 @@ class MatchForm(forms.ModelForm):
 
 
 class MatchEditForm(forms.ModelForm):
-    """ text """
+    """ only allows players and tiepsf from match """
 
     player1_name = 'player1'
     player2_name = 'player2'
@@ -187,6 +191,7 @@ class MatchEditForm(forms.ModelForm):
 
 
 class MatchUploadMultipleImages(UploadMultipleImages):
+    """source is auto assigned"""
 
     def __init__(self,  *args, **kwargs):
         season_var = kwargs.pop('source')
@@ -195,6 +200,7 @@ class MatchUploadMultipleImages(UploadMultipleImages):
         self.initial['source'] = season_var.pk
 
 class MatchUploadMultipartImages(UploadImagesMultipart):
+    """source is auto assigned"""
     def __init__(self,  *args, **kwargs):
         season_var = kwargs.pop('source')
         super(MatchUploadMultipartImages, self).__init__(*args, **kwargs)
