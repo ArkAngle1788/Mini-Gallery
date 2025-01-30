@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% load user_group_admin_check_filters %}
+{% load markdownify %}
+
+<h1>
+Player information for: {{season}}
+</h1>
+
+<p>
+<br>User: {{object.profile}}
+<br>Faction: {{object.print_most_specific_faction}}
+<br>Score: {{object.score}}
+<br>W:L: {{object.wlrecord}}
+{% comment %} {{object}} add previouslyplayed players here with links to their pages. Also add links to psf to match/season pages {% endcomment %}
+</p>
+<a href="{% url 'create army list' object.id %}">Add Army List</a>
+<br><br>
+
+
+{%for list in object.army_lists.all %}
+<button class="btn btn-primary m-1" type="button" data-bs-toggle="collapse" data-bs-target="#army_list_table_{{list.pk}}" aria-expanded="false" aria-controls="army_list_table_{{list.pk}}">
+  View List: {{list.army_list_name}}
+</button>
+{% comment %} <br> {% endcomment %}
+<a href="{% url 'edit army list' object.id list.id %}">Edit Army List</a>
+<a href="{% url 'delete army list' object.id list.id %}">Delete Army List</a>
+
+<div class="collapse" id="army_list_table_{{list.pk}}">
+
+  <table class="table table-bordered table-hover" style="width:100%">
+
+    <tbody>
+      <tr>
+        <td>{{list.army_list|linebreaksbr}}</td>
+        {% comment %} <td>{{match.player2.army_list|linebreaks}}</td>       {% endcomment %}
+      </tr>
+    </tbody>
+  </table>
+</div>
+<br>
+{%endfor%}
+
+
+
+
+{% endblock %}
+
+
+<!-- SIDEBAR Left -->
+{% block navbar_left_content %}
+
+<div class="panel-heading">
+  <h5>{{season.league.league_name}}</h5>
+  <h3>Rounds:</h3>
+</div>
+
+<div class='panel-body'>
+
+
+  {% comment %} {{season.league.child_season.all}} {% endcomment %}
+<ul align=left>
+  {%for loop_season in season.league.child_season.all%}
+      
+
+        {%if loop_season == season%}
+        <li><strong><em><a href="{% url 'season details' loop_season.id loop_season.league.league_name|slugify %}">{{loop_season.season_name}}</a></strong></em></li>
+          {%if season.seasons_rounds.all%}
+          <ul>
+            {%for round in season.seasons_rounds.all|dictsort:"id" %}
+              <li><a href="{% url 'round details' round.id round.season.league.league_name|slugify %}">Round {{round.round_number}}</a></li>
+            {%endfor%}
+          </ul>
+          {%else%}
+            <ul>
+              <li>No Rounds Currently Registered</li>
+            </ul>
+          {%endif%}
+        {%else%}
+        <li><a href="{% url 'season details' loop_season.id loop_season.league.league_name|slugify %}">{{loop_season.season_name}}</a></li>
+        {%endif%}
+  {%endfor%}
+</ul>
+
+  {% comment %} {%if season.seasons_rounds.all%}
+    <ul>
+      {%for round in season.seasons_rounds.all|dictsort:"id" %}
+        <li><a href="{% url 'round details' round.id round.season.league.league_name|slugify %}">Round {{round.round_number}}</a></li>
+      {%endfor%}
+    </ul>
+  {%else%}
+    <ul>No Rounds Currently Registered</ul>
+  {%endif%} {% endcomment %}
+
+</div>
+
+<a href="{% url 'league details' season.league.id season.league|slugify %}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
+</svg>Return to {{season.league}}</a>
+
+{%endblock%}
+
+<!-- SIDEBAR Right -->
+{% block navbar_right_content %}
+
+
+<h2>League Admins:</h2>
+{%if season.league.admins_managing.all %}
+  {%for admin in season.league.admins_managing.all %}
+    {{admin}}: {{admin.userprofile.user.first_name}} {{admin.userprofile.user.last_name}}<br>
+  {%endfor%}
+{%else%}
+  <br>No Admins
+{%endif%}
+
+
+{%if request.user.is_staff or season.league.group|is_primary_admin:request.user %}
+
+<div class="panel-heading">
+  <h3>League Administration Panel</h3>
+</div>
+
+<a href="{% url 'create round' season.pk %}">Create New Round</a>
+<br>
+<a href="{% url 'edit season' season.pk %}">Edit Season</a>
+<br>
+<a href="{% url 'close season' season.pk %}">Close Season</a>
+<br>
+<a href="{% url 'delete season' season.pk %}">Delete Season</a>
+
+{%endif%}
+
+
+
+{%endblock%}

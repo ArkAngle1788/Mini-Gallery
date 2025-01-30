@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<form method="post">{% csrf_token %}
+    <fieldset class="form-group">
+      <legend class="border-bottom mb-4">Delete List</legend>
+      <h2>Are you sure you want to delete the list: {{object.army_list_name}}</h2>
+    </fieldset>
+    <div class="form-group">
+      <button class="btn btn-outline-danger" type="submit">Delete</button>
+      <a class="btn btn-outline-secondary" href="{%url 'psf view' object.psf.id%}">Cancel</a>
+    </div>
+</form>
+
+{% endblock content%}
+
+<!-- SIDEBAR Right -->
+

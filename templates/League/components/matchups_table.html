@@ -4,8 +4,8 @@
           <th>Player</th>
           <th>Faction</th>
           <th>--</th>
-          <th>Faction</th>
           <th>Player</th>
+          <th>Faction</th>
           <th>Winner</th>
         </tr>
       </thead>
@@ -16,8 +16,8 @@
           <td>{{match.player1.profile}}</td>
           <td>{{match.player1.faction}}{% if match.player1.sub_faction %} -- {{match.player1.sub_faction}}{% endif %}</td>
           <td>VS.</td>
-          <td>{{match.player2.faction}}{% if match.player2.sub_faction %} -- {{match.player2.sub_faction}}{% endif %}</td>
           <td>{{match.player2.profile}}</td>
+          <td>{{match.player2.faction}}{% if match.player2.sub_faction %} -- {{match.player2.sub_faction}}{% endif %}</td>
           <td>{%if match.winner %}{{match.winner.profile}}{%else%}Match Not Played{%endif%}</td>
           
         </tr>

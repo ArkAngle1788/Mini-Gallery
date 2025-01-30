@@ -4,12 +4,12 @@
         <th>Player</th>
         <th>Faction</th>
         <th>W/L Record</th>
-        <th>Points</th>
+        <th>{%if season.league.system.game_system_name == 'Infinity' %}TP-OP-VP{%else%}Points{%endif%}</th>
       </tr>
     </thead>
     <tbody>
 
-    {% with season.players_in_season.all|dictsortreversed:"score" as player_list %}
+    {% with season.players_in_season.all|dictsortreversed:"internal_score" as player_list %}
  
       {% for psf in player_list %}
         {% if psf.profile.user.username != 'Tie' and psf.profile.user.username != 'Bye' %}

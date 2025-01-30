@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+# from League.models import PlayerSeasonFaction
 
 
 class Game(models.Model):
@@ -10,8 +11,13 @@ class Game(models.Model):
         return self.game_system_name
 
     def get_absolute_url(self):
-        """returns 'manage image fields'"""
+        """
+        returns 'manage image fields
+        We return this location b/c it's the page you can add other game details
+        '"""
         return reverse('manage image fields')
+    
+
 
 
 class FactionType(models.Model):
@@ -55,7 +61,10 @@ class Faction(models.Model):
 
 
 class SubFaction(models.Model):
-    """subfactions are children of factions"""
+    """
+    subfactions are children of factions
+    vars: faction, faction_name
+    """
 
     faction = models.ForeignKey(
         Faction, on_delete=models.CASCADE, related_name='faction_sub_faction')
@@ -120,3 +129,14 @@ class UnitType(models.Model):
     def get_absolute_url(self):
         """returns 'manage image fields'"""
         return reverse('manage image fields')
+
+
+class ArmyList(models.Model):
+    psf = models.ForeignKey(
+        'League.PlayerSeasonFaction', on_delete=models.CASCADE, related_name='army_lists')
+    army_list_name = models.CharField(max_length=25)
+    army_list = models.TextField()
+
+    def __str__(self):
+        return self.army_list_name
+

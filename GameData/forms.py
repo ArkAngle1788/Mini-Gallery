@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 # from django.forms.widgets import TextInput
 from django_select2 import forms as s2forms
 
-from .models import Faction, FactionType, Game, SubFaction, UnitType
+from .models import Faction, FactionType, Game, SubFaction, UnitType, ArmyList
 
 # select2 can only have limited styling applied to it with classes.
 # to substantially change it it looks like
@@ -45,7 +45,7 @@ class SystemForm(forms.ModelForm):
         model = Game
         fields = "__all__"
         widgets = {
-            'game_system_name': forms.TextInput,
+            'game_system_name': forms.TextInput(textfieldattrs),
         }
 
 
@@ -100,3 +100,12 @@ class UnitTypeForm(forms.ModelForm):
         for unit in UnitType.objects.filter(faction__faction_name=faction[0].faction_name):
             if unit.unit_type==unit_type:
                 raise ValidationError("This unit already exists within this faction")
+
+class ArmyListForm(forms.ModelForm):
+    """links a faction to it's type"""
+    class Meta:
+        model = ArmyList
+        fields = ["army_list_name","army_list"]
+        # widgets = {
+        #     'army_list': FactionTypeWidget(basicattrs),
+        # }

@@ -15,7 +15,6 @@
 <h3>Round {{match.round.round_number}}</h3>
 
 <h4>Match Details</h4>
-
 <div class="row">
   <div class="col-12 gy-3"align='center'style="overflow-x:auto;">
 
@@ -61,14 +60,14 @@
   <table class="table table-bordered table-hover" style="width:100%">
     <thead class="thead-light">
       <tr>
-        <th>{{match.player1.profile}}</th>
-        <th>{{match.player2.profile}}</th>
+        <th>{{match.player1.profile}}: {{match.player1_list}}</th>
+        <th>{{match.player2.profile}}: {{match.player2_list}}</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>{{match.player1.army_list|linebreaksbr}}</td>
-        <td>{{match.player2.army_list|linebreaks}}</td>      
+        <td>{{match.player1_list.army_list|linebreaksbr}}</td>
+        <td>{{match.player2_list.army_list|linebreaks}}</td>      
       </tr>
     </tbody>
   </table>

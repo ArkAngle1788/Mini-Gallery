@@ -2,9 +2,10 @@ from django import forms
 from django.db.models import Q
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 
-from GameData.models import Faction, SubFaction
+from GameData.models import Faction, SubFaction,ArmyList
 from UserAccounts.models import AdminProfile
 from Gallery.forms import UploadMultipleImages, UploadImagesMultipart
+from django.core.exceptions import (ValidationError)
 
 # from django.core.exceptions import ValidationError
 from .models import League, Match, PlayerSeasonFaction, Round, Season
@@ -110,7 +111,7 @@ class SeasonRegisterForm(forms.ModelForm):
 
     class Meta:
         model = PlayerSeasonFaction
-        fields = ["faction", "sub_faction","army_list", "registration_key"]
+        fields = ["faction", "sub_faction", "registration_key"]#"army_list",
 
     def __init__(self,  *args, **kwargs):
         league = kwargs.pop('league')
@@ -156,6 +157,21 @@ class MatchForm(forms.ModelForm):
             season=season).filter(matched=False).exclude(profile__user__username='Tie')
 
 
+
+def score_constraint_check(self,score_list):
+    """
+    returns None if constraints are met
+    returns string for the validation error if constraints fail
+    """
+    if self.instance.round.season.league.system.game_system_name=="Infinity":
+        datalist = score_list.split(',')
+        if len(datalist) != 2:
+            return "Infinity Scores should be in the format: OP,VP"
+        return None
+    return "Game System Does not have scoring Implemented"
+
+
+# need to add a validator to ensure score string matches format for the game
 class MatchEditForm(forms.ModelForm):
     """ only allows players and tiepsf from match """
 
@@ -164,11 +180,11 @@ class MatchEditForm(forms.ModelForm):
 
     class Meta:
         model = Match
-        fields = ["winner", "player1_score", "player2_score"]
+        fields = ["winner", "player1_score", "player2_score","player1_list","player2_list"]
         widgets = {
             'winner': Select2Widget,
-            'player1_score': forms.NumberInput(basicattrs),
-            'player2_score': forms.NumberInput(basicattrs),
+            'player1_score': forms.TextInput(basicattrs),
+            'player2_score': forms.TextInput(basicattrs),
         }
 
     def __init__(self,  *args, **kwargs):
@@ -188,7 +204,22 @@ class MatchEditForm(forms.ModelForm):
             |
             Q(id=tie_psf.id)
         )
+        self.fields['player1_list'].queryset = ArmyList.objects.filter(psf=player1)
+        self.fields['player2_list'].queryset = ArmyList.objects.filter(psf=player2)
 
+    def clean_player1_score(self):
+        """makes sure the score list has the right number of entries for the system"""
+        result=score_constraint_check(self,self.cleaned_data["player1_score"])
+        if result:
+            raise ValidationError(result)
+        return self.cleaned_data["player1_score"]
+    
+    def clean_player2_score(self):
+        """makes sure the score list has the right number of entries for the system"""
+        result=score_constraint_check(self,self.cleaned_data["player2_score"])
+        if result:
+            raise ValidationError(result)
+        return self.cleaned_data["player2_score"]
 
 class MatchUploadMultipleImages(UploadMultipleImages):
     """source is auto assigned"""

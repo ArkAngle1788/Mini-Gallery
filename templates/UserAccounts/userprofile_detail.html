@@ -17,6 +17,20 @@
 
 
 
+<p>Active seasons:
+{%for psf in active_psf %}
+  <br><a href="{% url 'psf view' psf.id %}">{{psf.season}} {{psf.print_most_specific_faction}}</a>
+{%endfor%}
+</p>
+<p>Inactive seasons:
+{%for psf in inactive_psf %}
+  <br><a href="{% url 'psf view' psf.id %}">{{psf.season}} {{psf.print_most_specific_faction}}</a>
+{%endfor%}
+</p>
+
+<br><br>
+<p>Images Uploaded:</p>
+
 {% include 'Gallery/gallery_display/pagination.html'%}
 
 

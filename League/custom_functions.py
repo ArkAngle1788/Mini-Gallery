@@ -80,6 +80,7 @@ def inner_matching(players_remaining, lookup, safety):
     return None
 
 
+
 def auto_round_matches_basic(season):
     """
     This function returns false if successful
@@ -88,8 +89,16 @@ def auto_round_matches_basic(season):
     It will also actually create and save the match entries
     """
 
+    # UserImage.objects.annotate(Count('popularity')).order_by('-popularity__count')
+
     players_in_season = PlayerSeasonFaction.objects.filter(
-        season=season).order_by('score')
+        season=season).order_by('internal_score')
+
+
+    # for player in players_in_season:
+    #     print(f'player {player.profile} Score: {player.score} Internal Score: {player.internal_score}')
+
+
     players_in_season = players_in_season.exclude(
         profile__user__username='Tie')
 

@@ -6,11 +6,14 @@ from django.urls import reverse
 
 
 class Country(models.Model):
-    """get_absolute_url returns groups top"""
+    """
+    params: country_name
+    get_absolute_url returns groups top
+    """
     country_name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.country_name
+        return str(self.country_name)
 
     def get_absolute_url(self):
         """returns groups top"""
@@ -24,7 +27,7 @@ class Region(models.Model):
         Country, on_delete=models.CASCADE, blank=False, null=False, related_name='country_regions')
 
     def __str__(self):
-        return self.region_name
+        return str(self.region_name)
 
     def get_absolute_url(self):
         """returns groups top"""
@@ -38,7 +41,7 @@ class City(models.Model):
         Region, on_delete=models.CASCADE, blank=False, null=False, related_name='region_cities')
 
     def __str__(self):
-        return self.city_name
+        return str(self.city_name)
 
     def get_absolute_url(self):
         """returns groups top"""
@@ -59,7 +62,7 @@ class PaintingStudio(models.Model):
         related_name='studios_managed')
 
     def __str__(self):
-        return self.Studio_name
+        return str(self.Studio_name)
 
     def get_absolute_url(self):
         """returns groups top"""
@@ -85,12 +88,11 @@ class Language(models.Model):
     language = models.CharField(max_length=20, unique=True)
 
     def __str__(self):
-        return self.language
+        return str(self.language)
 
 
-def validate_even(value):
+def validate_int_list(value):
     """
-    what is this fuction name?
     splits a list on ',' and checks that each item is an int
     """
 
@@ -114,7 +116,7 @@ class Group(models.Model):
     group_tag = models.CharField(max_length=50)
     group_description = models.CharField(max_length=600)
     group_image_str = models.CharField(
-        max_length=50, null=True,blank=True, validators=[validate_even])
+        max_length=50, null=True,blank=True, validators=[validate_int_list])
     group_leagues = models.ManyToManyField(
         'League.League', blank=True, related_name='group_running')
 
@@ -152,4 +154,4 @@ class Group(models.Model):
         return reverse('group info', kwargs={'zone': loc, 'group_slug': self.slug(), 'pk': self.pk})
 
     def __str__(self):
-        return self.group_name
+        return str(self.group_name)

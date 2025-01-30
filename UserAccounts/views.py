@@ -9,6 +9,7 @@ from ContentPost.custom_functions import calculate_news_bar
 from Gallery.filters import ImageFilter
 from Gallery.models import UserImage
 from UserAccounts.models import UserProfile
+from League.models import PlayerSeasonFaction
 
 from .forms import ProfileEditForm
 
@@ -52,8 +53,11 @@ class Profile(FilterView):
         # context['league_nav'] = leagues_nav
         image_filter=ImageFilter(self.request.GET, queryset=UserImage.objects.all())
         context['filter_form']=image_filter
-        context['profile']=UserProfile.objects.get(pk=self.kwargs['pk'])
+        profile=UserProfile.objects.get(pk=self.kwargs['pk'])
+        context['profile']=profile
         context['news']=calculate_news_bar()
+        context['inactive_psf']=PlayerSeasonFaction.objects.filter(season__season_active=False,season__registration_active=False,profile=profile).order_by('-pk')
+        context['active_psf']=PlayerSeasonFaction.objects.filter(season__season_active=True,season__registration_active=False,profile=profile).order_by('pk')
 
         if self.request.GET:
             dic_string=dict(self.request.GET)

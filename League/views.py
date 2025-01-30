@@ -17,7 +17,7 @@ from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django_filters.views import FilterView
-
+from django.core.exceptions import ValidationError
 from CommunityInfrastructure.custom_functions import (check_league_admin,
                                                       check_primary_admin)
 from CommunityInfrastructure.models import Group
@@ -387,27 +387,27 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
                 Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
 
-        for match in season.seasons_rounds.last().round_matches.all():
-            match.player1.previous_opponents.add(match.player2)
-            match.player1.score += match.player1_score
-            match.player1.matched = False
+        # for match in season.seasons_rounds.last().round_matches.all():
+        #     match.player1.previous_opponents.add(match.player2)
+        #     match.player1.score += match.player1_score
+        #     match.player1.matched = False
 
-            match.player2.previous_opponents.add(match.player1)
-            match.player2.score += match.player2_score
-            match.player2.matched = False
+        #     match.player2.previous_opponents.add(match.player1)
+        #     match.player2.score += match.player2_score
+        #     match.player2.matched = False
 
-            if match.winner == match.player1:
-                match.player1.wlrecord += "W-"
-                match.player2.wlrecord += "L-"
-            elif match.winner == match.player2:
-                match.player1.wlrecord += "L-"
-                match.player2.wlrecord += "W-"
-            else:
-                match.player1.wlrecord += "T-"
-                match.player2.wlrecord += "T-"
+        #     if match.winner == match.player1:
+        #         match.player1.wlrecord += "W-"
+        #         match.player2.wlrecord += "L-"
+        #     elif match.winner == match.player2:
+        #         match.player1.wlrecord += "L-"
+        #         match.player2.wlrecord += "W-"
+        #     else:
+        #         match.player1.wlrecord += "T-"
+        #         match.player2.wlrecord += "T-"
 
-            match.player1.save()
-            match.player2.save()
+        #     match.player1.save()
+        #     match.player2.save()
 
         season.season_active = False
         season.save()
@@ -683,30 +683,30 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if season.seasons_rounds.all():
             # if rounds exist we also need to lock in the results of previous rounds
 
-            for match in season.seasons_rounds.last().round_matches.all():
-                match.player1.previous_opponents.add(match.player2)
-                match.player1.score += match.player1_score
-                match.player1.matched = False
+            # for match in season.seasons_rounds.last().round_matches.all():
+            #     match.player1.previous_opponents.add(match.player2)
+            #     match.player1.score += match.player1_score
+            #     match.player1.matched = False
 
-                match.player2.previous_opponents.add(match.player1)
-                match.player2.score += match.player2_score
-                match.player2.matched = False
+            #     match.player2.previous_opponents.add(match.player1)
+            #     match.player2.score += match.player2_score
+            #     match.player2.matched = False
 
-                if match.winner.profile.user.username == "Bye":
-                    match.player1.wlrecord += "B-"
-                    match.player2.wlrecord += "B-"
-                elif match.winner == match.player1:
-                    match.player1.wlrecord += "W-"
-                    match.player2.wlrecord += "L-"
-                elif match.winner == match.player2:
-                    match.player1.wlrecord += "L-"
-                    match.player2.wlrecord += "W-"
-                else:
-                    match.player1.wlrecord += "T-"
-                    match.player2.wlrecord += "T-"
+            #     if match.winner.profile.user.username == "Bye":
+            #         match.player1.wlrecord += "B-"
+            #         match.player2.wlrecord += "B-"
+            #     elif match.winner == match.player1:
+            #         match.player1.wlrecord += "W-"
+            #         match.player2.wlrecord += "L-"
+            #     elif match.winner == match.player2:
+            #         match.player1.wlrecord += "L-"
+            #         match.player2.wlrecord += "W-"
+            #     else:
+            #         match.player1.wlrecord += "T-"
+            #         match.player2.wlrecord += "T-"
 
-                match.player1.save()
-                match.player2.save()
+            #     match.player1.save()
+            #     match.player2.save()
 
             form.instance.round_number = season.seasons_rounds.count()+1
 
@@ -916,7 +916,14 @@ class MatchEdit(UserPassesTestMixin, UpdateView):
         if form.cleaned_data['winner'].profile.user.username != "Tie":
             return super().form_valid(form)
 
-        if form.cleaned_data['player1_score'] != form.cleaned_data['player2_score']:
+        # might need system specific scoring checks right here. For now first number is score which must match
+        
+
+        img_list1 = form.cleaned_data['player1_score'].split(',')
+        img_list2= form.cleaned_data['player2_score'].split(',')
+
+
+        if img_list1[0] != img_list2[0]:
             form.add_error('player2_score', ValidationError(
                 ('Players must have the same score on a Tie'), code='invalid'))
             return super().form_invalid(form)
@@ -1086,3 +1093,20 @@ class MatchImageUploadMultipart(UserPassesTestMixin, GalleryUploadMultipart):
             'source': Match.objects.get(pk=self.kwargs['pk']).round.season
         })
         return kwargs
+
+
+
+class PSFView(DetailView):
+    """Viewing Matches is public"""
+    model = PlayerSeasonFaction
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # season_var = Season.objects.get(season=self.kwargs['pk'])
+        season_var= self.get_object().season
+
+
+        context['season'] = season_var
+        return context
