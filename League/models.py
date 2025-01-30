@@ -113,13 +113,15 @@ class PlayerSeasonFaction(models.Model):
         self.wlrecord='-'
         score_list=self.score.split(',')
         self.internal_score=0
+        # print((Match.objects.filter(round__season=self.season,player1__pk=self.pk)|Match.objects.filter(round__season=self.season,player2__pk=self.pk)).order_by('id'))
         for match in (Match.objects.filter(round__season=self.season,player1__pk=self.pk)|Match.objects.filter(round__season=self.season,player2__pk=self.pk)).order_by('id'):
-            if match.winner.pk == self.pk:
-                self.wlrecord += "W-"
-            elif match.winner.profile.user.username == 'Tie':
-                self.wlrecord += "T-"
-            else:
-                self.wlrecord += "L-"
+            if match.winner:#an active season can have a current round where winner is still null
+                if match.winner.pk == self.pk:
+                    self.wlrecord += "W-"
+                elif match.winner.profile.user.username == 'Tie':
+                    self.wlrecord += "T-"
+                else:
+                    self.wlrecord += "L-"
 
 
         # this could also be in match save with the score calculations but I'm putting it here now for simplicity's sake.
