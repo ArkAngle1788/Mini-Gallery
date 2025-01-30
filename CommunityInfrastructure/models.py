@@ -90,6 +90,9 @@ class Language(models.Model):
     def __str__(self):
         return str(self.language)
 
+# Legacy name needed by an old migration
+def validate_even(value):    
+    pass
 
 def validate_int_list(value):
     """
