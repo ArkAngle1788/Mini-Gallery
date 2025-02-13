@@ -20,3 +20,9 @@ website/settings.py
 venv/*
 .idea/*
 .vscode/*
+/CommunityInfrastructure/tests/__pycache__
+/ContentPost/tests/__pycache__
+/Gallery/tests/__pycache__
+/GameData/tests/__pycache__
+/UserAccounts/tests/__pycache__
+/League/tests/__pycache__

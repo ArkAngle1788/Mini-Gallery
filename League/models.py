@@ -5,6 +5,7 @@ from django.urls import reverse
 # from django.core.exceptions import ValidationError
 from CommunityInfrastructure.models import City, Group, validate_int_list
 from GameData.models import Faction, Game, SubFaction,ArmyList
+from GameData.custom_functions import calculate_score_infinity, calculate_score_other
 
 # from UserAccounts.models import UserProfile
 
@@ -120,6 +121,8 @@ class PlayerSeasonFaction(models.Model):
                     self.wlrecord += "W-"
                 elif match.winner.profile.user.username == 'Tie':
                     self.wlrecord += "T-"
+                elif match.winner.profile.user.username == 'Bye':
+                    self.wlrecord += "B-"
                 else:
                     self.wlrecord += "L-"
 
@@ -257,95 +260,61 @@ class Match(models.Model):
             player1_score_list = self.player1_score.split(',')
             previous_player2_score_list = previous_player2_score.split(',')
             player2_score_list = self.player2_score.split(',')
-            
+            bye_player=PlayerSeasonFaction.objects.filter(profile__user__username = "Bye")
 
             if self.round.season.league.system.game_system_name=="Infinity":
-                # calculate objective points
-                p1_objective_points=int(player1_score_list[0])
-                p2_objective_points=int(player2_score_list[0])
-                p1_tournament_points=0
-                p2_tournament_points=0
-
-                bye_player=PlayerSeasonFaction.objects.filter(profile__user__username = "Bye")
-                if self.player1==bye_player or self.player2==bye_player:
-                    if self.player1==bye_player:
-                        p2_tournament_points=4
-                    if self.player2==bye_player:
-                        p1_tournament_points=4
-                else:
-                    if (p1_objective_points-p2_objective_points)>0:
-                        # earn 4 p1
-                        p1_tournament_points=4
-                        if p1_objective_points>=5:
-                            # earn +1 p1
-                            p1_tournament_points+=1
-                        if p1_objective_points-p2_objective_points <=2:
-                            # earn +1 p2
-                            p2_tournament_points+=1
-                    elif (p1_objective_points-p2_objective_points)==0:
-                        # earn 2 both
-                        p1_tournament_points=2
-                        p2_tournament_points=2
-                        # missions might be designed to score such that it's impossible for both players to get 5+ but this covers unusual custom missions
-                        if p2_objective_points>=5:
-                            # earn +1 p2
-                            p2_tournament_points+=1
-                        if p1_objective_points>=5:
-                            # earn +1 p1
-                            p1_tournament_points+=1
-                    elif (p1_objective_points-p2_objective_points)<0:
-                        # earn 4 p2
-                        p2_tournament_points=4
-                        if p2_objective_points>=5:
-                            # earn +1 p2
-                            p2_tournament_points+=1
-                        if p2_objective_points-p1_objective_points<=2:
-                            # earn +1 p1
-                            p1_tournament_points+=1
-                self.player1_score =f'{p1_tournament_points},{int(player1_score_list[0])},{int(player1_score_list[1])}'
-                self.player2_score =f'{p2_tournament_points},{int(player2_score_list[0])},{int(player2_score_list[1])}'
-                player1_score_list = self.player1_score.split(',')
-                player2_score_list = self.player2_score.split(',')
-                    # Victory 4 Earning more Objective Points than the opponent.
-                    # Tie 2 Earning as many Objective Points as the opponent.
-                    # Defeat 0 Earning fewer Objective Points than the opponent.
-                    # Offensive Bonus +1 Earning 5 or more Objective Points. This Tournament Point is added to the obtained result.
-                    # Defensive Bonus +1 Losing by 2 or less Objective Points. This Tournament Point is added to the obtained result
-
-                    #a bye gives 4 TP and OP/VP calculated at the end of the event
-
+                calculate_score_infinity(self,player1_score_list,player2_score_list,bye_player)
+            else:
+                calculate_score_other(self,player1_score_list,player2_score_list,bye_player)
 
             super().save(*args, **kwargs)#update model
            
-
+            # need to update these to the possible new values set in the score calculation function
+            player1_score_list = self.player1_score.split(',')
+            player2_score_list = self.player2_score.split(',')
+  
             if  (self.player1_score != previous_player1_score) or (self.player2_score != previous_player2_score) :#check for differences
                 
-                if self.round.season.league.system.game_system_name=="Infinity":
+                total_score_list_p1=self.player1.score.split(',')
+                p1_new_score=[]
+                total_score_list_p2=self.player2.score.split(',')
+                p2_new_score=[]
+                for index,value in enumerate(player1_score_list):
+                    dif=int(value)-int(previous_player1_score_list[index])
+                    p1_new_score.append(str(int(total_score_list_p1[index])+dif))
+
+                self.player1.score=','.join(p1_new_score)
+                for index,value in enumerate(player2_score_list):
+                    dif=int(value)-int(previous_player2_score_list[index])
+                    p2_new_score.append(str(int(total_score_list_p2[index])+dif))
+                self.player2.score=','.join(p2_new_score)
+
+                # if self.round.season.league.system.game_system_name=="Infinity":
                     
 
-                    dif1=int(player1_score_list[0])-int(previous_player1_score_list[0])
-                    dif2=int(player1_score_list[1])-int(previous_player1_score_list[1])
-                    dif3=int(player1_score_list[2])-int(previous_player1_score_list[2])
+                #     dif1=int(player1_score_list[0])-int(previous_player1_score_list[0])
+                #     dif2=int(player1_score_list[1])-int(previous_player1_score_list[1])
+                #     dif3=int(player1_score_list[2])-int(previous_player1_score_list[2])
 
-                    total_score_list_p1=self.player1.score.split(',')
+                #     total_score_list_p1=self.player1.score.split(',')
 
-                    total_score_list_p1[0]=int(total_score_list_p1[0])+dif1
-                    total_score_list_p1[1]=int(total_score_list_p1[1])+dif2
-                    total_score_list_p1[2]=int(total_score_list_p1[2])+dif3
-                    self.player1.score=f'{total_score_list_p1[0]},{total_score_list_p1[1]},{total_score_list_p1[2]}'
+                #     total_score_list_p1[0]=int(total_score_list_p1[0])+dif1
+                #     total_score_list_p1[1]=int(total_score_list_p1[1])+dif2
+                #     total_score_list_p1[2]=int(total_score_list_p1[2])+dif3
+                #     self.player1.score=f'{total_score_list_p1[0]},{total_score_list_p1[1]},{total_score_list_p1[2]}'
 
                     
 
-                    dif1=int(player2_score_list[0])-int(previous_player2_score_list[0])
-                    dif2=int(player2_score_list[1])-int(previous_player2_score_list[1])
-                    dif3=int(player2_score_list[2])-int(previous_player2_score_list[2])
+                #     dif1=int(player2_score_list[0])-int(previous_player2_score_list[0])
+                #     dif2=int(player2_score_list[1])-int(previous_player2_score_list[1])
+                #     dif3=int(player2_score_list[2])-int(previous_player2_score_list[2])
 
-                    total_score_list_p2=self.player2.score.split(',')
+                #     total_score_list_p2=self.player2.score.split(',')
 
-                    total_score_list_p2[0]=int(total_score_list_p2[0])+dif1
-                    total_score_list_p2[1]=int(total_score_list_p2[1])+dif2
-                    total_score_list_p2[2]=int(total_score_list_p2[2])+dif3
-                    self.player2.score=f'{total_score_list_p2[0]},{total_score_list_p2[1]},{total_score_list_p2[2]}'
+                #     total_score_list_p2[0]=int(total_score_list_p2[0])+dif1
+                #     total_score_list_p2[1]=int(total_score_list_p2[1])+dif2
+                #     total_score_list_p2[2]=int(total_score_list_p2[2])+dif3
+                #     self.player2.score=f'{total_score_list_p2[0]},{total_score_list_p2[1]},{total_score_list_p2[2]}'
 
 
 
