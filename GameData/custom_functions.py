@@ -46,6 +46,9 @@ def calculate_score_infinity(self,player1_score_list,player2_score_list,bye_play
     p1_tournament_points=0
     p2_tournament_points=0
 
+    if bye_player:
+        bye_player=bye_player[0]
+
     if self.player1==bye_player or self.player2==bye_player:
         if self.player1==bye_player:
             p2_tournament_points=4
