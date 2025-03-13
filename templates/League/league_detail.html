@@ -20,10 +20,14 @@
 
     {%if my_var.1.season_active%}
       <h3>{{my_var.1.season_name}}</h3>
-      {% include 'League/components/season_player_table.html' with season=my_var.1%}
+      <div class="col-12 gy-3"align='center'style="overflow-x:auto;">
+        {% include 'League/components/season_player_table.html' with season=my_var.1%}
+      </div>
     {%else%}
     <h3>{{my_var.0.season_name}}</h3>
-      {% include 'League/components/season_player_table.html' with season=my_var.0%}
+      <div class="col-12 gy-3"align='center'style="overflow-x:auto;">
+        {% include 'League/components/season_player_table.html' with season=my_var.0%}
+      </div>
     {%endif%}
 
 

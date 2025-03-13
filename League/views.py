@@ -899,18 +899,56 @@ class MatchEdit(UserPassesTestMixin, UpdateView):
                     Contact and Admin if old results are invalid.')
         return False
 
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        # print(self.form_class)
+        # print(self.kwargs)
+        # print(self.args)
+        return super().get(request, *args, **kwargs)
+
+    def get_form(self, form_class=None):
+        """Return an instance of the form to be used in this view."""
+        if form_class is None:
+            form_class = self.get_form_class()
+        # var=form_class(**self.get_form_kwargs(),initial={"player1_score":"5,5,5"})
+        # form = form_class(**self.get_form_kwargs())
+        # form=form.is_valid()
+        # print(form)
+        # print(form.cleaned_data)
+        # print(form.fields['player1_score'])
+        return form_class(**self.get_form_kwargs())
+
+
     def get_form_kwargs(self):
         """Return the keyword arguments for instantiating the form."""
         kwargs = super().get_form_kwargs()
         if hasattr(self, 'object'):
+
+            saved_object=self.object
+            p1_score=saved_object.player1_score.split(',')
+            p2_score=saved_object.player2_score.split(',')
+            p1_score.pop(0)
+            p2_score.pop(0)
+            p1_score=",".join(p1_score)
+            p2_score=",".join(p2_score)
+            # temp_object=Match(round=saved_object.round,player1=saved_object.player1,player2=saved_object.player2,winner=saved_object.winner,player1_score=p1_score,player2_score=p2_score,player1_list=saved_object.player1_list,player2_list=saved_object.player2_list)
+
+
+            # change the score without saving the object so that the form has the values the user cares about
+            self.object.player1_score=p1_score
+            self.object.player2_score=p2_score
+
             kwargs.update({'instance': self.object})
         kwargs.update({
             'player1': self.object.player1,
             'player2': self.object.player2
         })
+        # print(kwargs)
         return kwargs
 
     def form_valid(self, form):
+
 
         # if there is not a tie no special processing neeeds to occur
         if form.cleaned_data['winner'].profile.user.username != "Tie":

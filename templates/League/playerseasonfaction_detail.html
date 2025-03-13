@@ -27,7 +27,7 @@ Player information for: {{season}}
 <a href="{% url 'edit army list' object.id list.id %}">Edit Army List</a>
 <a href="{% url 'delete army list' object.id list.id %}">Delete Army List</a>
 
-<div class="collapse" id="army_list_table_{{list.pk}}">
+<div style="overflow-x:auto;" class="collapse" id="army_list_table_{{list.pk}}">
 
   <table class="table table-bordered table-hover" style="width:100%">
 

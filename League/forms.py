@@ -171,7 +171,7 @@ def score_constraint_check(self,score_list):
     return "Game System Does not have scoring Implemented"
 
 
-# need to add a validator to ensure score string matches format for the game
+
 class MatchEditForm(forms.ModelForm):
     """ only allows players and tiepsf from match """
 
@@ -189,13 +189,19 @@ class MatchEditForm(forms.ModelForm):
 
     def __init__(self,  *args, **kwargs):
 
+        
         player1 = kwargs.pop('player1')
         player2 = kwargs.pop('player2')
         tie_psf = PlayerSeasonFaction.objects.get(
             profile__user__username='Tie', season=player1.season)
 
+        # print('form :')
+        # print(args)
+        # print(kwargs)
         super(MatchEditForm, self).__init__(*args, **kwargs)
+        self.fields['winner'].required = True
         self.fields['player1_score'].label = player1.profile
+        # print(self.fields['player1_score'].__dict__)
         self.fields['player2_score'].label = player2.profile
         self.fields['winner'].queryset = PlayerSeasonFaction.objects.filter(
             Q(id=player1.id)
