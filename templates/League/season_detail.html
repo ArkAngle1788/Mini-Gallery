@@ -159,6 +159,8 @@
 <br>
 <a href="{% url 'edit season' season.pk %}">Edit Season</a>
 <br>
+<a href="{% url 'add/drop player' season.pk season.league.league_name|slugify %}">Add or Drop Players</a>
+<br>
 <a href="{% url 'close season' season.pk %}">Close Season</a>
 <br>
 <a href="{% url 'delete season' season.pk %}">Delete Season</a>

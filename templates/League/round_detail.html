@@ -146,6 +146,9 @@
 <a href="{% url 'edit round' round.pk %}">Edit Round</a>
 <br>
 <a href="{% url 'create match' round.pk %}">Create Match</a>
+<br>
+<a href="{% url 'auto matchmake' round.pk %}">automatically create remaining matches</a>
+
 
 {%endif%}
 

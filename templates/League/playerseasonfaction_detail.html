@@ -105,6 +105,16 @@ Player information for: {{season}}
 <!-- SIDEBAR Right -->
 {% block navbar_right_content %}
 
+{%if season.league.group|is_primary_admin:request.user or season.league.group|is_secondary_admin:request.user or request.user.is_staff%}
+  <a href="{% url 'psf edit' object.pk %}">edit season profile</a>
+{%endif%}
+
+{%if request.user.profile == object.profile and season.registration_active %}
+  <a href="{% url 'psf edit' object.pk %}">edit season profile</a>
+{%endif%}
+
+
+
 
 <h2>League Admins:</h2>
 {%if season.league.admins_managing.all %}

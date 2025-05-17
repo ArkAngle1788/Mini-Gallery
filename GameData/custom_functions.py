@@ -97,6 +97,42 @@ def calculate_score_infinity(self,player1_score_list,player2_score_list,bye_play
 
 
 def calculate_score_other(self,player1_score_list,player2_score_list,bye_player):
-    pass
+    """
+    Default 'Other' score calculation. Expects format to be TP/score
+    calculates the new TP/OP for the match
+    edits self and player1_score_list/player2_score_list
+    score difference adjustments for psf score not handled here
+    """
+
+
+    # calculate objective points
+    p1_objective_points=int(player1_score_list[0])
+    p2_objective_points=int(player2_score_list[0])
+    p1_tournament_points=0
+    p2_tournament_points=0
+
+
+    if bye_player:
+        bye_player=bye_player[0]
+
+    if self.player1==bye_player or self.player2==bye_player:
+        if self.player1==bye_player:
+            p2_tournament_points=4
+        if self.player2==bye_player:
+            p1_tournament_points=4
+    else:
+        if (p1_objective_points-p2_objective_points)>0:
+            # earn 4 p1
+            p1_tournament_points=4
+        elif (p1_objective_points-p2_objective_points)==0:
+            # earn 2 both
+            p1_tournament_points=2
+            p2_tournament_points=2
+        elif (p1_objective_points-p2_objective_points)<0:
+            # earn 4 p2
+            p2_tournament_points=4
+
+    self.player1_score =f'{p1_tournament_points},{int(player1_score_list[0])}'
+    self.player2_score =f'{p2_tournament_points},{int(player2_score_list[0])}'
 
 

@@ -9,6 +9,10 @@ def inner_matching(players_remaining, lookup, safety):
     maches on success
     """
 
+    # print("\ninside inner matchmaking")
+    # for player in players_remaining:
+    #     print(player.profile)
+
     num_left = players_remaining.count()
 
     if num_left <= 1:
@@ -16,6 +20,7 @@ def inner_matching(players_remaining, lookup, safety):
         # if we hit this something is broken b/c this should be caught at the end of the function
         return None
     player1 = players_remaining.first()
+    # print(f'player 1 is : {player1}')
     # print('\n previous opponents are : '+str(player1.previous_opponents.all()))
 
     # we exclude player 1 and later the lookup to simulate them being matched
@@ -40,6 +45,9 @@ def inner_matching(players_remaining, lookup, safety):
     player2 = unplayed_players_remaining[lookup]
     players_remaining_edit = players_remaining_edit.exclude(
         id=player2.id)
+    
+    # print(f'player 2 is : {player2}')
+
 
     # if count is 0 we're at the deepest level and have found successful
     # matchup pairs to return. Returning something other than None will
@@ -54,9 +62,13 @@ def inner_matching(players_remaining, lookup, safety):
     # this is set to zero here because each time
     # we go deeper we want to start looking at the start again
     lookup = 0
+    # print(player1)
+    # print(player2)
+    # print(players_remaining_edit)
 
     output = None
-    while not output and safety < 10:
+    while not output and safety < 5:
+        # print()
         output = inner_matching(players_remaining_edit, lookup, safety)
         if output:
 
@@ -66,7 +78,7 @@ def inner_matching(players_remaining, lookup, safety):
             return output
 
         else:
-
+            # print(f'lookup is : {lookup}')
             if lookup >= num_left:
                 # print('bad lookup no matches found?')
                 return None
@@ -76,11 +88,13 @@ def inner_matching(players_remaining, lookup, safety):
             safety += 1
             # print('did not find a match. incrementing lookup. Lookup is : ' +
             #       str(lookup)+' safety is : '+str(safety))
-
+    # print('safety check hit')
     return None
 
 
 
+
+# will also need to exclude drops from auto matchmaking
 def auto_round_matches_basic(season):
     """
     This function returns false if successful
@@ -94,23 +108,33 @@ def auto_round_matches_basic(season):
     players_in_season = PlayerSeasonFaction.objects.filter(
         season=season).order_by('internal_score')
 
-
+    # print('first internal score check:')
     # for player in players_in_season:
     #     print(f'player {player.profile} Score: {player.score} Internal Score: {player.internal_score}')
 
 
     players_in_season = players_in_season.exclude(
         profile__user__username='Tie')
+    players_in_season = players_in_season.exclude(
+        dropped=True)
 
+    
+    # for player in players_in_season:
+        # print(player)
+
+    # print("starting matchmaking: \n\n")
+    # this check occurs before removing matched since it cares about the total number of active players
     if season.seasons_rounds.all().last().round_number >= (players_in_season.count()-1):
         return "Automatic Matchmaking Does not support this many rounds. Rematches Will Occur."
-
+    
+    players_in_season = players_in_season.exclude(
+        matched=True)
+    if not players_in_season:
+        return 'unmatched player list is empty'
     if players_in_season.count() % 2 != 0:
         return "Auto Matchmaking Cannot run with an odd number of players"
 
-    players_in_season = players_in_season.exclude(matched=True)
-    if not players_in_season:
-        return 'unmatched player list is empty'
+ 
     matchmaking_list = []
 
     # print("initial list of players: "+str(players_in_season)+'\n')

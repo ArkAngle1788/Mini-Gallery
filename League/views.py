@@ -17,6 +17,7 @@ from django.views import View
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django_filters.views import FilterView
+from django.template.defaultfilters import slugify
 from django.core.exceptions import ValidationError
 from CommunityInfrastructure.custom_functions import (check_league_admin,
                                                       check_primary_admin)
@@ -30,7 +31,8 @@ from UserAccounts.models import AdminProfile, UserProfile
 from .custom_functions import auto_round_matches_basic, match_permission_check
 from .forms import (LeagueForm, MatchEditForm, MatchForm,
                     MatchUploadMultipartImages, MatchUploadMultipleImages,
-                    RoundForm, SeasonForm, SeasonRegisterForm)
+                    RoundForm, SeasonForm, SeasonRegisterForm,AddDropPlayerForm,
+                    PSFUpdateForm)
 # from django.http import HttpResponseRedirect
 # from GameData.models import Games, Faction, Faction_Type, Sub_Faction
 from .models import League, Match, PlayerSeasonFaction, Round, Season
@@ -78,10 +80,13 @@ class LeagueCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
         if self.request.user.is_staff or (
             self.request.user.profile.linked_admin_profile
                 in owning_group.group_primary_admins.all()):
             return True
+        
         return False
 
     def get_form_kwargs(self):
@@ -119,13 +124,17 @@ class LeagueEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+        
         if self.request.user.is_staff or (
             (self.request.user.profile.linked_admin_profile
-             in league.group.group_primary_admins.all())
+            in league.group.group_primary_admins.all())
             or
             (league in self.request.user.profile.leagues_managed.all())
         ):
             return True
+      
         return False
 
     def get_form_kwargs(self):
@@ -169,10 +178,14 @@ class LeagueDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
 
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+        
         if self.request.user.is_staff or (
             self.request.user.profile.linked_admin_profile
                 in league.group_primary_admins.all()):
             return True
+        
         return False
 
     def get_success_url(self):
@@ -213,9 +226,10 @@ class SeasonCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
         if not AdminProfile.objects.filter(userprofile__user=self.request.user):
             return False
-
+    
         if parent_league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
             return True
+    
         return False
 
     def league_logic_test(self, request, *args, **kwargs):
@@ -314,6 +328,7 @@ class SeasonEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
         if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
             return True
+     
         return False
 
 
@@ -338,6 +353,7 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
 
         if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
             return True
+        
         return False
 
     def season_logic_test(self, request, *args, **kwargs):
@@ -438,9 +454,12 @@ class SeasonDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if not AdminProfile.objects.filter(userprofile__user=self.request.user):
             return False
 
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
         if self.request.user.profile.linked_admin_profile\
                 in season.league.group.group_primary_admins.all():
             return True
+        
         return False
 
     def get_success_url(self):
@@ -580,8 +599,11 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if self.request.user.is_staff:
             return True
 
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
         if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
             return True
+     
         return False
 
     def league_logic_test(self, request, *args, **kwargs):
@@ -602,16 +624,35 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             # redirect to the page to close registration instead of just bouncing
             url = reverse('edit season', args=[self.kwargs['pk']])
             return url
+        
+        for player in PlayerSeasonFaction.objects.filter(season=season).exclude(
+            profile__user__username="Tie").exclude(profile__user__username="Bye"):
+            if player.faction is None:
+                messages.error(
+                self.request,
+                'There are players that do not have a faction assigned')
+                # redirect to the page to close registration instead of just bouncing
+                url = reverse('edit season', args=[self.kwargs['pk']])
+                return url
 
         if leagues_seasons.count() > 1:
             iterate_var = 0
             for entry in leagues_seasons:
                 if entry == season:
-                    if leagues_seasons[iterate_var-1].season_active:
-                        messages.error(
-                            self.request,
-                            'The previous season is still active')
-                        return url
+                    # if we start registration for a second season makeing a new round will result in a negative index
+                    diff=iterate_var-1
+                    if diff>=0:
+                        if leagues_seasons[diff].season_active:
+                            messages.error(
+                                self.request,
+                                'The previous season is still active')
+                            return url
+                    else:#we will only get here if there is only one season in the league
+                        if not leagues_seasons[0].season_active:
+                            messages.error(
+                                self.request,
+                                'The season is not active')
+                            return url
                 iterate_var += 1
 
         number_of_players = PlayerSeasonFaction.objects.filter(season=season).exclude(
@@ -682,6 +723,20 @@ class RoundCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         # check if this is the first round being created
         if season.seasons_rounds.all():
             # if rounds exist we also need to lock in the results of previous rounds
+
+
+
+
+
+
+
+                # should previous opponent be here or maybe in match saving with the matched state?
+
+                # adding it to match save
+
+
+
+
 
             # for match in season.seasons_rounds.last().round_matches.all():
             #     match.player1.previous_opponents.add(match.player2)
@@ -763,6 +818,7 @@ class RoundEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if not AdminProfile.objects.filter(userprofile__user=self.request.user):
             return False
 
+        
         if (
                 self.get_object().season.league
                 in
@@ -796,6 +852,7 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             round_var = Round.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
+        
 
         if not AdminProfile.objects.filter(userprofile__user=self.request.user):
             return False
@@ -805,6 +862,25 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 self.request.user.profile.linked_admin_profile.leagues_managed.all()):
             return True
         return False
+    
+    def get(self, request, *args, **kwargs):
+        """ensures you do not make more rounds than the player count supports"""
+        round_var = Round.objects.get(pk=self.kwargs['pk'])
+        round_var = Round.objects.get(pk=self.kwargs['pk'])
+        players_in_round=round_var.season.players_in_season.all().exclude(profile__user__username='Tie')
+        players_in_round=players_in_round.exclude(dropped=True)
+        max_matchups=len(players_in_round)/2
+
+        if len(round_var.round_matches.all())>=max_matchups:
+            messages.error(
+                self.request,
+                'This round has the maximum number of matches')
+           
+            url = reverse('round details', args=[self.kwargs['pk'], slugify(
+        Round.objects.get(pk=self.kwargs['pk']).season.league)])
+            return redirect(url)
+        
+        return super().get(self, request, *args, **kwargs)
 
     def form_valid(self, form):
 
@@ -843,11 +919,204 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             'season': Round.objects.get(pk=self.kwargs['pk']).season
         })
         return kwargs
+    
+
+# for next time: add a view to drop a player and handle dropping/adding bye to keep numbers even.
+#                   add a view to add player. probably have a psf save wl string check to see first round participated in to -have 'N/A-' or something
+#                           if the player is given a starting score and the view also handles fixing byes everything else should just work with it.
+# remember to test adding a player back in that you drop
+ 
+class AddDropPlayer(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    allows a user to be added or removed from an active league season
+    
+    """
+    def test_func(self):
+        """must manage league or be staff to access"""
+        try:
+            season = Season.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff:
+            return True
+
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+        if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
+            return True
+        
+        return False
+    def get(self, request, *args, **kwargs):
+        """expects no args"""
+        season = Season.objects.get(pk=self.kwargs['pk'])
+        form=AddDropPlayerForm(season=season)
+
+        return render(request, 'League/add_drop.html',{'form': form})
+    def post(self, request, *args, **kwargs):
+        """adds or drops players"""
+        season = Season.objects.get(pk=self.kwargs['pk'])
+        success_url = reverse('season details', args=[self.kwargs['pk'], slugify(season.league)])
+        form=AddDropPlayerForm(request.POST,season=season)
+        if not form.is_valid():
+            return render(request, 'League/add_drop.html',{'form': form})
+
+        if form.cleaned_data["drop_players"] is None and form.cleaned_data["add_players"] is None:
+            messages.success(
+            self.request,
+            'No data submitted')
+            return redirect(success_url)
+        
+        drop_players=form.cleaned_data["drop_players"]
+        add_players=form.cleaned_data["add_players"]
+        change_bye_state=False
+
+        if drop_players and add_players:
+            if not (len(drop_players)+len(add_players))%2 == 0:
+                change_bye_state=True
+        elif drop_players and not add_players:
+            if not len(drop_players)%2 == 0:
+                change_bye_state=True
+        elif not drop_players and add_players:
+            if not len(add_players)%2 == 0:
+                change_bye_state=True
+
+        # we should check to see if the net result is even to save work on fiddling with bye player
+        if drop_players:
+            for player_id in drop_players:
+                if season.registration_active:
+                    player=PlayerSeasonFaction.objects.get(pk=player_id)
+                    player.delete()
+                else:
+                    player=PlayerSeasonFaction.objects.get(pk=player_id)
+                    player.dropped=True
+                    player.save()
+        
+
+
+        added_psfs=[]
+        if add_players:
+            for player_id in add_players:
+                player=UserProfile.objects.get(pk=player_id)
+                var=PlayerSeasonFaction(profile=player,season=season)
+                var.save()
+                added_psfs+=[var]
+
+               
+
+        if change_bye_state and not season.registration_active:
+            updated=False
+            for player in PlayerSeasonFaction.objects.filter(season=season):
+                if player.profile.user.username=='Bye':
+                    if player.dropped:
+                        player.dropped=False
+                        updated=True
+                        player.save()
+                    else:
+                        player.dropped=True
+                        updated=True
+                        player.save()
+            if updated == False:
+                player=UserProfile.objects.get(user__username="Bye")
+                var=PlayerSeasonFaction(profile=player,season=season)
+                var.save()
+
+
+
+        if added_psfs:
+            update_string=''
+            first_item=added_psfs.pop(0)
+            if len(added_psfs)==0:
+                success_url = reverse('psf edit', args=[first_item.id])
+
+            # for psf in added_psfs:
+            #     update_string+=(str(psf.id)+',')
+            for psf in added_psfs:
+                if not update_string:
+                    update_string = str(psf.id)
+                else:
+                    update_string += ','+str(psf.id)
+
+            url = reverse('psf edit', args=[first_item.pk])
+            url += f'?update_users={update_string}'
+            success_url=url
+
+        return redirect(success_url)
+
+class CreateMatchAuto(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    will create matches for all remaining players in a league
+    """
+    def test_func(self):
+        """must manage league or be staff to access"""
+        try:
+            season = Round.objects.get(pk=self.kwargs['pk']).season
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff:
+            return True
+
+        if not AdminProfile.objects.filter(userprofile__user=self.request.user):
+            return False
+    
+        if season.league in self.request.user.profile.linked_admin_profile.leagues_managed.all():
+            return True
+    
+        return False
+    
+    
+    
+    
+    def get(self, request, *args, **kwargs):
+        """expects no args"""
+
+
+        round_var = Round.objects.get(pk=self.kwargs['pk'])
+        players_in_round=round_var.season.players_in_season.all().exclude(profile__user__username='Tie')
+        players_in_round=players_in_round.exclude(dropped=True)
+        max_matchups=len(players_in_round)/2
+
+
+        if len(round_var.round_matches.all())>=max_matchups:
+            messages.error(
+                self.request,
+                'This round has the maximum number of matches')
+           
+            url = reverse('round details', args=[self.kwargs['pk'], slugify(
+                Round.objects.get(pk=self.kwargs['pk']).season.league)])
+            return redirect(url)
+
+
+        # add a check for  unmatched players  - does the check for max rounds acheive the same thing? probably?
+        season=Round.objects.get(id=self.kwargs['pk']).season
+        # unmatched_players=PlayerSeasonFaction.objects.filter(season=season).exclude(matched=True)
+        # print('automatch get ran')
+        # print(PlayerSeasonFaction.objects.filter(season=season))
+        # print(unmatched_players)
+        auto_matches_result = auto_round_matches_basic(season)
+
+        if auto_matches_result:
+
+            messages.error(
+                self.request,
+                f'{auto_matches_result}')
+
+        else:
+            messages.success(
+            self.request,
+            'Automatic matchmaking complete!')
+
+        league_str=slugify(season.league.league_name)
+        url = reverse('round details', args=[self.kwargs['pk'],league_str])
+
+        return redirect(url)
+
 
 
 class MatchEdit(UserPassesTestMixin, UpdateView):
     """
-    W:L record string is not generated until the round is closed
+    updates PSF info on save
     """
     model = Match
     form_class = MatchEditForm
@@ -857,12 +1126,17 @@ class MatchEdit(UserPassesTestMixin, UpdateView):
         Must be logged in and then: must be one of the two players in a match during the round or a league admin
         OR
         can be logged out but then must have the qr_code_key
+        --
+        Cannot progress if the maximum number of  matches for the round have not been created yet
         """
 
         try:
             match = Match.objects.get(pk=self.kwargs['pk'])
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
+        
+        
+
 
         # checks for being logged out
         if not self.request.user.is_authenticated:
@@ -874,7 +1148,7 @@ class MatchEdit(UserPassesTestMixin, UpdateView):
                 if match.round.season.seasons_rounds.last() == match.round:
                     return True
                 return False
-            except:
+            except ObjectDoesNotExist as error:
                 return False
 
         # checks for being logged in
@@ -882,8 +1156,6 @@ class MatchEdit(UserPassesTestMixin, UpdateView):
         if self.request.user.is_staff:
             return True
 
-        if check_primary_admin(match.round.season.league.group, self.request.user):
-            return True
 
         if check_league_admin(match.round.season.league, self.request.user):
             return True
@@ -896,16 +1168,46 @@ class MatchEdit(UserPassesTestMixin, UpdateView):
             messages.error(
                 self.request,
                 'You can only edit results for the current round. \
-                    Contact and Admin if old results are invalid.')
+                    Contact an Admin if old results are invalid.')
         return False
 
+    def does_matchmaking_need_to_fail(self):
+        """ 
+        Cannot progress if the maximum number of  matches for the round have not been created yet
+        returns false if it's safe to continue
+        and a url to redirect to if not
+        """
+        match = Match.objects.get(pk=self.kwargs['pk'])
+        all_matches_in_round=Match.objects.filter(round=match.round)
+        number_of_players=PlayerSeasonFaction.objects.filter(season=match.round.season).exclude(profile__user__username='Tie').exclude(
+        dropped=True).count()
+        if all_matches_in_round.count() < number_of_players/2 :
+            messages.error(
+                self.request,
+                'You cannot edit results until all matches have been created.')
+            league_str=slugify(match.round.season.league.league_name)
+            url = reverse('round details', args=[match.round.pk,league_str])
+            return url
+        return False
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         # print(self.form_class)
         # print(self.kwargs)
         # print(self.args)
+
+        result=self.does_matchmaking_need_to_fail()
+        if result:
+            return redirect(result)
+
         return super().get(request, *args, **kwargs)
+    
+    def post(self,request,*args,**kwargs):
+        result=self.does_matchmaking_need_to_fail()
+        if result:
+            return redirect(result)
+
+        return super().post(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
         """Return an instance of the form to be used in this view."""
@@ -983,10 +1285,12 @@ class MatchDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if not AdminProfile.objects.filter(userprofile__user=self.request.user):
             return False
 
+        
         if (match.round.season.league
             in
                 self.request.user.profile.linked_admin_profile.leagues_managed.all()):
             return True
+    
         return False
 
     def form_valid(self, form):
@@ -1148,3 +1452,60 @@ class PSFView(DetailView):
 
         context['season'] = season_var
         return context
+    
+class PSFEdit(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """only staff and the primary admins can edit."""
+    model = PlayerSeasonFaction
+    form_class = PSFUpdateForm
+
+    def test_func(self):
+
+        try:
+            psf = PlayerSeasonFaction.objects.get(pk=self.kwargs['pk'])
+        except ObjectDoesNotExist as error:
+            raise Http404(f'{error}') from error
+
+        if self.request.user.is_staff:
+            return True
+
+        if not (self.request.user == psf.profile.user):
+            
+            if check_league_admin(psf.season.league, self.request.user):
+                return True
+
+            return False
+
+        if not psf.season.registration_active:
+            return False
+
+        return True
+    
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        kwargs.update({
+            'league': self.object.season.league
+        })
+        return kwargs
+    
+    def get_success_url(self):
+
+        if self.request.method == "POST":
+            pklist = self.request.GET.get('update_users')
+            if pklist:
+                pklist = pklist.split(',')
+                next_user=pklist.pop(0)
+                if pklist:
+                    url = reverse('psf edit', args=[next_user])
+                    print(pklist)
+                    string=','.join(pklist)
+                    print(string)
+                    url += f'?update_users={string}'
+                    print(url)
+                    return url
+                url = reverse('psf edit', args=[next_user])
+                return url
+
+        return super().get_success_url()

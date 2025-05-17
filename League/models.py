@@ -103,19 +103,24 @@ class PlayerSeasonFaction(models.Model):
     
     wlrecord = models.CharField(max_length=100, default="-")
 
-    # each time a new round is created this will need to be reset to False
-    # right now this should only be looked at for active players so the
-    # value can be true from previous rounds as long as it's reset each round (currently reset when match saves)
-    # theoretically if you saved a match while auto matchmaking was happening that could break things
+
     matched = models.BooleanField(default=False)
+    dropped = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         
+
         self.wlrecord='-'
         score_list=self.score.split(',')
         self.internal_score=0
         # print((Match.objects.filter(round__season=self.season,player1__pk=self.pk)|Match.objects.filter(round__season=self.season,player2__pk=self.pk)).order_by('id'))
-        for match in (Match.objects.filter(round__season=self.season,player1__pk=self.pk)|Match.objects.filter(round__season=self.season,player2__pk=self.pk)).order_by('id'):
+        participating_matches=(Match.objects.filter(round__season=self.season,player1__pk=self.pk)|Match.objects.filter(round__season=self.season,player2__pk=self.pk)).order_by('id')
+        
+        # this is for players added mid season
+        if participating_matches:
+            if participating_matches[0].round.round_number!=1:
+                self.wlrecord +="N/A-"
+        for match in participating_matches:
             if match.winner:#an active season can have a current round where winner is still null
                 if match.winner.pk == self.pk:
                     self.wlrecord += "W-"
@@ -126,6 +131,8 @@ class PlayerSeasonFaction(models.Model):
                 else:
                     self.wlrecord += "L-"
 
+        if self.dropped:
+            self.wlrecord += "Dropped-"
 
         # this could also be in match save with the score calculations but I'm putting it here now for simplicity's sake.
         # we could alternativly calculate this by adding or subtracting scores applying game specific modifiers in match save but this is much less lines of code since it all fits in a system agnostic loop
@@ -316,9 +323,14 @@ class Match(models.Model):
                 #     total_score_list_p2[2]=int(total_score_list_p2[2])+dif3
                 #     self.player2.score=f'{total_score_list_p2[0]},{total_score_list_p2[1]},{total_score_list_p2[2]}'
 
+                match.player1.previous_opponents.add(match.player2)
 
+                if self.player2 in self.player1.previous_opponents.all():
+                    self.player1.previous_opponents.add(self.player2)
+                if self.player1 in self.player2.previous_opponents.all():
+                    self.player2.previous_opponents.add(self.player1)
 
-
+                # self.player2.previous_opponents.
                 self.player1.matched = False
                 self.player2.matched = False
                 self.player1.save()
