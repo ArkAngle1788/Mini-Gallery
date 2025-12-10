@@ -106,7 +106,7 @@ def auto_round_matches_basic(season):
     # UserImage.objects.annotate(Count('popularity')).order_by('-popularity__count')
 
     players_in_season = PlayerSeasonFaction.objects.filter(
-        season=season).order_by('internal_score')
+        season=season).order_by('-internal_score')
 
     # print('first internal score check:')
     # for player in players_in_season:
@@ -124,7 +124,8 @@ def auto_round_matches_basic(season):
 
     # print("starting matchmaking: \n\n")
     # this check occurs before removing matched since it cares about the total number of active players
-    if season.seasons_rounds.all().last().round_number >= (players_in_season.count()-1):
+    # print(season.seasons_rounds.all().last().round_number)
+    if season.seasons_rounds.all().last().round_number >= (players_in_season.count()):
         return "Automatic Matchmaking Does not support this many rounds. Rematches Will Occur."
     
     players_in_season = players_in_season.exclude(

@@ -8,7 +8,7 @@ class Game(models.Model):
     game_system_name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return self.game_system_name
+        return str(self.game_system_name)
 
     def get_absolute_url(self):
         """

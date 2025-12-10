@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import (ImproperlyConfigured, ObjectDoesNotExist,
                                     ValidationError)
 from django.db.models import Count  # used for sorting likes
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
@@ -386,7 +386,7 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request, *args, **kwargs):
         """expects no args"""
-        print("test")
+        # print("test")
         if not self.season_logic_test(self, request):
             url = reverse('season details', args=[self.kwargs['pk'], slugify(
                 Season.objects.get(pk=self.kwargs['pk']).league)])
@@ -403,27 +403,53 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
                 Season.objects.get(pk=self.kwargs['pk']).league)])
             return redirect(url)
 
-        # for match in season.seasons_rounds.last().round_matches.all():
-        #     match.player1.previous_opponents.add(match.player2)
-        #     match.player1.score += match.player1_score
-        #     match.player1.matched = False
+        # in infinity bye round OP and VP are calculated at the end of the season
+        if season.league.system.game_system_name=="Infinity":
+            for match in Match.objects.filter(round__season=season):
 
-        #     match.player2.previous_opponents.add(match.player1)
-        #     match.player2.score += match.player2_score
-        #     match.player2.matched = False
+                if match.player1.profile.user.username=='Bye' or  match.player2.profile.user.username=='Bye':
 
-        #     if match.winner == match.player1:
-        #         match.player1.wlrecord += "W-"
-        #         match.player2.wlrecord += "L-"
-        #     elif match.winner == match.player2:
-        #         match.player1.wlrecord += "L-"
-        #         match.player2.wlrecord += "W-"
-        #     else:
-        #         match.player1.wlrecord += "T-"
-        #         match.player2.wlrecord += "T-"
+                    if match.player1.profile.user.username=='Bye':
+                        player=match.player2
+                    elif match.player2.profile.user.username=='Bye':
+                        player=match.player1
+                    
+                    op=0
+                    vp=0
+                    for player_match in Match.objects.filter(Q(player1=player) | Q(player2=player)):
+                        if player_match.player1==player:
+                            score_list=player_match.player1_score.split(',')
+                            op+=int(score_list[1])
+                            vp+=int(score_list[2])
+                        if player_match.player2==player:
+                            score_list=player_match.player2_score.split(',')
+                            op+=int(score_list[1])
+                            vp+=int(score_list[2])
+                    
+                    num_rounds=Round.objects.filter(round__season=season).count()
 
-        #     match.player1.save()
-        #     match.player2.save()
+
+                    if ((op*num_rounds)%(num_rounds-1)) != 0:
+                        op=(op*num_rounds)/(num_rounds-1)+1
+                    else:
+                        op=(op*num_rounds)/(num_rounds-1)
+                  
+                    if ((vp*num_rounds)%(num_rounds-1)) != 0:
+                        vp=(vp*num_rounds)/(num_rounds-1)+1
+                    else:
+                        vp=(vp*num_rounds)/(num_rounds-1)
+                    
+                    new_score_string=""+score_list[0]+","+op+","+vp
+                    if match.player1==player:
+                        match.player1_score=new_score_string
+                    elif match.player2==player:
+                        match.player2_score=new_score_string
+                    match.save()
+
+        # bye: add up all objective points the player earned
+        # multiply the result by the number of rounts
+        # divide the result by the number of rounds played (round up)
+        # This is done for OP and VP
 
         season.season_active = False
         season.save()
@@ -492,41 +518,7 @@ class SeasonView(FilterView):
         context['season'] = season_var
         return context
 
-    def get_queryset(self):
-        """
-        Return the list of items for this view.
-        The return value must be an iterable and may be an instance of
-        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
-        """
-        if self.queryset is not None:
-            queryset = self.queryset
-            if isinstance(queryset, QuerySet):
-                queryset = queryset.all()
-        elif self.model is not None:
 
-            try:
-                # show the most popular images first
-                queryset = UserImage.objects.filter(
-                    source__pk=self.kwargs['pk']).annotate(
-                        num_likes=Count('popularity')).order_by('-num_likes', 'id')
-
-                # qs.annotate(num_likes=Count('popularity')
-                #              ).order_by('-num_likes', 'id')
-            except ObjectDoesNotExist as error:
-                raise Http404(f'{error}') from error
-        else:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} is missing a QuerySet. Define "
-                f"{self.__class__.__name__}.model, {self.__class__.__name__}.queryset, or override "
-                f"{self.__class__.__name__}.get_queryset()."
-            )
-        ordering = self.get_ordering()
-        if ordering:
-            if isinstance(ordering, str):
-                ordering = (ordering,)
-            queryset = queryset.order_by(*ordering)
-
-        return queryset
 
 
 class SeasonRegister(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -853,6 +845,8 @@ class MatchCreateManual(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         except ObjectDoesNotExist as error:
             raise Http404(f'{error}') from error
         
+        if self.request.user.is_staff:
+            return True
 
         if not AdminProfile.objects.filter(userprofile__user=self.request.user):
             return False
