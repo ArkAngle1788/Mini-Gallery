@@ -436,15 +436,15 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
                     num_rounds=Round.objects.filter(season=season).count()
 
 
-                    if ((op*num_rounds)%(rounds_played-1)) != 0:
-                        op=(op*num_rounds)/(rounds_played-1)+1
+                    if ((op*num_rounds)%(rounds_played)) != 0:
+                        op=(op*num_rounds)/(rounds_played)+1
                     else:
-                        op=(op*num_rounds)/(rounds_played-1)
+                        op=(op*num_rounds)/(rounds_played)
                   
-                    if ((vp*num_rounds)%(rounds_played-1)) != 0:
-                        vp=(vp*num_rounds)/(rounds_played-1)+1
+                    if ((vp*num_rounds)%(rounds_played)) != 0:
+                        vp=(vp*num_rounds)/(rounds_played)+1
                     else:
-                        vp=(vp*num_rounds)/(rounds_played-1)
+                        vp=(vp*num_rounds)/(rounds_played)
                     
                     new_score_string=""+score_list[0]+","+str(int(op))+","+str(int(vp))
                     if match.player1==player:
