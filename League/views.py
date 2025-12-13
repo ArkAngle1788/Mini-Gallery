@@ -416,28 +416,35 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
                     
                     op=0
                     vp=0
+                    rounds_played=0 #IF YOU ONLY PLAY ONE ROUND AND CLOSE A SEASON THIS WILL DIVIDE BY 0 :(
                     for player_match in Match.objects.filter(Q(player1=player) | Q(player2=player)):
+                        has_bye=False
                         if player_match.player1==player:
                             score_list=player_match.player1_score.split(',')
                             op+=int(score_list[1])
                             vp+=int(score_list[2])
+                            if player_match.player2.profile.user.username=='Bye':
+                                has_bye=True
                         if player_match.player2==player:
                             score_list=player_match.player2_score.split(',')
                             op+=int(score_list[1])
                             vp+=int(score_list[2])
-                    
-                    num_rounds=Round.objects.filter(round__season=season).count()
+                            if player_match.player1.profile.user.username=='Bye':
+                                has_bye=True
+                        if not has_bye:
+                            rounds_played+=1
+                    num_rounds=Round.objects.filter(season=season).count()
 
 
-                    if ((op*num_rounds)%(num_rounds-1)) != 0:
-                        op=(op*num_rounds)/(num_rounds-1)+1
+                    if ((op*num_rounds)%(rounds_played-1)) != 0:
+                        op=(op*num_rounds)/(rounds_played-1)+1
                     else:
-                        op=(op*num_rounds)/(num_rounds-1)
+                        op=(op*num_rounds)/(rounds_played-1)
                   
-                    if ((vp*num_rounds)%(num_rounds-1)) != 0:
-                        vp=(vp*num_rounds)/(num_rounds-1)+1
+                    if ((vp*num_rounds)%(rounds_played-1)) != 0:
+                        vp=(vp*num_rounds)/(rounds_played-1)+1
                     else:
-                        vp=(vp*num_rounds)/(num_rounds-1)
+                        vp=(vp*num_rounds)/(rounds_played-1)
                     
                     new_score_string=""+score_list[0]+","+op+","+vp
                     if match.player1==player:
@@ -447,7 +454,7 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
                     match.save()
 
         # bye: add up all objective points the player earned
-        # multiply the result by the number of rounts
+        # multiply the result by the number of rounds
         # divide the result by the number of rounds played (round up)
         # This is done for OP and VP
 
