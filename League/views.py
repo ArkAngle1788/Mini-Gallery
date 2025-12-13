@@ -446,7 +446,7 @@ class SeasonClose(LoginRequiredMixin, UserPassesTestMixin, View):
                     else:
                         vp=(vp*num_rounds)/(rounds_played-1)
                     
-                    new_score_string=""+score_list[0]+","+str(op)+","+str(vp)
+                    new_score_string=""+score_list[0]+","+int(op)+","+int(vp)
                     if match.player1==player:
                         match.player1_score=new_score_string
                     elif match.player2==player:
