@@ -524,6 +524,42 @@ class SeasonView(FilterView):
         context['filter_form'] = image_filter
         context['season'] = season_var
         return context
+    
+    def get_queryset(self):
+        """
+        Return the list of items for this view.
+        The return value must be an iterable and may be an instance of
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        if self.queryset is not None:
+            queryset = self.queryset
+            if isinstance(queryset, QuerySet):
+                queryset = queryset.all()
+        elif self.model is not None:
+
+            try:
+                # show the most popular images first
+                queryset = UserImage.objects.filter(
+                    source__pk=self.kwargs['pk']).annotate(
+                        num_likes=Count('popularity')).order_by('-num_likes', 'id')
+
+                # qs.annotate(num_likes=Count('popularity')
+                #              ).order_by('-num_likes', 'id')
+            except ObjectDoesNotExist as error:
+                raise Http404(f'{error}') from error
+        else:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} is missing a QuerySet. Define "
+                f"{self.__class__.__name__}.model, {self.__class__.__name__}.queryset, or override "
+                f"{self.__class__.__name__}.get_queryset()."
+            )
+        ordering = self.get_ordering()
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+
+        return queryset
 
 
 
